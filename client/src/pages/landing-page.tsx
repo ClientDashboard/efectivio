@@ -27,10 +27,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container max-w-7xl mx-auto flex h-20 items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold">
-              <span className="text-[#062644]">Efectiv</span>
-              <span className="text-[#39FFBD]">io</span>
-            </div>
+            <img src="/images/primary-logo.png" alt="Efectivio Logo" className="h-10" />
           </div>
           
           {/* Mobile Menu Button */}
@@ -77,10 +74,7 @@ export default function LandingPage() {
           <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
             <div className="container flex h-16 items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="text-xl font-bold">
-                  <span className="text-[#062644]">Efectiv</span>
-                  <span className="text-[#39FFBD]">io</span>
-                </div>
+                <img src="/images/primary-logo.png" alt="Efectivio Logo" className="h-8" />
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)} className="text-foreground">
                 <X className="h-6 w-6" />
@@ -163,7 +157,7 @@ export default function LandingPage() {
                 <span>Software de Contabilidad #1 en Panamá</span>
               </div>
               <div className="space-y-2">
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                <h1 className="text-4xl font-heading font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                   Simplifica tu Contabilidad con{" "}
                   <span className="text-[#39FFBD] relative">
                     Efectivio
@@ -247,7 +241,7 @@ export default function LandingPage() {
               <span className="font-medium">Características Inteligentes</span>
             </div>
             <div className="space-y-2 max-w-3xl">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-5xl text-[#062644]">
+              <h2 className="text-3xl font-heading font-bold tracking-tighter md:text-5xl text-[#062644]">
                 Potencia tu gestión financiera con IA
               </h2>
               <p className="text-muted-foreground md:text-xl/relaxed">
@@ -323,7 +317,7 @@ export default function LandingPage() {
         <div className="container max-w-7xl mx-auto px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+              <h2 className="text-3xl font-heading font-bold tracking-tighter md:text-4xl/tight">
                 ¿Listo para transformar la contabilidad de tu empresa?
               </h2>
               <p className="mt-4 text-gray-300 md:text-xl/relaxed max-w-[600px]">
@@ -381,9 +375,7 @@ export default function LandingPage() {
         <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
             <div className="flex flex-col col-span-2 lg:col-span-2">
-              <div className="text-2xl font-bold mb-2">
-                <span className="text-[#062644]">Efectiv</span><span className="text-[#39FFBD]">io</span>
-              </div>
+              <img src="/images/dark-logo.png" alt="Efectivio Logo" className="h-10 mb-2" />
               <p className="text-muted-foreground mt-2 text-sm">
                 Simplificando la contabilidad de empresas en toda Latinoamérica desde 2024.
               </p>
