@@ -1,10 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Obtener credenciales de las variables de entorno (con el prefijo VITE_ para el frontend)
+// Obtener credenciales de las variables de entorno en el cliente
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-// Nota: No deberíamos usar la clave de service role en el frontend por seguridad
-// Solo se usa aquí para el desarrollo, en producción debería gestionarse desde el backend
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -15,6 +13,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Cliente para operaciones administrativas (con privilegios elevados)
+// Nota: Este cliente no se debería usar directamente en el frontend
+// Se incluye aquí solo para desarrollo y depuración
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-export default supabase;

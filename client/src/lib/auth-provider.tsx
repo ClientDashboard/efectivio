@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 // Definir el tipo de usuario
 type User = {
@@ -8,6 +9,7 @@ type User = {
   username: string;
   fullName: string;
   role: string;
+  token?: string;
 } | null;
 
 // Definir el contexto de autenticación
@@ -15,9 +17,9 @@ type AuthContextType = {
   user: User;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   register: (fullName: string, email: string, username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 // Crear el contexto
@@ -33,9 +35,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // Primero verificamos si hay usuario en localStorage
         const savedUser = localStorage.getItem('auth_user');
         if (savedUser) {
-          setUser(JSON.parse(savedUser));
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
+          
+          // Verificamos con el servidor si la sesión sigue siendo válida
+          try {
+            const response = await fetch('/api/auth/user', {
+              credentials: 'include',
+              headers: {
+                'Authorization': `Bearer ${parsedUser.token}`
+              }
+            });
+            
+            if (response.ok) {
+              const userData = await response.json();
+              // Actualizamos el usuario con datos frescos del servidor
+              const updatedUser = { ...userData, token: parsedUser.token };
+              setUser(updatedUser);
+              localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+            } else {
+              // Si hay un error, limpiamos la sesión local
+              setUser(null);
+              localStorage.removeItem('auth_user');
+              console.log('Sesión expirada o inválida');
+            }
+          } catch (serverError) {
+            console.error('Error al verificar sesión con el servidor:', serverError);
+          }
         }
       } catch (error) {
         console.error('Error al restaurar la sesión:', error);
@@ -48,23 +77,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Función de inicio de sesión
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // En producción, esto se reemplazaría con una llamada real a una API
-      // Por ahora, simulamos una respuesta exitosa para desarrollo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const mockUser = {
-        id: 1,
-        email: `${username}@ejemplo.com`,
-        username,
-        fullName: username,
-        role: 'admin'
-      };
-
-      setUser(mockUser);
-      localStorage.setItem('auth_user', JSON.stringify(mockUser));
+      const response = await apiRequest('POST', '/api/auth/login', { 
+        email, 
+        password 
+      });
+      
+      const userData = await response.json();
+      
+      setUser(userData);
+      localStorage.setItem('auth_user', JSON.stringify(userData));
 
       toast({
         title: "Sesión iniciada",
@@ -72,12 +96,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error de inicio de sesión:', error);
       toast({
         variant: "destructive",
         title: "Error de autenticación",
-        description: "No se pudo iniciar sesión. Verifica tus credenciales.",
+        description: error.message || "No se pudo iniciar sesión. Verifica tus credenciales.",
       });
       return false;
     } finally {
@@ -94,33 +118,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // En producción, esto se reemplazaría con una llamada real a una API
-      // Por ahora, simulamos una respuesta exitosa para desarrollo
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      const mockUser = {
-        id: 1,
+      const response = await apiRequest('POST', '/api/auth/register', {
+        fullName,
         email,
         username,
-        fullName,
-        role: 'user'
-      };
-
-      setUser(mockUser);
-      localStorage.setItem('auth_user', JSON.stringify(mockUser));
-
-      toast({
-        title: "Cuenta creada",
-        description: "Tu cuenta ha sido creada correctamente",
+        password
       });
-
-      return true;
-    } catch (error) {
+      
+      const userData = await response.json();
+      
+      // Después del registro, iniciamos sesión automáticamente
+      return await login(email, password);
+      
+    } catch (error: any) {
       console.error('Error de registro:', error);
       toast({
         variant: "destructive",
         title: "Error de registro",
-        description: "No se pudo crear la cuenta. Inténtalo de nuevo.",
+        description: error.message || "No se pudo crear la cuenta. Inténtalo de nuevo.",
       });
       return false;
     } finally {
@@ -129,13 +144,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Función de cierre de sesión
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth_user');
-    toast({
-      title: "Sesión cerrada",
-      description: "Has cerrado sesión correctamente",
-    });
+  const logout = async () => {
+    try {
+      await apiRequest('POST', '/api/auth/logout');
+    } catch (error) {
+      console.error('Error al cerrar sesión en el servidor:', error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('auth_user');
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente",
+      });
+    }
   };
 
   return (

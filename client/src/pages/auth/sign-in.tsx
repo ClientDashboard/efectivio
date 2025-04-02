@@ -11,9 +11,9 @@ export default function SignInPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   
   // Usar nuestro hook de autenticación personalizado
@@ -29,11 +29,11 @@ export default function SignInPage() {
   const validateForm = () => {
     let isValid = true;
     
-    if (username.length < 3) {
-      setUsernameError("El nombre de usuario debe tener al menos 3 caracteres");
+    if (!email.includes('@') || !email.includes('.')) {
+      setEmailError("Por favor ingresa un correo electrónico válido");
       isValid = false;
     } else {
-      setUsernameError("");
+      setEmailError("");
     }
     
     if (password.length < 6) {
@@ -54,7 +54,7 @@ export default function SignInPage() {
     }
     
     // Utilizar la función login de nuestro AuthProvider
-    const success = await login(username, password);
+    const success = await login(email, password);
     if (success) {
       navigate("/dashboard");
     }
@@ -86,20 +86,21 @@ export default function SignInPage() {
           <CardContent className="pt-4">
             <form onSubmit={onSubmit} className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="username" className="block text-sm font-medium">
-                  Usuario
+                <label htmlFor="email" className="block text-sm font-medium">
+                  Correo electrónico
                 </label>
                 <div>
                   <Input 
-                    id="username"
-                    name="username"
-                    placeholder="Ingresa tu nombre de usuario" 
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="ejemplo@empresa.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
                   />
-                  {usernameError && (
-                    <p className="text-sm text-red-500 mt-1">{usernameError}</p>
+                  {emailError && (
+                    <p className="text-sm text-red-500 mt-1">{emailError}</p>
                   )}
                 </div>
               </div>

@@ -8,9 +8,11 @@ import {
   insertExpenseSchema,
   insertAccountSchema,
   insertJournalEntrySchema,
-  insertJournalLineSchema
+  insertJournalLineSchema,
+  insertUserSchema
 } from "@shared/schema";
 import { ZodError } from "zod";
+import { supabase, supabaseAdmin } from "./supabase";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Helper function to handle validation errors
@@ -567,6 +569,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Error generating income statement", error });
+    }
+  });
+
+  // Authentication API endpoints
+  app.post("/api/auth/register", async (req: Request, res: Response) => {
+    try {
+      // Validar los datos de entrada
+      const validation = validateRequest(insertUserSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Error de validación", 
+          errors: validation.error 
+        });
+      }
+
+      const { username, email, password, fullName } = validation.data;
+
+      // Verificar si el usuario ya existe en la base de datos
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "El nombre de usuario ya está en uso" });
+      }
+
+      // Registrar usuario en Supabase
+      const { data: supabaseUser, error: supabaseError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+            full_name: fullName
+          }
+        }
+      });
+
+      if (supabaseError) {
+        console.error("Error al registrar usuario en Supabase:", supabaseError);
+        return res.status(500).json({ 
+          message: "Error al registrar usuario", 
+          error: supabaseError.message 
+        });
+      }
+
+      // Crear usuario en nuestra base de datos
+      const user = await storage.createUser({
+        username,
+        password, // En una implementación real, habría que hashear la contraseña
+        email,
+        fullName,
+        clerkId: supabaseUser.user?.id || '',
+        role: 'user'
+      });
+
+      res.status(201).json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role
+      });
+    } catch (error) {
+      console.error("Error al registrar usuario:", error);
+      res.status(500).json({ message: "Error al registrar usuario", error });
+    }
+  });
+
+  app.post("/api/auth/login", async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      // Autenticar con Supabase
+      const { data: sessionData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (authError) {
+        return res.status(401).json({ message: "Credenciales inválidas", error: authError.message });
+      }
+
+      // Obtener usuario de nuestra base de datos
+      const user = await storage.getUserByUsername(email);
+      if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        token: sessionData.session?.access_token
+      });
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      res.status(500).json({ message: "Error al iniciar sesión", error });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req: Request, res: Response) => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        return res.status(500).json({ message: "Error al cerrar sesión", error: error.message });
+      }
+      
+      res.status(200).json({ message: "Sesión cerrada correctamente" });
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      res.status(500).json({ message: "Error al cerrar sesión", error });
+    }
+  });
+
+  app.get("/api/auth/user", async (req: Request, res: Response) => {
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session) {
+        return res.status(401).json({ message: "No autenticado" });
+      }
+      
+      const supabaseUser = sessionData.session.user;
+      const user = await storage.getUserByUsername(supabaseUser.email || '');
+      
+      if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+      
+      res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role
+      });
+    } catch (error) {
+      console.error("Error al obtener usuario:", error);
+      res.status(500).json({ message: "Error al obtener usuario", error });
     }
   });
 
