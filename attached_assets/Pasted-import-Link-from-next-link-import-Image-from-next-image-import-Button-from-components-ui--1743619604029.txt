@@ -1,0 +1,762 @@
+import Link from "next/link"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import {
+  ArrowRight,
+  BarChart2,
+  BrainCircuit,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Facebook,
+  FileText,
+  Folder,
+  Instagram,
+  Layers,
+  Linkedin,
+  LockKeyhole,
+  ShieldCheck,
+  Twitter,
+  Upload,
+  Users,
+  Zap,
+} from "lucide-react"
+import { AuthButtons } from "@/components/auth-buttons"
+import { MobileMenu } from "@/components/mobile-menu"
+
+export default function LandingPage() {
+  return (
+    <div className="flex min-h-screen flex-col overflow-x-hidden w-full">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container max-w-7xl mx-auto flex h-20 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/images/primary-logo.png"
+              alt="Efectivio Logo"
+              width={200}
+              height={60}
+              className="h-12 w-auto"
+            />
+          </div>
+          <MobileMenu />
+          <nav className="hidden md:flex gap-6">
+            <Link href="#caracteristicas" className="text-sm font-medium hover:text-[#39FFBD] transition-colors">
+              Características
+            </Link>
+            <Link href="#portal-cliente" className="text-sm font-medium hover:text-[#39FFBD] transition-colors">
+              Portal de Cliente
+            </Link>
+            <Link href="#testimonios" className="text-sm font-medium hover:text-[#39FFBD] transition-colors">
+              Testimonios
+            </Link>
+            <Link href="#precios" className="text-sm font-medium hover:text-[#39FFBD] transition-colors">
+              Precios
+            </Link>
+            <Link href="#contacto" className="text-sm font-medium hover:text-[#39FFBD] transition-colors">
+              Contacto
+            </Link>
+          </nav>
+          <div className="hidden md:block">
+            <AuthButtons />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-br from-[#062644] to-[#071C2B] text-white relative overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-[#39FFBD]/10 blur-3xl"></div>
+            <div className="absolute -bottom-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-[#39FFBD]/5 blur-3xl"></div>
+
+            {/* Animated elements */}
+            <div
+              className="absolute top-1/4 left-1/4 w-4 h-4 rounded-full bg-[#39FFBD]/30 animate-ping"
+              style={{ animationDuration: "3s", animationDelay: "0.5s" }}
+            ></div>
+            <div
+              className="absolute top-1/3 right-1/3 w-6 h-6 rounded-full bg-[#39FFBD]/20 animate-ping"
+              style={{ animationDuration: "4s", animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute bottom-1/4 right-1/4 w-5 h-5 rounded-full bg-[#39FFBD]/40 animate-ping"
+              style={{ animationDuration: "5s", animationDelay: "1.5s" }}
+            ></div>
+          </div>
+          <div className="container max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+              <div className="flex flex-col justify-center space-y-4">
+                <div className="inline-flex items-center space-x-2 rounded-full bg-[#39FFBD]/10 px-3 py-1 text-sm text-[#39FFBD] mb-4 w-fit">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#39FFBD] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#39FFBD]"></span>
+                  </span>
+                  <span>Software de Contabilidad #1 en Panamá</span>
+                  <Image
+                    src="/images/panama-flag.png"
+                    alt="Bandera de Panamá"
+                    width={20}
+                    height={12}
+                    className="h-4 w-auto"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                    Simplifica tu Contabilidad con{" "}
+                    <span className="text-[#39FFBD] relative">
+                      Efectivio
+                      <span className="absolute -bottom-2 left-0 w-full h-1 bg-[#39FFBD]/30"></span>
+                    </span>
+                  </h1>
+                  <p className="max-w-[600px] text-gray-300 md:text-xl leading-relaxed">
+                    Efectivio es una plataforma contable integral potenciada por IA que automatiza la gestión financiera
+                    de tu empresa, ahorrándote tiempo y recursos mientras maximiza la precisión.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-4 mt-4">
+                  <div className="flex items-center space-x-2 bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
+                    <BrainCircuit className="h-5 w-5 text-[#39FFBD]" />
+                    <span className="text-sm">Inteligencia Artificial</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
+                    <Zap className="h-5 w-5 text-[#39FFBD]" />
+                    <span className="text-sm">Automatización Avanzada</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
+                    <Clock className="h-5 w-5 text-[#39FFBD]" />
+                    <span className="text-sm">Ahorro de Tiempo</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 min-[400px]:flex-row mt-6">
+                  <Button className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] font-medium text-base px-6 py-6 h-auto group relative overflow-hidden">
+                    <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
+                    <span className="relative">Prueba Gratis</span>
+                    <ArrowRight className="ml-2 h-4 w-4 relative group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-white/30 text-white hover:bg-white/10 font-medium text-base px-6 py-6 h-auto"
+                  >
+                    Solicitar Demo
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-4 text-sm mt-4">
+                  <div className="flex items-center">
+                    <CheckCircle2 className="mr-1 h-4 w-4 text-[#39FFBD]" />
+                    <span>Sin tarjeta de crédito</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle2 className="mr-1 h-4 w-4 text-[#39FFBD]" />
+                    <span>14 días de prueba</span>
+                  </div>
+                </div>
+              </div>
+              <div className="relative lg:order-last">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#39FFBD]/20 to-transparent rounded-2xl blur-xl -z-10 transform rotate-3"></div>
+                <div className="relative">
+                  <div
+                    className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-[#39FFBD]/20 animate-bounce"
+                    style={{ animationDuration: "3s" }}
+                  ></div>
+                  <div
+                    className="absolute -bottom-6 -right-6 w-12 h-12 rounded-full bg-[#39FFBD]/20 animate-bounce"
+                    style={{ animationDuration: "4s", animationDelay: "1s" }}
+                  ></div>
+                  <Image
+                    src="/placeholder.svg?height=550&width=550"
+                    width={550}
+                    height={550}
+                    alt="Dashboard Preview"
+                    className="mx-auto rounded-2xl shadow-2xl border border-white/10 transform -rotate-1 transition-transform hover:rotate-0 duration-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section id="caracteristicas" className="w-full py-12 md:py-24 lg:py-32 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-[#062644]/5 bg-grid bg-center [mask-image:radial-gradient(ellipse_at_center,transparent_20%,white)]"></div>
+          <div className="container max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full bg-[#39FFBD]/10 px-3 py-1 text-sm text-[#062644]">
+                <span className="font-medium">Características Inteligentes</span>
+              </div>
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-5xl text-[#062644]">
+                  Potencia tu gestión financiera con IA
+                </h2>
+                <p className="text-muted-foreground md:text-xl/relaxed">
+                  Nuestra plataforma combina inteligencia artificial y automatización para ofrecerte una experiencia
+                  contable sin precedentes, reduciendo errores y maximizando la eficiencia.
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-6xl items-center gap-8 py-12 md:grid-cols-3 lg:gap-16">
+              {[
+                {
+                  icon: Layers,
+                  title: "Gestión Integral",
+                  description:
+                    "Controla clientes, facturación, gastos, inventario y más en un solo sistema. Nuestra plataforma centraliza todas tus operaciones financieras para una gestión sin complicaciones.",
+                },
+                {
+                  icon: BarChart2,
+                  title: "Reportes y Análisis",
+                  description:
+                    "Accede a dashboards interactivos, gráficos y reportes en tiempo real para tomar decisiones informadas. Visualiza tendencias, identifica oportunidades y anticipa desafíos con datos precisos.",
+                },
+                {
+                  icon: Zap,
+                  title: "Integración y Automatización",
+                  description:
+                    "Conecta con CRM, APIs, y automatiza procesos para una operación sin complicaciones. Elimina tareas repetitivas y reduce errores humanos con flujos de trabajo inteligentes.",
+                },
+                {
+                  icon: BrainCircuit,
+                  title: "Inteligencia Artificial",
+                  description:
+                    "Aprovecha el poder de la IA para predecir flujos de caja, detectar anomalías y recibir recomendaciones personalizadas para optimizar tus finanzas y reducir costos.",
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "Seguridad Avanzada",
+                  description:
+                    "Protege tus datos financieros con encriptación de nivel bancario, autenticación de dos factores y cumplimiento con las normativas internacionales de seguridad y privacidad.",
+                },
+                {
+                  icon: FileText,
+                  title: "Documentación Digital",
+                  description:
+                    "Digitaliza y organiza automáticamente facturas, recibos y documentos contables con reconocimiento inteligente de texto (OCR) y clasificación automática por categorías.",
+                },
+              ].map((feature, index) => (
+                <div
+                  key={index}
+                  className="group flex flex-col items-center space-y-4 rounded-2xl border border-[#39FFBD]/20 bg-white p-8 shadow-lg transition-all hover:border-[#39FFBD]/50 hover:shadow-xl hover:-translate-y-1"
+                >
+                  <div className="rounded-full bg-gradient-to-br from-[#39FFBD]/20 to-[#39FFBD]/10 p-3 transition-colors group-hover:from-[#39FFBD]/30 group-hover:to-[#39FFBD]/20">
+                    <feature.icon className="h-6 w-6 text-[#062644]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-[#062644]">{feature.title}</h3>
+                  <p className="text-center text-muted-foreground">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Portal de Cliente Section */}
+        <section
+          id="portal-cliente"
+          className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-[#062644] to-[#071C2B] text-white relative overflow-hidden"
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-[10%] right-[10%] w-[40%] h-[40%] rounded-full bg-[#39FFBD]/10 blur-3xl"></div>
+            <div className="absolute bottom-[10%] left-[10%] w-[40%] h-[40%] rounded-full bg-[#39FFBD]/5 blur-3xl"></div>
+          </div>
+          <div className="container max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <div className="grid gap-12 lg:grid-cols-2 items-center">
+              <div className="order-2 lg:order-1 relative">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#39FFBD]/20 to-transparent rounded-2xl blur-xl -z-10 transform -rotate-3"></div>
+                <div className="relative bg-[#062644]/80 rounded-2xl p-6 border border-white/10 backdrop-blur-sm shadow-2xl">
+                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
+                    <div className="flex items-center gap-2">
+                      <Folder className="h-5 w-5 text-[#39FFBD]" />
+                      <span className="font-medium">Portal de Cliente - Proyecto ABC</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-[#39FFBD]"></div>
+                      <span className="text-sm">En línea</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-400">Cliente</span>
+                      <span className="font-medium">Empresa Innovadora S.A.</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-400">Último acceso</span>
+                      <span className="font-medium">Hoy, 14:32</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-[#39FFBD]" />
+                        <span>Informe_Financiero_Q2.pdf</span>
+                      </div>
+                      <span className="text-xs text-gray-400">2.4 MB</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-[#39FFBD]" />
+                        <span>Facturas_Junio.xlsx</span>
+                      </div>
+                      <span className="text-xs text-gray-400">1.8 MB</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-[#39FFBD]" />
+                        <span>Presupuesto_2023.docx</span>
+                      </div>
+                      <span className="text-xs text-gray-400">956 KB</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 text-sm h-9">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Subir archivo
+                    </Button>
+                    <div className="flex items-center gap-2 text-sm text-gray-300">
+                      <LockKeyhole className="h-4 w-4 text-[#39FFBD]" />
+                      <span>Conexión segura</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="order-1 lg:order-2 flex flex-col space-y-6">
+                <div className="inline-flex items-center space-x-1 rounded-full bg-[#39FFBD]/10 px-3 py-1 text-sm text-[#39FFBD] mb-2 w-fit">
+                  <span>Colaboración Segura</span>
+                </div>
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
+                  Portal de Cliente Personalizado
+                </h2>
+                <p className="text-gray-300 md:text-xl leading-relaxed">
+                  Ofrece a tus clientes un espacio digital seguro donde pueden acceder a todos sus documentos, archivos
+                  y proyectos con un simple enlace protegido por contraseña.
+                </p>
+                <div className="space-y-4 mt-4">
+                  {[
+                    {
+                      icon: Users,
+                      title: "Acceso Personalizado",
+                      description:
+                        "Genera URLs únicas con contraseñas seguras para que tus clientes accedan a sus documentos, facturas, informes y archivos multimedia en cualquier momento y desde cualquier dispositivo.",
+                    },
+                    {
+                      icon: ShieldCheck,
+                      title: "Seguridad Avanzada",
+                      description:
+                        "Protección de datos con encriptación de extremo a extremo, autenticación de dos factores y permisos personalizables para controlar exactamente qué puede ver cada cliente.",
+                    },
+                    {
+                      icon: Folder,
+                      title: "Organización Intuitiva",
+                      description:
+                        "Estructura de carpetas personalizable con capacidad para almacenar documentos, imágenes, videos, PDFs y cualquier tipo de archivo que necesites compartir con tus clientes.",
+                    },
+                    {
+                      icon: Zap,
+                      title: "Comunicación Eficiente",
+                      description:
+                        "Chat integrado, notificaciones automáticas cuando se añaden nuevos documentos y seguimiento de actividad para mantener a todos informados en tiempo real.",
+                    },
+                  ].map((feature, index) => (
+                    <div key={index} className="flex items-start space-x-4">
+                      <div className="rounded-full bg-[#39FFBD]/20 p-2 mt-1">
+                        <feature.icon className="h-5 w-5 text-[#39FFBD]" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-white">{feature.title}</h3>
+                        <p className="text-gray-300">{feature.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="pt-4">
+                  <Button className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] group">
+                    Explorar Portal de Cliente
+                    <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section
+          id="testimonios"
+          className="w-full py-12 md:py-24 lg:py-32 bg-[#071C2B] text-white relative overflow-hidden"
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-[20%] left-[10%] w-[30%] h-[30%] rounded-full bg-[#39FFBD]/5 blur-3xl"></div>
+            <div className="absolute bottom-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-[#39FFBD]/5 blur-3xl"></div>
+          </div>
+          <div className="container max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full bg-[#39FFBD]/10 px-3 py-1 text-sm text-[#39FFBD]">
+                <span className="font-medium">Testimonios</span>
+              </div>
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-5xl">Lo que dicen nuestros clientes</h2>
+                <p className="text-gray-300 md:text-xl/relaxed">
+                  Descubre por qué las empresas confían en Efectivio para su gestión financiera y cómo ha transformado
+                  sus operaciones diarias.
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-6xl gap-8 py-12 lg:grid-cols-3">
+              {[
+                {
+                  quote:
+                    "Efectivio ha transformado nuestra gestión financiera. ¡Es increíblemente fácil de usar! Ahora tenemos control total sobre nuestras finanzas y hemos reducido nuestro tiempo de contabilidad en un 70%.",
+                  author: "Juan Pérez",
+                  role: "CEO, Innovación Digital",
+                  company: "Empresa de tecnología con 50 empleados",
+                },
+                {
+                  quote:
+                    "Los reportes automáticos nos han ahorrado horas de trabajo manual. El retorno de inversión fue evidente en el primer mes de uso. La función de IA para predecir flujos de caja es simplemente revolucionaria.",
+                  author: "María González",
+                  role: "CFO, Grupo Empresarial",
+                  company: "Corporación con presencia en 5 países",
+                },
+                {
+                  quote:
+                    "Como dueño de un pequeño negocio, dudaba sobre la inversión, pero Efectivio se ha pagado por sí mismo. El soporte al cliente es excepcional y el Portal de Cliente ha impresionado a todos nuestros clientes.",
+                  author: "Carlos Rodríguez",
+                  role: "Propietario, Tienda Local",
+                  company: "Negocio familiar con 15 años de trayectoria",
+                },
+              ].map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col justify-between rounded-2xl bg-gradient-to-br from-[#062644] to-[#062644]/80 p-8 shadow-lg border border-white/5 backdrop-blur-sm hover:border-[#39FFBD]/20 transition-colors"
+                >
+                  <div className="space-y-4">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-5 w-5 fill-[#39FFBD] text-[#39FFBD]"
+                        >
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-300 italic">"{testimonial.quote}"</p>
+                  </div>
+                  <div className="mt-6 flex items-center space-x-4">
+                    <div className="rounded-full bg-[#39FFBD]/20 p-1">
+                      <div className="h-10 w-10 rounded-full bg-[#39FFBD]/30" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{testimonial.author}</p>
+                      <p className="text-sm text-gray-400">{testimonial.role}</p>
+                      <p className="text-xs text-gray-500 mt-1">{testimonial.company}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="precios" className="w-full py-12 md:py-24 lg:py-32 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-[#062644]/5 bg-grid bg-center [mask-image:radial-gradient(ellipse_at_center,transparent_20%,white)]"></div>
+          <div className="container max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full bg-[#39FFBD]/10 px-3 py-1 text-sm text-[#062644]">
+                <span className="font-medium">Precios</span>
+              </div>
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-5xl text-[#062644]">
+                  Planes simples y transparentes
+                </h2>
+                <p className="text-muted-foreground md:text-xl/relaxed">
+                  Elige el plan que mejor se adapte a tu negocio. Todos los planes incluyen una prueba gratuita de 14
+                  días y acceso completo a todas las funcionalidades.
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-5xl gap-8 py-12 lg:grid-cols-3">
+              {[
+                {
+                  name: "Básico",
+                  description: "Perfecto para pequeñas empresas y autónomos",
+                  price: "€29",
+                  features: [
+                    "Hasta 5 usuarios",
+                    "Facturación básica",
+                    "Reportes mensuales",
+                    "Portal de Cliente (1 portal)",
+                    "Almacenamiento 5GB",
+                    "Soporte por email",
+                  ],
+                  cta: "Comenzar",
+                  popular: false,
+                },
+                {
+                  name: "Profesional",
+                  description: "Para empresas en crecimiento",
+                  price: "€79",
+                  features: [
+                    "Hasta 20 usuarios",
+                    "Facturación avanzada",
+                    "Reportes en tiempo real",
+                    "Portal de Cliente (5 portales)",
+                    "Almacenamiento 25GB",
+                    "Soporte prioritario",
+                    "Integraciones básicas",
+                    "Asistente IA básico",
+                  ],
+                  cta: "Comenzar",
+                  popular: true,
+                },
+                {
+                  name: "Empresarial",
+                  description: "Para grandes organizaciones",
+                  price: "€199",
+                  features: [
+                    "Usuarios ilimitados",
+                    "Facturación personalizada",
+                    "Análisis avanzado",
+                    "Portal de Cliente (ilimitados)",
+                    "Almacenamiento 100GB",
+                    "Soporte 24/7",
+                    "Integraciones avanzadas",
+                    "Asistente IA avanzado",
+                    "API personalizada",
+                  ],
+                  cta: "Contactar Ventas",
+                  popular: false,
+                },
+              ].map((plan, index) => (
+                <div
+                  key={index}
+                  className={`flex flex-col rounded-2xl ${plan.popular ? "bg-gradient-to-b from-white to-[#39FFBD]/5 border-[#39FFBD]/30" : "bg-white border-gray-200"} p-8 shadow-lg border relative hover:shadow-xl transition-all hover:-translate-y-1`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-0 right-0 mx-auto w-fit rounded-full bg-[#39FFBD] px-3 py-1 text-xs font-medium text-[#062644]">
+                      Más Popular
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-[#062644]">{plan.name}</h3>
+                    <p className="text-muted-foreground">{plan.description}</p>
+                  </div>
+                  <div className="mt-4 flex items-baseline">
+                    <span className="text-4xl font-bold text-[#062644]">{plan.price}</span>
+                    <span className="ml-1 text-muted-foreground">/mes</span>
+                  </div>
+                  <ul className="mt-6 space-y-3 flex-1">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center">
+                        <CheckCircle2 className="mr-2 h-4 w-4 text-[#39FFBD]" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    className={`mt-8 ${plan.popular ? "bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644]" : "bg-[#062644] hover:bg-[#062644]/90 text-white"} group relative overflow-hidden`}
+                  >
+                    <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
+                    <span className="relative">{plan.cta}</span>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-[#062644] to-[#071C2B] text-white relative overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-[30%] right-[20%] w-[40%] h-[40%] rounded-full bg-[#39FFBD]/10 blur-3xl"></div>
+            <div className="absolute bottom-[30%] left-[20%] w-[40%] h-[40%] rounded-full bg-[#39FFBD]/5 blur-3xl"></div>
+          </div>
+          <div className="container max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center max-w-3xl mx-auto">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-5xl">
+                  ¿Listo para transformar tu gestión financiera?
+                </h2>
+                <p className="text-gray-300 md:text-xl/relaxed">
+                  Únete a miles de empresas satisfechas que han optimizado su contabilidad con nuestra plataforma
+                  potenciada por IA.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row mt-6">
+                <Button className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] font-medium text-base px-6 py-6 h-auto group relative overflow-hidden">
+                  <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
+                  <span className="relative">Comienza tu prueba gratuita</span>
+                  <ArrowRight className="ml-2 h-4 w-4 relative group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10 font-medium text-base px-6 py-6 h-auto"
+                >
+                  Solicitar Demo
+                </Button>
+              </div>
+              <p className="text-sm text-gray-300 mt-4">Sin tarjeta de crédito. Prueba gratuita de 14 días.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer
+        id="contacto"
+        className="w-full border-t border-white/10 bg-[#071C2B]/90 py-12 text-white backdrop-blur-md"
+      >
+        <div className="container max-w-7xl mx-auto px-4 md:px-6">
+          <div className="grid gap-8 lg:grid-cols-4">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/images/white-logo.png"
+                  alt="Efectivio Logo"
+                  width={180}
+                  height={50}
+                  className="h-10 w-auto"
+                />
+              </div>
+              <p className="text-sm text-gray-300">
+                Simplifica tu gestión financiera y aumenta la productividad con nuestra plataforma integral potenciada
+                por inteligencia artificial.
+              </p>
+              <div className="flex space-x-4">
+                <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                  <Twitter className="h-5 w-5" />
+                  <span className="sr-only">Twitter</span>
+                </Link>
+                <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                  <Facebook className="h-5 w-5" />
+                  <span className="sr-only">Facebook</span>
+                </Link>
+                <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                  <Instagram className="h-5 w-5" />
+                  <span className="sr-only">Instagram</span>
+                </Link>
+                <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                  <Linkedin className="h-5 w-5" />
+                  <span className="sr-only">LinkedIn</span>
+                </Link>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Producto</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Características
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Precios
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Portal de Cliente
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Integraciones
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Actualizaciones
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Empresa</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Acerca de nosotros
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Carreras
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Clientes
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Prensa
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Recursos</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Documentación
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Centro de Ayuda
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Comunidad
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Webinars
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-gray-300 hover:text-[#39FFBD] transition-colors">
+                    Socios
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 border-t border-gray-700 pt-8 text-center text-sm text-gray-300">
+            <p>© {new Date().getFullYear()} Efectivio. Todos los derechos reservados.</p>
+            <div className="mt-2 flex justify-center space-x-6">
+              <Link href="#" className="hover:text-[#39FFBD] transition-colors">
+                Términos de Servicio
+              </Link>
+              <Link href="#" className="hover:text-[#39FFBD] transition-colors">
+                Política de Privacidad
+              </Link>
+              <Link href="#" className="hover:text-[#39FFBD] transition-colors">
+                Política de Cookies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
+

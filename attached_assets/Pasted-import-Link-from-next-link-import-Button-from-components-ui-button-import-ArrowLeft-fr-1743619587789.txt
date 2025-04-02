@@ -1,0 +1,54 @@
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
+
+export default function DashboardPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#062644] to-[#071C2B] text-white">
+      <div className="container mx-auto px-4 py-8">
+        <Link href="/">
+          <Button variant="outline" className="mb-8 border-white/30 text-white hover:bg-white/10">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver a Inicio
+          </Button>
+        </Link>
+
+        <div className="rounded-xl bg-white/10 backdrop-blur-sm p-8 border border-white/20">
+          <h1 className="text-3xl font-bold mb-6">Bienvenido a tu Dashboard</h1>
+
+          <div className="bg-white/5 p-6 rounded-lg border border-white/10 mb-8">
+            <h2 className="text-xl font-semibold mb-2">Autenticación desactivada</h2>
+            <p className="text-gray-300 mb-4">
+              La autenticación con Clerk ha sido temporalmente desactivada para permitir el despliegue de la aplicación.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10 hover:border-[#39FFBD]/30 transition-colors">
+              <h2 className="text-xl font-semibold mb-4">Portal de Cliente</h2>
+              <p className="text-gray-300 mb-4">
+                Gestiona los portales de tus clientes y comparte documentos de forma segura.
+              </p>
+              <Button className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] w-full">Gestionar Portales</Button>
+            </div>
+
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10 hover:border-[#39FFBD]/30 transition-colors">
+              <h2 className="text-xl font-semibold mb-4">Contabilidad</h2>
+              <p className="text-gray-300 mb-4">Accede a tus registros contables, facturas y reportes financieros.</p>
+              <Button className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] w-full">Ver Contabilidad</Button>
+            </div>
+
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10 hover:border-[#39FFBD]/30 transition-colors">
+              <h2 className="text-xl font-semibold mb-4">Asistente IA</h2>
+              <p className="text-gray-300 mb-4">
+                Consulta con nuestro asistente de IA para obtener insights sobre tus finanzas.
+              </p>
+              <Button className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] w-full">Iniciar Asistente</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
