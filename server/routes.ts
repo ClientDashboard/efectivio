@@ -612,15 +612,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Crear usuario en nuestra base de datos
-      const user = await storage.createUser({
+      // No necesitamos crear el usuario en nuestra base de datos
+      // ya que Supabase maneja esto automáticamente con el trigger
+      // que hemos definido en el script SQL
+      const user = {
+        id: supabaseUser.user?.id,
         username,
-        password, // En una implementación real, habría que hashear la contraseña
         email,
         fullName,
-        clerkId: supabaseUser.user?.id || '',
         role: 'user'
-      });
+      };
 
       res.status(201).json({
         id: user.id,
@@ -649,18 +650,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Credenciales inválidas", error: authError.message });
       }
 
-      // Obtener usuario de nuestra base de datos
-      const user = await storage.getUserByUsername(email);
-      if (!user) {
-        return res.status(404).json({ message: "Usuario no encontrado" });
+      // Obtener el perfil del usuario desde Supabase
+      const supabaseUser = sessionData.session?.user;
+      
+      // Consultar la tabla de perfiles para obtener información adicional
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser?.id)
+        .single();
+      
+      if (profileError) {
+        return res.status(404).json({ message: "Perfil de usuario no encontrado", error: profileError.message });
       }
-
+      
       res.json({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
+        id: supabaseUser?.id,
+        username: profileData.username || supabaseUser?.email,
+        email: supabaseUser?.email,
+        fullName: profileData.full_name,
+        role: profileData.role,
         token: sessionData.session?.access_token
       });
     } catch (error) {
@@ -693,18 +702,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const supabaseUser = sessionData.session.user;
-      const user = await storage.getUserByUsername(supabaseUser.email || '');
       
-      if (!user) {
-        return res.status(404).json({ message: "Usuario no encontrado" });
+      // Consultar la tabla de perfiles para obtener información adicional
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+      
+      if (profileError) {
+        return res.status(404).json({ message: "Perfil de usuario no encontrado", error: profileError.message });
       }
       
       res.json({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role
+        id: supabaseUser.id,
+        username: profileData.username || supabaseUser.email,
+        email: supabaseUser.email,
+        fullName: profileData.full_name,
+        role: profileData.role
       });
     } catch (error) {
       console.error("Error al obtener usuario:", error);
