@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useSignUp } from "@clerk/clerk-react";
+import { useAuth } from "@/lib/auth-provider";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
 export default function SignUpPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -21,8 +20,15 @@ export default function SignUpPage() {
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   
-  // Usar el hook de Clerk
-  const { isLoaded, signUp, setActive } = useSignUp();
+  // Usar nuestro hook de autenticación personalizado
+  const { register, isAuthenticated, isLoading } = useAuth();
+  
+  useEffect(() => {
+    // Redirigir si hay sesión activa
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
   
   const validateForm = () => {
     let isValid = true;
@@ -65,28 +71,10 @@ export default function SignUpPage() {
       return;
     }
     
-    setIsLoading(true);
-    
-    try {
-      // Versión temporal que usa un usuario simulado para desarrollo
-      // Se eliminará cuando la integración completa de Clerk esté disponible
-      toast({
-        title: "Cuenta creada",
-        description: "Tu cuenta ha sido creada exitosamente",
-      });
-      
-      setTimeout(() => {
-        navigate("/dashboard");
-        setIsLoading(false);
-      }, 1500);
-      
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error al crear cuenta",
-        description: "No se pudo crear la cuenta. Intente de nuevo.",
-      });
-      setIsLoading(false);
+    // Utilizar la función register de nuestro AuthProvider
+    const success = await register(fullName, email, username, password);
+    if (success) {
+      navigate("/dashboard");
     }
   };
 

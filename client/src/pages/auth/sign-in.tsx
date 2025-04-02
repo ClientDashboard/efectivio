@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useSignIn } from "@clerk/clerk-react";
+import { useAuth } from "@/lib/auth-provider";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,22 +10,21 @@ import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
 export default function SignInPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   
-  // Usar el hook de Clerk
-  const { isLoaded, signIn, setActive } = useSignIn();
+  // Usar nuestro hook de autenticación personalizado
+  const { login, isAuthenticated, isLoading } = useAuth();
   
   useEffect(() => {
     // Redirigir si hay sesión activa
-    if (isLoaded && signIn?.status === "complete") {
+    if (isAuthenticated) {
       navigate("/dashboard");
     }
-  }, [isLoaded, signIn, navigate]);
+  }, [isAuthenticated, navigate]);
   
   const validateForm = () => {
     let isValid = true;
@@ -54,28 +53,10 @@ export default function SignInPage() {
       return;
     }
     
-    setIsLoading(true);
-    
-    try {
-      // Versión temporal que usa un usuario simulado para desarrollo
-      // Se eliminará cuando la integración completa de Clerk esté disponible
-      toast({
-        title: "Iniciando sesión",
-        description: "Este es un inicio de sesión simulado mientras se configura Clerk",
-      });
-      
-      setTimeout(() => {
-        navigate("/dashboard");
-        setIsLoading(false);
-      }, 1500);
-      
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error de inicio de sesión",
-        description: "Credenciales incorrectas. Intente de nuevo.",
-      });
-      setIsLoading(false);
+    // Utilizar la función login de nuestro AuthProvider
+    const success = await login(username, password);
+    if (success) {
+      navigate("/dashboard");
     }
   };
 
