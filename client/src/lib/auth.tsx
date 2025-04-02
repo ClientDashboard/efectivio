@@ -25,43 +25,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [_, setLocation] = useLocation();
 
   useEffect(() => {
-    // Check if user is logged in
     const checkAuth = async () => {
       try {
-        // For now, we'll use a mock user
-        // In a real implementation, this would check with Clerk
-        const mockUser = localStorage.getItem('efectivio_user');
-        
-        if (mockUser) {
-          setUser(JSON.parse(mockUser));
+        const storedUser = localStorage.getItem("efectivio_user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
         }
       } catch (error) {
-        console.error('Authentication error:', error);
+        console.error("Authentication error:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // Mock login - in real app, use Clerk
-      const mockUser: User = {
-        id: '1',
-        name: 'Juan Sánchez',
-        email: email,
-        role: 'Administrador',
-        initials: 'JS'
+      // Mock user for demonstration
+      const newUser: User = {
+        id: "1",
+        name: "Juan Sánchez",
+        email,
+        role: "Administrador",
+        initials: "JS"
       };
       
-      localStorage.setItem('efectivio_user', JSON.stringify(mockUser));
-      setUser(mockUser);
-      setLocation('/');
+      localStorage.setItem("efectivio_user", JSON.stringify(newUser));
+      setUser(newUser);
+      setLocation("/");
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -71,25 +67,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (name: string, email: string, password: string) => {
     try {
       setIsLoading(true);
-      // Mock registration - in real app, use Clerk
-      const nameParts = name.split(' ');
+      const nameParts = name.split(" ");
       const initials = nameParts.length > 1 
-        ? `${nameParts[0][0]}${nameParts[1][0]}` 
-        : `${nameParts[0][0]}${nameParts[0][1] || ''}`;
+        ? nameParts[0][0] + nameParts[1][0]
+        : nameParts[0][0] + (nameParts[0][1] || "");
       
-      const mockUser: User = {
-        id: '1',
-        name: name,
-        email: email,
-        role: 'Administrador',
+      // Mock user for demonstration
+      const newUser: User = {
+        id: "1",
+        name,
+        email,
+        role: "Administrador",
         initials: initials.toUpperCase()
       };
       
-      localStorage.setItem('efectivio_user', JSON.stringify(mockUser));
-      setUser(mockUser);
-      setLocation('/');
+      localStorage.setItem("efectivio_user", JSON.stringify(newUser));
+      setUser(newUser);
+      setLocation("/");
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -97,9 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('efectivio_user');
+    localStorage.removeItem("efectivio_user");
     setUser(null);
-    setLocation('/login');
+    setLocation("/login");
   };
 
   return (
@@ -112,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
