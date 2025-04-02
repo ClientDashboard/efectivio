@@ -1,0 +1,79 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { Menu, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+export function MobileMenu() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="md:hidden">
+      <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)} className="text-foreground">
+        <Menu className="h-6 w-6" />
+        <span className="sr-only">Abrir menú</span>
+      </Button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
+          <div className="container flex h-16 items-center justify-between">
+            <div></div>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-foreground">
+              <X className="h-6 w-6" />
+              <span className="sr-only">Cerrar menú</span>
+            </Button>
+          </div>
+          <nav className="container grid gap-6 py-8">
+            <Link
+              href="#caracteristicas"
+              className="flex items-center justify-center rounded-md px-4 py-2 text-lg font-medium hover:bg-accent"
+              onClick={() => setIsOpen(false)}
+            >
+              Características
+            </Link>
+            <Link
+              href="#portal-cliente"
+              className="flex items-center justify-center rounded-md px-4 py-2 text-lg font-medium hover:bg-accent"
+              onClick={() => setIsOpen(false)}
+            >
+              Portal de Cliente
+            </Link>
+            <Link
+              href="#testimonios"
+              className="flex items-center justify-center rounded-md px-4 py-2 text-lg font-medium hover:bg-accent"
+              onClick={() => setIsOpen(false)}
+            >
+              Testimonios
+            </Link>
+            <Link
+              href="#precios"
+              className="flex items-center justify-center rounded-md px-4 py-2 text-lg font-medium hover:bg-accent"
+              onClick={() => setIsOpen(false)}
+            >
+              Precios
+            </Link>
+            <Link
+              href="#contacto"
+              className="flex items-center justify-center rounded-md px-4 py-2 text-lg font-medium hover:bg-accent"
+              onClick={() => setIsOpen(false)}
+            >
+              Contacto
+            </Link>
+            <div className="flex flex-col gap-2 mt-4">
+              <Link href="/dashboard">
+                <Button className="w-full bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644]">Registrarse</Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button variant="outline" className="w-full">
+                  Iniciar Sesión
+                </Button>
+              </Link>
+            </div>
+          </nav>
+        </div>
+      )}
+    </div>
+  )
+}
+
