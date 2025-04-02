@@ -4,7 +4,7 @@ import { apiRequest } from '@/lib/queryClient';
 
 // Definir el tipo de usuario
 type User = {
-  id: number;
+  id: string; // ID de Supabase es UUID (string)
   email: string;
   username: string;
   fullName: string;
