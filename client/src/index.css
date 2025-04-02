@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-gray-50 text-gray-900;
+  }
+}
+
+.financial-figure {
+  font-family: 'Roboto Mono', monospace;
+}
+
+.sidebar-link.active {
+  @apply bg-primary-50 border-l-3 border-primary-500;
+}
+
+.chart-placeholder {
+  background: linear-gradient(135deg, #f1f3f5 25%, #e9ecef 25%, #e9ecef 50%, #f1f3f5 50%, #f1f3f5 75%, #e9ecef 75%, #e9ecef 100%);
+  background-size: 20px 20px;
+}
+
+@layer utilities {
+  .border-l-3 {
+    border-left-width: 3px;
+  }
+}
