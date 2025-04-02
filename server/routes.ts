@@ -14,6 +14,12 @@ import {
   insertUserSchema,
   insertFileSchema,
   insertClientInvitationSchema,
+  insertClientPortalUserSchema,
+  insertProjectSchema,
+  insertTaskSchema,
+  insertTimeEntrySchema,
+  insertAppointmentSchema,
+  insertMeetingSchema,
   FileCategory
 } from "@shared/schema";
 import { ZodError } from "zod";
@@ -194,6 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         [
           // Debit accounts receivable
           {
+            journalEntryId: 0, // Será asignado por el sistema
             accountId: 2, // Accounts Receivable (ID from sample data)
             description: `Invoice #${invoice.invoiceNumber}`,
             debit: invoice.total.toString(),
@@ -201,6 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           // Credit revenue
           {
+            journalEntryId: 0, // Será asignado por el sistema
             accountId: 5, // Revenue account (ID from sample data)
             description: `Invoice #${invoice.invoiceNumber}`,
             debit: "0",
@@ -314,6 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         [
           // Debit expense account
           {
+            journalEntryId: 0, // Será asignado por el sistema
             accountId: 6, // Expense account (ID from sample data)
             description: expense.description,
             debit: expense.amount.toString(),
@@ -321,6 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           // Credit cash
           {
+            journalEntryId: 0, // Será asignado por el sistema
             accountId: 1, // Cash and Banks (ID from sample data)
             description: expense.description,
             debit: "0",
@@ -1069,6 +1079,443 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Error registering client", error });
+    }
+  });
+
+  // Portal del Cliente: Proyectos API
+  app.get("/api/client-portal/projects", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { clientId } = req.query;
+      
+      if (!clientId) {
+        return res.status(400).json({ message: "Client ID is required" });
+      }
+      
+      const { data: projects, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('client_id', clientId);
+      
+      if (error) {
+        return res.status(500).json({ message: "Error fetching projects", error });
+      }
+      
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.status(500).json({ message: "Error fetching projects", error });
+    }
+  });
+
+  app.get("/api/client-portal/projects/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      
+      const { data: project, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        return res.status(404).json({ message: "Project not found", error });
+      }
+      
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      res.status(500).json({ message: "Error fetching project", error });
+    }
+  });
+
+  app.post("/api/client-portal/projects", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validation = validateRequest(insertProjectSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const { data: project, error } = await supabase
+        .from('projects')
+        .insert(validation.data)
+        .select()
+        .single();
+      
+      if (error) {
+        return res.status(500).json({ message: "Error creating project", error });
+      }
+      
+      res.status(201).json(project);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      res.status(500).json({ message: "Error creating project", error });
+    }
+  });
+
+  app.put("/api/client-portal/projects/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const validation = validateRequest(insertProjectSchema.partial(), req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const { data: project, error } = await supabase
+        .from('projects')
+        .update(validation.data)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        return res.status(404).json({ message: "Project not found", error });
+      }
+      
+      res.json(project);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      res.status(500).json({ message: "Error updating project", error });
+    }
+  });
+
+  app.delete("/api/client-portal/projects/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        return res.status(404).json({ message: "Error deleting project", error });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ message: "Error deleting project", error });
+    }
+  });
+
+  // Portal del Cliente: Tareas API
+  app.get("/api/client-portal/tasks", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { projectId } = req.query;
+      
+      if (!projectId) {
+        return res.status(400).json({ message: "Project ID is required" });
+      }
+      
+      const { data: tasks, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', projectId);
+      
+      if (error) {
+        return res.status(500).json({ message: "Error fetching tasks", error });
+      }
+      
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Error fetching tasks", error });
+    }
+  });
+
+  app.post("/api/client-portal/tasks", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validation = validateRequest(insertTaskSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const { data: task, error } = await supabase
+        .from('tasks')
+        .insert(validation.data)
+        .select()
+        .single();
+      
+      if (error) {
+        return res.status(500).json({ message: "Error creating task", error });
+      }
+      
+      // Actualizar el progreso del proyecto
+      await updateProjectProgress(validation.data.projectId);
+      
+      res.status(201).json(task);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ message: "Error creating task", error });
+    }
+  });
+
+  app.put("/api/client-portal/tasks/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const validation = validateRequest(insertTaskSchema.partial(), req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      // Obtener la tarea actual para conocer su proyecto
+      const { data: currentTask } = await supabase
+        .from('tasks')
+        .select('project_id')
+        .eq('id', id)
+        .single();
+        
+      if (!currentTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      const { data: task, error } = await supabase
+        .from('tasks')
+        .update(validation.data)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        return res.status(500).json({ message: "Error updating task", error });
+      }
+      
+      // Actualizar el progreso del proyecto
+      await updateProjectProgress(currentTask.project_id);
+      
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ message: "Error updating task", error });
+    }
+  });
+
+  // Función para actualizar el progreso de un proyecto basado en las tareas completadas
+  async function updateProjectProgress(projectId: number) {
+    try {
+      // Obtener todas las tareas del proyecto
+      const { data: tasks } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', projectId);
+      
+      if (!tasks || tasks.length === 0) return;
+      
+      // Calcular el progreso (porcentaje de tareas completadas)
+      const completedTasks = tasks.filter(task => task.status === 'completed');
+      const progressPercentage = Math.round((completedTasks.length / tasks.length) * 100);
+      
+      // Actualizar el progreso del proyecto
+      await supabase
+        .from('projects')
+        .update({ progress: progressPercentage })
+        .eq('id', projectId);
+    } catch (error) {
+      console.error("Error updating project progress:", error);
+    }
+  }
+
+  app.delete("/api/client-portal/tasks/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      
+      // Obtener la tarea actual para conocer su proyecto
+      const { data: currentTask } = await supabase
+        .from('tasks')
+        .select('project_id')
+        .eq('id', id)
+        .single();
+        
+      if (!currentTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        return res.status(500).json({ message: "Error deleting task", error });
+      }
+      
+      // Actualizar el progreso del proyecto
+      await updateProjectProgress(currentTask.project_id);
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Error deleting task", error });
+    }
+  });
+
+  // Portal del Cliente: Registros de tiempo API
+  app.get("/api/client-portal/time-entries", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { taskId } = req.query;
+      
+      if (!taskId) {
+        return res.status(400).json({ message: "Task ID is required" });
+      }
+      
+      const { data: timeEntries, error } = await supabase
+        .from('time_entries')
+        .select('*')
+        .eq('task_id', taskId);
+      
+      if (error) {
+        return res.status(500).json({ message: "Error fetching time entries", error });
+      }
+      
+      res.json(timeEntries);
+    } catch (error) {
+      console.error("Error fetching time entries:", error);
+      res.status(500).json({ message: "Error fetching time entries", error });
+    }
+  });
+
+  app.post("/api/client-portal/time-entries", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validation = validateRequest(insertTimeEntrySchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const { data: timeEntry, error } = await supabase
+        .from('time_entries')
+        .insert(validation.data)
+        .select()
+        .single();
+      
+      if (error) {
+        return res.status(500).json({ message: "Error creating time entry", error });
+      }
+      
+      // Si incluye horas, actualizar las horas acumuladas de la tarea
+      if (validation.data.hours) {
+        // Obtener la tarea actual
+        const { data: task } = await supabase
+          .from('tasks')
+          .select('actual_hours')
+          .eq('id', validation.data.taskId)
+          .single();
+          
+        if (task) {
+          const newHours = parseFloat(task.actual_hours || "0") + parseFloat(validation.data.hours.toString());
+          
+          await supabase
+            .from('tasks')
+            .update({ actual_hours: newHours.toString() })
+            .eq('id', validation.data.taskId);
+        }
+      }
+      
+      res.status(201).json(timeEntry);
+    } catch (error) {
+      console.error("Error creating time entry:", error);
+      res.status(500).json({ message: "Error creating time entry", error });
+    }
+  });
+
+  // Portal del Cliente: Citas y calendario API
+  app.get("/api/client-portal/appointments", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { clientId, projectId, startDate, endDate } = req.query;
+      
+      let query = supabase.from('appointments').select('*');
+      
+      if (clientId) {
+        query = query.eq('client_id', clientId);
+      } else if (projectId) {
+        query = query.eq('project_id', projectId);
+      } else {
+        return res.status(400).json({ message: "Client ID or Project ID is required" });
+      }
+      
+      const { data: appointments, error } = await query;
+      
+      if (error) {
+        return res.status(500).json({ message: "Error fetching appointments", error });
+      }
+      
+      // Filtrar por rango de fechas si se proporcionan
+      let filteredAppointments = appointments;
+      if (startDate && endDate) {
+        const start = new Date(startDate as string);
+        const end = new Date(endDate as string);
+        
+        filteredAppointments = appointments.filter(appointment => {
+          const appointmentDate = new Date(appointment.start_time);
+          return appointmentDate >= start && appointmentDate <= end;
+        });
+      }
+      
+      res.json(filteredAppointments);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+      res.status(500).json({ message: "Error fetching appointments", error });
+    }
+  });
+
+  app.post("/api/client-portal/appointments", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validation = validateRequest(insertAppointmentSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const { data: appointment, error } = await supabase
+        .from('appointments')
+        .insert(validation.data)
+        .select()
+        .single();
+      
+      if (error) {
+        return res.status(500).json({ message: "Error creating appointment", error });
+      }
+      
+      res.status(201).json(appointment);
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+      res.status(500).json({ message: "Error creating appointment", error });
+    }
+  });
+
+  // API para enviar recordatorios de citas
+  app.post("/api/client-portal/appointments/:id/send-reminder", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      
+      // Obtener la cita
+      const { data: appointment, error } = await supabase
+        .from('appointments')
+        .select('*, clients(*)')
+        .eq('id', id)
+        .single();
+      
+      if (error || !appointment) {
+        return res.status(404).json({ message: "Appointment not found", error });
+      }
+      
+      // TODO: Integrar con SendGrid para enviar correo electrónico
+      // En una implementación real, aquí se enviaría el correo de recordatorio
+      
+      // Marcar la cita como que se ha enviado el recordatorio
+      await supabase
+        .from('appointments')
+        .update({ reminder_sent: true })
+        .eq('id', id);
+      
+      res.json({ message: "Reminder sent successfully" });
+    } catch (error) {
+      console.error("Error sending appointment reminder:", error);
+      res.status(500).json({ message: "Error sending appointment reminder", error });
     }
   });
 

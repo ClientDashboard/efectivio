@@ -126,6 +126,26 @@ export const fileCategoryEnum = pgEnum("file_category", [
   "invoice", "quote", "receipt", "contract", "report", "tax", "other"
 ]);
 
+// Enum para el estado de proyectos
+export const projectStatusEnum = pgEnum("project_status", [
+  "pending", "in_progress", "completed", "cancelled", "on_hold"
+]);
+
+// Enum para la prioridad de tareas
+export const taskPriorityEnum = pgEnum("task_priority", [
+  "low", "medium", "high", "urgent"
+]);
+
+// Enum para el estado de tareas
+export const taskStatusEnum = pgEnum("task_status", [
+  "pending", "in_progress", "completed", "cancelled"
+]);
+
+// Enum para el tipo de cita
+export const appointmentTypeEnum = pgEnum("appointment_type", [
+  "meeting", "call", "video_call", "other"
+]);
+
 // Modelo de archivos
 export const files = pgTable("files", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -134,6 +154,7 @@ export const files = pgTable("files", {
   size: integer("size").notNull(),
   mimeType: text("mime_type").notNull(),
   clientId: integer("client_id"),
+  projectId: integer("project_id"),
   companyId: integer("company_id"),
   category: fileCategoryEnum("category").default("other").notNull(),
   userId: uuid("user_id").notNull(),
@@ -150,6 +171,97 @@ export const clientInvitations = pgTable("client_invitations", {
   expiresAt: timestamp("expires_at").notNull(),
   userId: uuid("user_id").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Modelo para autenticación de clientes en el portal
+export const clientPortalUsers = pgTable("client_portal_users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  clientId: integer("client_id").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  lastLogin: timestamp("last_login"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modelo para proyectos
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  clientId: integer("client_id").notNull(),
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  endDate: timestamp("end_date"),
+  status: projectStatusEnum("status").default("pending").notNull(),
+  progress: integer("progress").default(0).notNull(),
+  userId: uuid("user_id").notNull(), // Creador/propietario del proyecto
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modelo para tareas en proyectos
+export const tasks = pgTable("tasks", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  projectId: integer("project_id").notNull(),
+  assignedTo: uuid("assigned_to").notNull(),
+  dueDate: timestamp("due_date"),
+  priority: taskPriorityEnum("priority").default("medium").notNull(),
+  status: taskStatusEnum("status").default("pending").notNull(),
+  estimatedHours: numeric("estimated_hours", { precision: 5, scale: 2 }),
+  actualHours: numeric("actual_hours", { precision: 5, scale: 2 }).default("0"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modelo para registros de tiempo en tareas
+export const timeEntries = pgTable("time_entries", {
+  id: serial("id").primaryKey(),
+  taskId: integer("task_id").notNull(),
+  userId: uuid("user_id").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"),
+  description: text("description"),
+  hours: numeric("hours", { precision: 5, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modelo para citas y calendario
+export const appointments = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  clientId: integer("client_id").notNull(),
+  projectId: integer("project_id"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  location: text("location"),
+  type: appointmentTypeEnum("type").default("meeting").notNull(),
+  meetingUrl: text("meeting_url"), // URL para reuniones de Google Meet
+  reminderSent: boolean("reminder_sent").default(false).notNull(),
+  userId: uuid("user_id").notNull(), // Creador de la cita
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modelo para reuniones grabadas
+export const meetings = pgTable("meetings", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  appointmentId: integer("appointment_id"),
+  projectId: integer("project_id"),
+  clientId: integer("client_id").notNull(),
+  recordingUrl: text("recording_url"),
+  summary: text("summary"), // Resumen generado por AI
+  duration: integer("duration"), // Duración en minutos
+  meetingDate: timestamp("meeting_date").notNull(),
+  participants: text("participants").array(), // Lista de participantes
+  keyPoints: text("key_points").array(), // Puntos clave identificados por AI
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Insert schemas for validation
@@ -182,6 +294,24 @@ export const insertFileSchema = createInsertSchema(files)
 
 export const insertClientInvitationSchema = createInsertSchema(clientInvitations)
   .omit({ id: true, createdAt: true });
+
+export const insertClientPortalUserSchema = createInsertSchema(clientPortalUsers)
+  .omit({ id: true, lastLogin: true, createdAt: true, updatedAt: true });
+
+export const insertProjectSchema = createInsertSchema(projects)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertTaskSchema = createInsertSchema(tasks)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertTimeEntrySchema = createInsertSchema(timeEntries)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertAppointmentSchema = createInsertSchema(appointments)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertMeetingSchema = createInsertSchema(meetings)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -217,3 +347,25 @@ export type FileCategory = "invoice" | "quote" | "receipt" | "contract" | "repor
 
 export type ClientInvitation = typeof clientInvitations.$inferSelect;
 export type InsertClientInvitation = z.infer<typeof insertClientInvitationSchema>;
+
+export type ClientPortalUser = typeof clientPortalUsers.$inferSelect;
+export type InsertClientPortalUser = z.infer<typeof insertClientPortalUserSchema>;
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type ProjectStatus = "pending" | "in_progress" | "completed" | "cancelled" | "on_hold";
+
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
+export type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+export type TimeEntry = typeof timeEntries.$inferSelect;
+export type InsertTimeEntry = z.infer<typeof insertTimeEntrySchema>;
+
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
+export type AppointmentType = "meeting" | "call" | "video_call" | "other";
+
+export type Meeting = typeof meetings.$inferSelect;
+export type InsertMeeting = z.infer<typeof insertMeetingSchema>;
