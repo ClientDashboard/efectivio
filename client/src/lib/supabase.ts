@@ -1,13 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY || '';
+// Obtener credenciales de las variables de entorno
+const supabaseUrl = import.meta.env.SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY || '';
+const supabaseServiceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase credentials not found. Some features may not work.');
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Credenciales de Supabase no encontradas. Algunas funciones pueden no funcionar correctamente.');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Cliente para operaciones de usuario normal
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Cliente para operaciones administrativas (con privilegios elevados)
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 export default supabase;
