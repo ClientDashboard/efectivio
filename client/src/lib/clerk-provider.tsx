@@ -1,7 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ClerkProvider as BaseClerkProvider } from '@clerk/clerk-react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './queryClient';
 
 // Obtener la clave pública de Clerk desde las variables de entorno
 // Al utilizar Vite, necesitamos el prefijo VITE_
@@ -16,6 +14,18 @@ type ClerkProviderProps = {
 };
 
 export function ClerkProvider({ children }: ClerkProviderProps) {
+  const [mounted, setMounted] = useState(false);
+
+  // Asegurarnos de que el componente solo se renderice en el cliente
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Evitamos un error de hidratación renderizando solo del lado del cliente
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <BaseClerkProvider
       publishableKey={publishableKey}

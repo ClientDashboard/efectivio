@@ -1,73 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useSignIn } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUserStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
-
-const signInSchema = z.object({
-  username: z.string().min(3, {
-    message: "El nombre de usuario debe tener al menos 3 caracteres",
-  }),
-  password: z.string().min(6, {
-    message: "La contraseña debe tener al menos 6 caracteres",
-  }),
-});
-
-type SignInValues = z.infer<typeof signInSchema>;
 
 export default function SignInPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { setUser } = useUserStore();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  
+  // Usar el hook de Clerk
+  const { isLoaded, signIn, setActive } = useSignIn();
+  
+  useEffect(() => {
+    // Redirigir si hay sesión activa
+    if (isLoaded && signIn?.status === "complete") {
+      navigate("/dashboard");
+    }
+  }, [isLoaded, signIn, navigate]);
+  
+  const validateForm = () => {
+    let isValid = true;
+    
+    if (username.length < 3) {
+      setUsernameError("El nombre de usuario debe tener al menos 3 caracteres");
+      isValid = false;
+    } else {
+      setUsernameError("");
+    }
+    
+    if (password.length < 6) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres");
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+    
+    return isValid;
+  };
 
-  const form = useForm<SignInValues>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (values: SignInValues) => {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
+    
     try {
-      // In a real app, this would call the Clerk API or your authentication endpoint
-      // For now, simulate a successful login with mock data
-      // This is just for demoing the UI flow
-      const mockUser = {
-        id: 1,
-        username: values.username,
-        email: `${values.username}@example.com`,
-        fullName: values.username,
-        role: "admin"
-      };
-
-      // Set a timeout to simulate network request
+      // Versión temporal que usa un usuario simulado para desarrollo
+      // Se eliminará cuando la integración completa de Clerk esté disponible
+      toast({
+        title: "Iniciando sesión",
+        description: "Este es un inicio de sesión simulado mientras se configura Clerk",
+      });
+      
       setTimeout(() => {
-        setUser(mockUser);
-        toast({
-          title: "Inicio de sesión exitoso",
-          description: "Bienvenido a Efectivio",
-        });
         navigate("/dashboard");
-      }, 1000);
+        setIsLoading(false);
+      }, 1500);
       
     } catch (error) {
       toast({
@@ -75,7 +75,6 @@ export default function SignInPage() {
         title: "Error de inicio de sesión",
         description: "Credenciales incorrectas. Intente de nuevo.",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -104,94 +103,92 @@ export default function SignInPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="px-4 py-8 shadow sm:rounded-lg sm:px-10">
           <CardContent className="pt-4">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Usuario</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Ingresa tu nombre de usuario" 
-                          {...field} 
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+            <form onSubmit={onSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="username" className="block text-sm font-medium">
+                  Usuario
+                </label>
+                <div>
+                  <Input 
+                    id="username"
+                    name="username"
+                    placeholder="Ingresa tu nombre de usuario" 
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  {usernameError && (
+                    <p className="text-sm text-red-500 mt-1">{usernameError}</p>
                   )}
-                />
+                </div>
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input 
-                            type={showPassword ? "text" : "password"} 
-                            placeholder="Ingresa tu contraseña" 
-                            {...field} 
-                            disabled={isLoading}
-                          />
-                          <button
-                            type="button"
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOffIcon className="h-5 w-5 text-gray-400" />
-                            ) : (
-                              <EyeIcon className="h-5 w-5 text-gray-400" />
-                            )}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-sm font-medium">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <Input 
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Ingresa tu contraseña" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+                {passwordError && (
+                  <p className="text-sm text-red-500 mt-1">{passwordError}</p>
+                )}
+              </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      id="remember_me"
-                      name="remember_me"
-                      type="checkbox"
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
-                      Recordarme
-                    </label>
-                  </div>
-
-                  <div className="text-sm">
-                    <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
-                      ¿Olvidaste tu contraseña?
-                    </a>
-                  </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember_me"
+                    name="remember_me"
+                    type="checkbox"
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
+                    Recordarme
+                  </label>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full flex justify-center py-2"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Iniciando sesión...
-                    </>
-                  ) : (
-                    "Iniciar Sesión"
-                  )}
-                </Button>
-              </form>
-            </Form>
+                <div className="text-sm">
+                  <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full flex justify-center py-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Iniciando sesión...
+                  </>
+                ) : (
+                  "Iniciar Sesión"
+                )}
+              </Button>
+            </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 pt-4 border-t">
             <div className="relative mt-6">

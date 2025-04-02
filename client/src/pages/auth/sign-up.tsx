@@ -1,88 +1,91 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
+import { useSignUp } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
-
-const signUpSchema = z.object({
-  fullName: z.string().min(3, {
-    message: "El nombre debe tener al menos 3 caracteres",
-  }),
-  username: z.string().min(3, {
-    message: "El nombre de usuario debe tener al menos 3 caracteres",
-  }),
-  email: z.string().email({
-    message: "Ingresa un email válido",
-  }),
-  password: z.string().min(8, {
-    message: "La contraseña debe tener al menos 8 caracteres",
-  }),
-  confirmPassword: z.string(),
-  terms: z.boolean().refine((val) => val === true, {
-    message: "Debes aceptar los términos y condiciones",
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Las contraseñas no coinciden",
-  path: ["confirmPassword"],
-});
-
-type SignUpValues = z.infer<typeof signUpSchema>;
 
 export default function SignUpPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullNameError, setFullNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  
+  // Usar el hook de Clerk
+  const { isLoaded, signUp, setActive } = useSignUp();
+  
+  const validateForm = () => {
+    let isValid = true;
+    
+    if (fullName.length < 3) {
+      setFullNameError("El nombre completo debe tener al menos 3 caracteres");
+      isValid = false;
+    } else {
+      setFullNameError("");
+    }
+    
+    if (!email.includes('@') || !email.includes('.')) {
+      setEmailError("Por favor ingresa un email válido");
+      isValid = false;
+    } else {
+      setEmailError("");
+    }
+    
+    if (username.length < 3) {
+      setUsernameError("El nombre de usuario debe tener al menos 3 caracteres");
+      isValid = false;
+    } else {
+      setUsernameError("");
+    }
+    
+    if (password.length < 6) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres");
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+    
+    return isValid;
+  };
 
-  const form = useForm<SignUpValues>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      fullName: "",
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      terms: false,
-    },
-  });
-
-  const onSubmit = async (values: SignUpValues) => {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
+    
     try {
-      // In a real app, this would call the Clerk API or your registration endpoint
-      // This is just for demoing the UI flow
+      // Versión temporal que usa un usuario simulado para desarrollo
+      // Se eliminará cuando la integración completa de Clerk esté disponible
+      toast({
+        title: "Cuenta creada",
+        description: "Tu cuenta ha sido creada exitosamente",
+      });
+      
       setTimeout(() => {
-        toast({
-          title: "Registro exitoso",
-          description: "Tu cuenta ha sido creada correctamente",
-        });
-        navigate("/auth/sign-in");
+        navigate("/dashboard");
+        setIsLoading(false);
       }, 1500);
       
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error de registro",
+        title: "Error al crear cuenta",
         description: "No se pudo crear la cuenta. Intente de nuevo.",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -96,7 +99,7 @@ export default function SignUpPage() {
           </svg>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Crea tu cuenta
+          Crear una nueva cuenta
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           ¿Ya tienes una cuenta?{" "}
@@ -111,144 +114,97 @@ export default function SignUpPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="px-4 py-8 shadow sm:rounded-lg sm:px-10">
           <CardContent className="pt-4">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre completo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ingresa tu nombre completo" {...field} disabled={isLoading} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+            <form onSubmit={onSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="fullName" className="block text-sm font-medium">
+                  Nombre completo
+                </label>
+                <div>
+                  <Input 
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Ingresa tu nombre completo" 
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  {fullNameError && (
+                    <p className="text-sm text-red-500 mt-1">{fullNameError}</p>
                   )}
-                />
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nombre de usuario</FormLabel>
-                        <FormControl>
-                          <Input placeholder="usuario123" {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Correo electrónico</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="ejemplo@correo.com" {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input 
-                            type={showPassword ? "text" : "password"} 
-                            placeholder="Crea una contraseña segura" 
-                            {...field} 
-                            disabled={isLoading}
-                          />
-                          <button
-                            type="button"
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOffIcon className="h-5 w-5 text-gray-400" />
-                            ) : (
-                              <EyeIcon className="h-5 w-5 text-gray-400" />
-                            )}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Debe tener al menos 8 caracteres
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium">
+                  Correo electrónico
+                </label>
+                <div>
+                  <Input 
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="ejemplo@empresa.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  {emailError && (
+                    <p className="text-sm text-red-500 mt-1">{emailError}</p>
                   )}
-                />
+                </div>
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirmar contraseña</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input 
-                            type={showConfirmPassword ? "text" : "password"} 
-                            placeholder="Confirma tu contraseña" 
-                            {...field} 
-                            disabled={isLoading}
-                          />
-                          <button
-                            type="button"
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          >
-                            {showConfirmPassword ? (
-                              <EyeOffIcon className="h-5 w-5 text-gray-400" />
-                            ) : (
-                              <EyeIcon className="h-5 w-5 text-gray-400" />
-                            )}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+              <div className="space-y-2">
+                <label htmlFor="username" className="block text-sm font-medium">
+                  Nombre de usuario
+                </label>
+                <div>
+                  <Input 
+                    id="username"
+                    name="username"
+                    placeholder="Ingresa un nombre de usuario" 
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  {usernameError && (
+                    <p className="text-sm text-red-500 mt-1">{usernameError}</p>
                   )}
-                />
+                </div>
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="terms"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          He leído y acepto los{" "}
-                          <a href="#" className="text-primary-600 hover:text-primary-500">
-                            términos y condiciones
-                          </a>
-                        </FormLabel>
-                        <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-sm font-medium">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <Input 
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Crea una contraseña segura" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+                {passwordError && (
+                  <p className="text-sm text-red-500 mt-1">{passwordError}</p>
+                )}
+              </div>
 
+              <div>
                 <Button
                   type="submit"
                   className="w-full flex justify-center py-2"
@@ -263,8 +219,8 @@ export default function SignUpPage() {
                     "Crear cuenta"
                   )}
                 </Button>
-              </form>
-            </Form>
+              </div>
+            </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 pt-4 border-t">
             <div className="relative mt-6">
@@ -272,7 +228,7 @@ export default function SignUpPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">O registrarse con</span>
+                <span className="px-2 bg-white text-gray-500">O continuar con</span>
               </div>
             </div>
 

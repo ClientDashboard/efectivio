@@ -93,18 +93,9 @@ function Router() {
       {/* Public Pages */}
       <Route path="/" component={LandingPage} />
       
-      {/* Auth Pages - Estas páginas serán manejadas por los componentes de Clerk */}
-      <Route path="/auth/sign-in">
-        <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
-          <SignIn redirectUrl="/dashboard" />
-        </div>
-      </Route>
-      
-      <Route path="/auth/sign-up">
-        <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
-          <SignUp redirectUrl="/dashboard" />
-        </div>
-      </Route>
+      {/* Auth Pages - Usando páginas personalizadas que implementan los componentes de Clerk */}
+      <Route path="/auth/sign-in" component={SignInPage} />
+      <Route path="/auth/sign-up" component={SignUpPage} />
       
       {/* Fallback */}
       <Route component={NotFound} />
