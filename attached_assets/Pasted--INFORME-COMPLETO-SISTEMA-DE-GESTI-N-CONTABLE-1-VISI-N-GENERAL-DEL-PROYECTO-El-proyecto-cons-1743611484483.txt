@@ -1,0 +1,451 @@
+# INFORME COMPLETO: SISTEMA DE GESTIÓN CONTABLE
+
+## 1. VISIÓN GENERAL DEL PROYECTO
+
+El proyecto consiste en un sistema completo de gestión contable que incluye un landing page público, un sistema de autenticación mediante Clerk, y un dashboard administrativo con múltiples módulos funcionales. El sistema está diseñado para manejar todas las operaciones contables y administrativas de una empresa, desde la gestión de clientes hasta la generación de estados financieros.
+
+## 2. ARQUITECTURA DEL SISTEMA
+
+### 2.1 Componentes Principales
+
+1. **Frontend**: Desarrollado con Next.js para crear una aplicación web de una sola página (SPA) con renderizado del lado del servidor.
+2. **Backend API**: Estructura de API RESTful que sirve datos a la interfaz de usuario.
+3. **Autenticación**: Implementación de Clerk para manejo de identidad y acceso.
+4. **Base de Datos**: Sistema de almacenamiento para toda la información contable y administrativa.
+
+### 2.2 Stack Tecnológico Recomendado
+
+- **Frontend**: Next.js, React, TailwindCSS
+- **Backend**: Node.js con Express o Next.js API Routes
+- **Base de Datos**: PostgreSQL o MongoDB
+- **Autenticación**: Clerk
+- **Estado Global**: Zustand o Context API
+- **Formularios**: React Hook Form con Zod para validaciones
+- **UI/UX**: Componentes personalizados con Radix UI o shadcn/ui
+
+## 3. ESTRUCTURA DE ARCHIVOS Y CARPETAS
+
+### 3.1 Estructura Raíz del Proyecto
+
+```
+proyecto-contable/
+├── public/                        # Archivos estáticos
+├── src/                           # Código fuente
+│   ├── app/                       # Rutas de Next.js (App Router)
+│   ├── components/                # Componentes reutilizables
+│   ├── lib/                       # Utilidades y configuraciones
+│   ├── api/                       # API endpoints (opcional si usas Route Handlers)
+│   └── styles/                    # Estilos globales
+├── prisma/                        # Esquema de base de datos (si usas Prisma)
+├── .env                           # Variables de entorno
+├── .env.example                   # Ejemplo de variables de entorno
+├── next.config.js                 # Configuración de Next.js
+├── package.json                   # Dependencias del proyecto
+└── tailwind.config.js             # Configuración de TailwindCSS
+```
+
+### 3.2 Estructura de la Aplicación (App Router)
+
+```
+src/app/
+├── page.js                        # Landing Page
+├── layout.js                      # Layout raíz
+├── (auth)/                        # Grupo de rutas de autenticación
+│   ├── signin/
+│   │   └── page.js                # Página de inicio de sesión
+│   └── signup/
+│       └── page.js                # Página de registro
+├── (dashboard)/                   # Grupo de rutas del dashboard
+│   ├── layout.js                  # Layout del dashboard
+│   ├── page.js                    # Dashboard principal
+│   ├── clientes/                  # Módulo de clientes
+│   ├── cotizaciones/              # Módulo de cotizaciones
+│   ├── facturas/                  # Módulo de facturas
+│   ├── gastos/                    # Módulo de gastos
+│   ├── movimientos/               # Módulo de movimientos
+│   ├── ordenes-de-compra/         # Módulo de órdenes de compra
+│   ├── productos/                 # Módulo de productos
+│   ├── bodegas/                   # Módulo de bodegas
+│   ├── asientos/                  # Módulo de asientos contables
+│   └── contabilidad/              # Módulo de contabilidad
+└── api/                           # API endpoints (Route Handlers)
+```
+
+### 3.3 Estructura de API
+
+```
+src/api/ (o app/api/)
+├── ai/                            # Funcionalidades de IA
+├── asientos/                      # API para asientos contables
+├── auth/                          # Webhooks y funciones relacionadas a autenticación
+├── bodegas/                       # API para manejo de bodegas/almacenes
+├── client/                        # Cliente API (integraciones)
+├── clientes/                      # API para gestión de clientes
+├── contabilidad/                  # API para funciones contables generales
+├── cotizaciones/                  # API para cotizaciones
+├── facturas/                      # API para facturas
+├── files/                         # API para manejo de archivos
+├── gastos/                        # API para gestión de gastos
+├── movimientos/                   # API para movimientos financieros
+├── ordenes-de-compra/             # API para órdenes de compra
+└── productos/                     # API para gestión de productos
+```
+
+### 3.4 Estructura de Componentes
+
+```
+src/components/
+├── ui/                            # Componentes de UI básicos
+│   ├── button.jsx
+│   ├── input.jsx
+│   ├── select.jsx
+│   ├── table.jsx
+│   ├── modal.jsx
+│   └── ...
+├── forms/                         # Componentes de formulario
+│   ├── cliente-form.jsx
+│   ├── factura-form.jsx
+│   └── ...
+├── layouts/                       # Componentes de layout
+│   ├── dashboard-layout.jsx
+│   ├── sidebar.jsx
+│   └── header.jsx
+└── módulos/                       # Componentes específicos por módulo
+    ├── clientes/
+    ├── facturas/
+    └── ...
+```
+
+## 4. DETALLE DE MÓDULOS FUNCIONALES
+
+### 4.1 Landing Page
+- **Características**: Presentación del producto, planes/precios, testimonios, formulario de contacto
+- **Páginas**: Home, Pricing, Features, Contact, About
+
+### 4.2 Autenticación (Clerk)
+- **Características**: Registro, inicio de sesión, recuperación de contraseña, autenticación multifactor
+- **Páginas**: Sign In, Sign Up, Forgot Password
+
+### 4.3 Dashboard Principal
+- **Características**: Vista general del negocio, KPIs, gráficos, actividad reciente
+- **Componentes**: Gráficos de ventas, estado de cuentas por cobrar/pagar, actividad reciente, tareas pendientes
+
+### 4.4 Módulo de Clientes
+- **Características**: CRUD de clientes, historial de transacciones, saldos
+- **Páginas**:
+  - Lista de clientes (con filtros y búsqueda)
+  - Crear/editar cliente
+  - Detalle de cliente (con pestañas para diferentes secciones)
+  - Historial de transacciones
+
+### 4.5 Módulo de Cotizaciones
+- **Características**: Creación y gestión de cotizaciones, conversión a facturas
+- **Páginas**:
+  - Lista de cotizaciones (con filtros por estado, fecha, cliente)
+  - Crear/editar cotización
+  - Vista de cotización (con opción para imprimir/enviar)
+  - Convertir a factura
+
+### 4.6 Módulo de Facturas
+- **Características**: Emisión de facturas, gestión de pagos, facturas recurrentes
+- **Páginas**:
+  - Lista de facturas (con filtros por estado, vencimiento, etc.)
+  - Crear/editar factura
+  - Vista de factura (con opciones para imprimir, enviar por email)
+  - Registro de pagos
+  - Facturas recurrentes
+
+### 4.7 Módulo de Gastos
+- **Características**: Registro de gastos, categorización, adjuntos de comprobantes
+- **Páginas**:
+  - Lista de gastos (con filtros por categoría, fecha, estado)
+  - Crear/editar gasto
+  - Vista de gasto (con comprobantes adjuntos)
+
+### 4.8 Módulo de Movimientos
+- **Características**: Registro de movimientos financieros, conciliación bancaria
+- **Páginas**:
+  - Lista de movimientos
+  - Nuevo movimiento (ingreso/egreso)
+  - Conciliación bancaria
+  - Transferencias entre cuentas
+
+### 4.9 Módulo de Órdenes de Compra
+- **Características**: Creación de órdenes, seguimiento, recepción de mercancía
+- **Páginas**:
+  - Lista de órdenes de compra
+  - Crear/editar orden
+  - Vista de orden
+  - Recepción de productos
+
+### 4.10 Módulo de Productos
+- **Características**: Catálogo de productos, precios, inventario
+- **Páginas**:
+  - Lista de productos (con filtros y búsqueda)
+  - Crear/editar producto
+  - Detalle de producto
+  - Historial de movimientos de inventario
+
+### 4.11 Módulo de Bodegas
+- **Características**: Gestión de múltiples almacenes, traslados
+- **Páginas**:
+  - Lista de bodegas
+  - Crear/editar bodega
+  - Inventario por bodega
+  - Traslados entre bodegas
+
+### 4.12 Módulo de Asientos Contables
+- **Características**: Asientos manuales, plantillas, validaciones
+- **Páginas**:
+  - Lista de asientos
+  - Crear/editar asiento
+  - Vista de asiento
+
+### 4.13 Módulo de Contabilidad
+- **Características**: Plan de cuentas, libros contables, estados financieros
+- **Páginas**:
+  - Plan de cuentas
+  - Libro diario
+  - Libro mayor
+  - Balance general
+  - Estado de resultados
+
+### 4.14 Módulo de Archivos
+- **Características**: Almacenamiento y organización de documentos
+- **Páginas**:
+  - Explorador de archivos
+  - Subir nuevo archivo
+  - Vista previa de archivos
+
+## 5. MODELO DE DATOS
+
+### 5.1 Entidades Principales
+
+1. **Usuario**: Información de usuarios del sistema
+2. **Cliente**: Datos de clientes
+3. **Proveedor**: Datos de proveedores
+4. **Producto**: Catálogo de productos/servicios
+5. **Bodega**: Almacenes físicos
+6. **Cotización**: Presupuestos a clientes
+7. **Factura**: Documentos de venta
+8. **OrdenCompra**: Órdenes a proveedores
+9. **Movimiento**: Movimientos financieros
+10. **Gasto**: Registro de gastos
+11. **AsientoContable**: Asientos del libro diario
+12. **Cuenta**: Plan de cuentas contable
+13. **Inventario**: Stock de productos
+
+### 5.2 Relaciones Clave
+
+- Cliente tiene muchas Cotizaciones y Facturas
+- Producto está en muchos Items de Cotización/Factura
+- Producto tiene Inventario en múltiples Bodegas
+- Factura genera Movimientos y AsientosContables
+- Gasto genera Movimientos y AsientosContables
+
+## 6. SEGURIDAD Y PERMISOS
+
+### 6.1 Roles de Usuario
+
+1. **Administrador**: Acceso completo al sistema
+2. **Contador**: Acceso a módulos contables y visualización de otros
+3. **Vendedor**: Acceso a clientes, cotizaciones, facturas
+4. **Comprador**: Acceso a proveedores, órdenes de compra, productos
+5. **Auxiliar**: Acceso limitado según configuración
+
+### 6.2 Matriz de Permisos
+
+| Módulo          | Administrador | Contador | Vendedor | Comprador | Auxiliar |
+|-----------------|---------------|----------|----------|-----------|----------|
+| Clientes        | CRUD          | R        | CRUD     | R         | Config   |
+| Cotizaciones    | CRUD          | R        | CRUD     | -         | Config   |
+| Facturas        | CRUD          | R        | CRU      | -         | Config   |
+| Gastos          | CRUD          | CRUD     | -        | CR        | Config   |
+| Productos       | CRUD          | R        | R        | CRUD      | Config   |
+| Compras         | CRUD          | R        | -        | CRUD      | Config   |
+| Movimientos     | CRUD          | CRUD     | -        | -         | Config   |
+| Asientos        | CRUD          | CRUD     | -        | -         | Config   |
+| Contabilidad    | CRUD          | CRUD     | -        | -         | Config   |
+| Configuración   | CRUD          | -        | -        | -         | -        |
+
+*CRUD: Create, Read, Update, Delete; R: Solo lectura; Config: Configurable*
+
+## 7. FLUJOS DE TRABAJO PRINCIPALES
+
+### 7.1 Ciclo de Venta
+
+1. Creación de cliente
+2. Elaboración de cotización
+3. Aprobación por cliente
+4. Conversión a factura
+5. Entrega de productos/servicios
+6. Recepción de pago
+7. Generación de asientos contables
+
+### 7.2 Ciclo de Compra
+
+1. Creación de orden de compra
+2. Envío a proveedor
+3. Recepción de mercancía
+4. Registro de factura de proveedor
+5. Pago a proveedor
+6. Actualización de inventario
+7. Generación de asientos contables
+
+### 7.3 Ciclo Contable
+
+1. Registro de transacciones diarias
+2. Generación automática de asientos
+3. Revisión y ajustes
+4. Conciliación bancaria
+5. Cierre mensual
+6. Generación de informes
+7. Cierre anual
+
+## 8. INTERFACES DE USUARIO
+
+### 8.1 Landing Page
+
+- **Diseño**: Moderno, enfocado en conversión
+- **Secciones**: Hero section, características, precios, testimonios, FAQ, contacto
+- **Componentes**: Menú de navegación, CTA buttons, formularios de contacto
+
+### 8.2 Dashboard
+
+- **Diseño**: Interfaz administrativa, clara y funcional
+- **Layout**: Sidebar de navegación, header con perfil y notificaciones, área de contenido
+- **Componentes**: Cards para KPIs, gráficos, tablas de actividad reciente
+
+### 8.3 Módulos Específicos
+
+- **Tablas**: Listados con ordenación, filtrado, paginación y búsqueda
+- **Formularios**: Campos validados, autocompletado, cálculos automáticos
+- **Vistas de detalle**: Información organizada en pestañas o secciones
+
+## 9. INTEGRACIONES
+
+### 9.1 Integraciones Externas
+
+1. **Pasarelas de Pago**: Stripe, PayPal, etc.
+2. **Servicios de Email**: SendGrid, Mailgun
+3. **Almacenamiento**: AWS S3, Google Cloud Storage
+4. **Facturación Electrónica**: Según requisitos locales
+5. **Servicios Bancarios**: APIs de bancos para conciliación
+
+### 9.2 Integraciones Internas
+
+1. **Notificaciones**: Sistema push, emails, alertas en dashboard
+2. **Reportes**: Generación PDF, Excel, CSV
+3. **Calendario**: Recordatorios, vencimientos, tareas
+
+## 10. PLAN DE IMPLEMENTACIÓN
+
+### 10.1 Fases del Proyecto
+
+#### Fase 1: Fundamentos (4-6 semanas)
+- Setup del proyecto y entorno de desarrollo
+- Landing page
+- Autenticación con Clerk
+- Dashboard básico
+- Base de datos y modelos principales
+
+#### Fase 2: Módulos de Operación (6-8 semanas)
+- Clientes
+- Productos
+- Cotizaciones
+- Facturas 
+- Bodegas
+
+#### Fase 3: Módulos Financieros (4-6 semanas)
+- Gastos
+- Movimientos
+- Órdenes de compra
+- Proveedores
+
+#### Fase 4: Contabilidad (4-6 semanas)
+- Asientos contables
+- Plan de cuentas
+- Libros contables
+- Estados financieros
+
+#### Fase 5: Mejoras y Optimización (4 semanas)
+- Reportes avanzados
+- Dashboards personalizables
+- Integraciones adicionales
+- Optimización de rendimiento
+
+### 10.2 Metodología de Desarrollo
+
+- **Enfoque**: Desarrollo ágil con sprints de 2 semanas
+- **Pruebas**: Implementación de pruebas unitarias y de integración
+- **Despliegue**: CI/CD para automatizar procesos
+
+## 11. CONSIDERACIONES TÉCNICAS
+
+### 11.1 Performance
+
+- Implementación de SSR/ISR para carga rápida de páginas
+- Optimización de consultas a base de datos
+- Lazy loading de componentes y módulos
+- Paginación y carga bajo demanda para listas grandes
+
+### 11.2 Escalabilidad
+
+- Arquitectura modular para facilitar crecimiento
+- Separación clara de responsabilidades (frontend/backend)
+- Caching estratégico para reducir carga en servidor
+- Diseño de base de datos optimizado para volumen
+
+### 11.3 Mantenibilidad
+
+- Convenciones de código consistentes
+- Documentación detallada
+- Componentes reutilizables
+- Pruebas automatizadas
+
+## 12. TECNOLOGÍAS ESPECÍFICAS RECOMENDADAS
+
+### 12.1 Frontend
+
+- **Framework**: Next.js 14+ (con App Router)
+- **UI**: TailwindCSS + shadcn/ui o Mantine
+- **Estado**: Zustand o Context API + reducers
+- **Formularios**: React Hook Form + Zod
+- **Tablas**: TanStack Table
+- **Gráficos**: Recharts o Chart.js
+- **Fetching de datos**: TanStack Query o SWR
+
+### 12.2 Backend
+
+- **API**: Next.js API Routes o Express.js
+- **ORM**: Prisma o Drizzle
+- **Validación**: Zod
+- **Autenticación**: Clerk
+- **Almacenamiento**: Uploadthing o next-s3-upload
+
+### 12.3 DevOps
+
+- **Hosting**: Vercel o Netlify
+- **Base de datos**: PlanetScale, Neon o Supabase
+- **CI/CD**: GitHub Actions
+- **Monitoreo**: Sentry, Vercel Analytics
+
+## 13. CONCLUSIONES Y RECOMENDACIONES FINALES
+
+1. **Priorizar la experiencia de usuario**: Un sistema contable debe ser fácil de usar, especialmente para usuarios no técnicos.
+
+2. **Implementación gradual**: Comenzar con los módulos esenciales y expandir progresivamente.
+
+3. **Seguridad ante todo**: Implementar buenas prácticas de seguridad desde el inicio, especialmente para datos financieros.
+
+4. **Validaciones robustas**: Asegurar la integridad de datos con validaciones exhaustivas tanto en frontend como backend.
+
+5. **Diseño responsivo**: Garantizar que el sistema funcione bien en diferentes dispositivos.
+
+6. **Documentación completa**: Mantener documentación detallada para facilitar mantenimiento y soporte.
+
+7. **Feedback temprano**: Involucrar a usuarios reales en fases tempranas para validar funcionalidades.
+
+8. **Escalabilidad**: Diseñar pensando en el crecimiento futuro, tanto en datos como en funcionalidades.
+
+Este informe proporciona una visión completa del proyecto de sistema contable, desde su estructura hasta su implementación. Las decisiones finales deben adaptarse a los requisitos específicos del negocio y consideraciones técnicas particulares.
