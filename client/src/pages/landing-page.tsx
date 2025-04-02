@@ -17,6 +17,8 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import primaryLogo from "../assets/primary-logo.png";
+import darkLogo from "../assets/dark-logo.png";
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,7 +29,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container max-w-7xl mx-auto flex h-20 items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="./images/primary-logo.png" alt="Efectivio Logo" className="h-10" />
+            <img src={primaryLogo} alt="Efectivio Logo" className="h-10" />
           </div>
           
           {/* Mobile Menu Button */}
@@ -74,7 +76,7 @@ export default function LandingPage() {
           <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
             <div className="container flex h-16 items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src="./images/primary-logo.png" alt="Efectivio Logo" className="h-8" />
+                <img src={primaryLogo} alt="Efectivio Logo" className="h-8" />
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)} className="text-foreground">
                 <X className="h-6 w-6" />
@@ -375,7 +377,7 @@ export default function LandingPage() {
         <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
             <div className="flex flex-col col-span-2 lg:col-span-2">
-              <img src="/images/dark-logo.png" alt="Efectivio Logo" className="h-10 mb-2" />
+              <img src={darkLogo} alt="Efectivio Logo" className="h-10 mb-2" />
               <p className="text-muted-foreground mt-2 text-sm">
                 Simplificando la contabilidad de empresas en toda Latinoamérica desde 2024.
               </p>
