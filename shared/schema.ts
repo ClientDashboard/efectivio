@@ -1,245 +1,173 @@
-import { pgTable, text, serial, integer, boolean, date, numeric, timestamp, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { relations } from "drizzle-orm";
 
-// Enumeraciones para estados
-export const invoiceStatusEnum = pgEnum('invoice_status', ['draft', 'pending', 'paid', 'overdue', 'canceled']);
-export const expenseStatusEnum = pgEnum('expense_status', ['pending', 'paid', 'rejected']);
-
-// Tabla de usuarios
+// Auth user model - basic structure to be extended with Clerk
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
-  name: text("name").notNull(),
-  role: text("role").default("user"),
-  created_at: timestamp("created_at").defaultNow(),
+  fullName: text("full_name"),
+  role: text("role").default("user").notNull(),
+  clerkId: text("clerk_id").unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Tabla de clientes
+// Client/Customer model
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  companyName: text("company_name").notNull(),
+  contactName: text("contact_name"),
   email: text("email"),
   phone: text("phone"),
   address: text("address"),
-  tax_id: text("tax_id"),
+  taxId: text("tax_id"),
   notes: text("notes"),
-  created_at: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Tabla de productos/servicios
-export const products = pgTable("products", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-  cost: numeric("cost", { precision: 10, scale: 2 }),
-  sku: text("sku"),
-  tax_rate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0"),
-  is_active: boolean("is_active").default(true),
-  created_at: timestamp("created_at").defaultNow(),
-});
+// Invoice status enum
+export const invoiceStatusEnum = pgEnum("invoice_status", [
+  "draft", "sent", "paid", "overdue", "cancelled"
+]);
 
-// Tabla de facturas
+// Invoices model
 export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
-  invoice_number: text("invoice_number").notNull().unique(),
-  client_id: integer("client_id").notNull().references(() => clients.id),
-  issue_date: date("issue_date").notNull(),
-  due_date: date("due_date").notNull(),
+  invoiceNumber: text("invoice_number").notNull().unique(),
+  clientId: integer("client_id").notNull(),
+  issueDate: timestamp("issue_date").defaultNow().notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  status: invoiceStatusEnum("status").default("draft").notNull(),
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
-  tax: numeric("tax", { precision: 10, scale: 2 }).notNull(),
+  taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0"),
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
-  status: invoiceStatusEnum("status").default("draft"),
   notes: text("notes"),
-  created_at: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Tabla de líneas de factura
+// Invoice items model
 export const invoiceItems = pgTable("invoice_items", {
   id: serial("id").primaryKey(),
-  invoice_id: integer("invoice_id").notNull().references(() => invoices.id),
-  product_id: integer("product_id").references(() => products.id),
+  invoiceId: integer("invoice_id").notNull(),
   description: text("description").notNull(),
   quantity: numeric("quantity", { precision: 10, scale: 2 }).notNull(),
-  unit_price: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
-  tax_rate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0"),
-  line_total: numeric("line_total", { precision: 10, scale: 2 }).notNull(),
+  unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0"),
 });
 
-// Tabla de gastos
+// Expense categories enum
+export const expenseCategoryEnum = pgEnum("expense_category", [
+  "office", "travel", "marketing", "utilities", "rent", "salary", "equipment", "supplies", "taxes", "other"
+]);
+
+// Expenses model
 export const expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
-  expense_number: text("expense_number").notNull().unique(),
-  supplier_name: text("supplier_name").notNull(),
-  date: date("date").notNull(),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  tax_amount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0"),
-  category: text("category"),
-  notes: text("notes"),
-  status: expenseStatusEnum("status").default("pending"),
-  created_at: timestamp("created_at").defaultNow(),
-});
-
-// Tabla de asientos contables
-export const ledgerEntries = pgTable("ledger_entries", {
-  id: serial("id").primaryKey(),
-  entry_number: text("entry_number").notNull().unique(),
-  date: date("date").notNull(),
   description: text("description").notNull(),
-  is_posted: boolean("is_posted").default(false),
-  created_at: timestamp("created_at").defaultNow(),
+  date: timestamp("date").defaultNow().notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  category: expenseCategoryEnum("category").default("other").notNull(),
+  notes: text("notes"),
+  receipt: text("receipt_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Tabla de líneas de asiento contable
-export const ledgerLines = pgTable("ledger_lines", {
+// Chart of accounts types enum
+export const accountTypeEnum = pgEnum("account_type", [
+  "asset", "liability", "equity", "revenue", "expense"
+]);
+
+// Chart of accounts model
+export const accounts = pgTable("accounts", {
   id: serial("id").primaryKey(),
-  entry_id: integer("entry_id").notNull().references(() => ledgerEntries.id),
-  account_code: text("account_code").notNull(),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  type: accountTypeEnum("type").notNull(),
   description: text("description"),
-  debit: numeric("debit", { precision: 10, scale: 2 }).default("0"),
-  credit: numeric("credit", { precision: 10, scale: 2 }).default("0"),
+  parentId: integer("parent_id"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Relaciones
-export const usersRelations = relations(users, ({ many }) => ({
-  invoices: many(invoices),
-  expenses: many(expenses),
-}));
-
-export const clientsRelations = relations(clients, ({ many }) => ({
-  invoices: many(invoices),
-}));
-
-export const productsRelations = relations(products, ({ many }) => ({
-  invoiceItems: many(invoiceItems),
-}));
-
-export const invoicesRelations = relations(invoices, ({ one, many }) => ({
-  client: one(clients, {
-    fields: [invoices.client_id],
-    references: [clients.id],
-  }),
-  items: many(invoiceItems),
-}));
-
-export const invoiceItemsRelations = relations(invoiceItems, ({ one }) => ({
-  invoice: one(invoices, {
-    fields: [invoiceItems.invoice_id],
-    references: [invoices.id],
-  }),
-  product: one(products, {
-    fields: [invoiceItems.product_id],
-    references: [products.id],
-  }),
-}));
-
-export const ledgerEntriesRelations = relations(ledgerEntries, ({ many }) => ({
-  lines: many(ledgerLines),
-}));
-
-export const ledgerLinesRelations = relations(ledgerLines, ({ one }) => ({
-  entry: one(ledgerEntries, {
-    fields: [ledgerLines.entry_id],
-    references: [ledgerEntries.id],
-  }),
-}));
-
-// Esquemas de inserción
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  name: true,
-  role: true,
+// Journal entries model
+export const journalEntries = pgTable("journal_entries", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").defaultNow().notNull(),
+  reference: text("reference"),
+  description: text("description").notNull(),
+  sourceType: text("source_type"), // 'invoice', 'expense', 'manual'
+  sourceId: integer("source_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertClientSchema = createInsertSchema(clients).pick({
-  name: true,
-  email: true,
-  phone: true,
-  address: true,
-  tax_id: true,
-  notes: true,
+// Journal entry lines model
+export const journalLines = pgTable("journal_lines", {
+  id: serial("id").primaryKey(),
+  journalEntryId: integer("journal_entry_id").notNull(),
+  accountId: integer("account_id").notNull(),
+  description: text("description"),
+  debit: numeric("debit", { precision: 10, scale: 2 }).default("0").notNull(),
+  credit: numeric("credit", { precision: 10, scale: 2 }).default("0").notNull(),
 });
 
-export const insertProductSchema = createInsertSchema(products).pick({
-  name: true,
-  description: true,
-  price: true,
-  cost: true,
-  sku: true,
-  tax_rate: true,
-  is_active: true,
-});
+// Insert schemas for validation
+export const insertUserSchema = createInsertSchema(users)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
-export const insertInvoiceSchema = createInsertSchema(invoices).pick({
-  invoice_number: true,
-  client_id: true,
-  issue_date: true,
-  due_date: true,
-  subtotal: true,
-  tax: true,
-  total: true,
-  status: true,
-  notes: true,
-});
+export const insertClientSchema = createInsertSchema(clients)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
-export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).pick({
-  invoice_id: true,
-  product_id: true,
-  description: true,
-  quantity: true,
-  unit_price: true,
-  tax_rate: true,
-  line_total: true,
-});
+export const insertInvoiceSchema = createInsertSchema(invoices)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
-export const insertExpenseSchema = createInsertSchema(expenses).pick({
-  expense_number: true,
-  supplier_name: true,
-  date: true,
-  amount: true,
-  tax_amount: true,
-  category: true,
-  notes: true,
-  status: true,
-});
+export const insertInvoiceItemSchema = createInsertSchema(invoiceItems)
+  .omit({ id: true });
 
-export const insertLedgerEntrySchema = createInsertSchema(ledgerEntries).pick({
-  entry_number: true,
-  date: true,
-  description: true,
-  is_posted: true,
-});
+export const insertExpenseSchema = createInsertSchema(expenses)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
-export const insertLedgerLineSchema = createInsertSchema(ledgerLines).pick({
-  entry_id: true,
-  account_code: true,
-  description: true,
-  debit: true,
-  credit: true,
-});
+export const insertAccountSchema = createInsertSchema(accounts)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
-// Tipos de inserción
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type InsertClient = z.infer<typeof insertClientSchema>;
-export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
-export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
-export type InsertExpense = z.infer<typeof insertExpenseSchema>;
-export type InsertLedgerEntry = z.infer<typeof insertLedgerEntrySchema>;
-export type InsertLedgerLine = z.infer<typeof insertLedgerLineSchema>;
+export const insertJournalEntrySchema = createInsertSchema(journalEntries)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
-// Tipos de selección
+export const insertJournalLineSchema = createInsertSchema(journalLines)
+  .omit({ id: true });
+
+// Types
 export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
 export type Client = typeof clients.$inferSelect;
-export type Product = typeof products.$inferSelect;
+export type InsertClient = z.infer<typeof insertClientSchema>;
+
 export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type InvoiceStatus = z.infer<typeof invoiceStatusEnum.enum>;
+
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
+export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
+
 export type Expense = typeof expenses.$inferSelect;
-export type LedgerEntry = typeof ledgerEntries.$inferSelect;
-export type LedgerLine = typeof ledgerLines.$inferSelect;
+export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+export type ExpenseCategory = z.infer<typeof expenseCategoryEnum.enum>;
+
+export type Account = typeof accounts.$inferSelect;
+export type InsertAccount = z.infer<typeof insertAccountSchema>;
+export type AccountType = z.infer<typeof accountTypeEnum.enum>;
+
+export type JournalEntry = typeof journalEntries.$inferSelect;
+export type InsertJournalEntry = z.infer<typeof insertJournalEntrySchema>;
+
+export type JournalLine = typeof journalLines.$inferSelect;
+export type InsertJournalLine = z.infer<typeof insertJournalLineSchema>;

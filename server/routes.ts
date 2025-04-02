@@ -2,242 +2,571 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
-  insertUserSchema, 
   insertClientSchema, 
-  insertProductSchema, 
-  insertInvoiceSchema,
-  insertExpenseSchema
+  insertInvoiceSchema, 
+  insertInvoiceItemSchema,
+  insertExpenseSchema,
+  insertAccountSchema,
+  insertJournalEntrySchema,
+  insertJournalLineSchema
 } from "@shared/schema";
-import { db } from "./db";
-import { clients, products, invoices, expenses, invoiceItems } from "@shared/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { ZodError } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication routes
-  app.post("/api/register", async (req: Request, res: Response) => {
+  // Helper function to handle validation errors
+  const validateRequest = (schema: any, data: any) => {
     try {
-      const validatedData = insertUserSchema.parse(req.body);
-      const user = await storage.createUser(validatedData);
-      res.status(201).json(user);
+      return { success: true, data: schema.parse(data) };
     } catch (error) {
-      console.error("Registration error:", error);
-      res.status(400).json({ error: "Invalid user data" });
-    }
-  });
-
-  app.post("/api/login", async (req: Request, res: Response) => {
-    try {
-      const { username, password } = req.body;
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ error: "Invalid credentials" });
+      if (error instanceof ZodError) {
+        return { 
+          success: false, 
+          error: error.errors.map(e => ({
+            path: e.path.join('.'),
+            message: e.message
+          }))
+        };
       }
-      
-      // In a real app, you would generate a JWT token here
-      res.json({ user: { ...user, password: undefined } });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "An error occurred during login" });
+      return { success: false, error: "Unknown validation error" };
     }
-  });
+  };
 
-  // Clients routes
+  // Clients API
   app.get("/api/clients", async (req: Request, res: Response) => {
     try {
-      const allClients = await db.select().from(clients).orderBy(desc(clients.name));
-      res.json(allClients);
+      const clients = await storage.getClients();
+      res.json(clients);
     } catch (error) {
-      console.error("Error fetching clients:", error);
-      res.status(500).json({ error: "Failed to fetch clients" });
-    }
-  });
-
-  app.post("/api/clients", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertClientSchema.parse(req.body);
-      const [newClient] = await db.insert(clients).values(validatedData).returning();
-      res.status(201).json(newClient);
-    } catch (error) {
-      console.error("Error creating client:", error);
-      res.status(400).json({ error: "Invalid client data" });
+      res.status(500).json({ message: "Error fetching clients", error });
     }
   });
 
   app.get("/api/clients/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const [client] = await db.select().from(clients).where(eq(clients.id, id));
+      const client = await storage.getClient(id);
       
       if (!client) {
-        return res.status(404).json({ error: "Client not found" });
+        return res.status(404).json({ message: "Client not found" });
       }
       
       res.json(client);
     } catch (error) {
-      console.error("Error fetching client:", error);
-      res.status(500).json({ error: "Failed to fetch client" });
+      res.status(500).json({ message: "Error fetching client", error });
     }
   });
 
-  // Products routes
-  app.get("/api/products", async (req: Request, res: Response) => {
+  app.post("/api/clients", async (req: Request, res: Response) => {
     try {
-      const allProducts = await db.select().from(products).orderBy(desc(products.name));
-      res.json(allProducts);
+      const validation = validateRequest(insertClientSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const client = await storage.createClient(validation.data);
+      res.status(201).json(client);
     } catch (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Failed to fetch products" });
+      res.status(500).json({ message: "Error creating client", error });
     }
   });
 
-  app.post("/api/products", async (req: Request, res: Response) => {
+  app.put("/api/clients/:id", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertProductSchema.parse(req.body);
-      const [newProduct] = await db.insert(products).values(validatedData).returning();
-      res.status(201).json(newProduct);
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertClientSchema.partial(), req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const updatedClient = await storage.updateClient(id, validation.data);
+      
+      if (!updatedClient) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      res.json(updatedClient);
     } catch (error) {
-      console.error("Error creating product:", error);
-      res.status(400).json({ error: "Invalid product data" });
+      res.status(500).json({ message: "Error updating client", error });
     }
   });
 
-  // Invoices routes
+  app.delete("/api/clients/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteClient(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting client", error });
+    }
+  });
+
+  // Invoices API
   app.get("/api/invoices", async (req: Request, res: Response) => {
     try {
-      const allInvoices = await db.select({
-        id: invoices.id,
-        invoice_number: invoices.invoice_number,
-        client_id: invoices.client_id,
-        client_name: clients.name,
-        issue_date: invoices.issue_date,
-        due_date: invoices.due_date,
-        total: invoices.total,
-        status: invoices.status
-      })
-      .from(invoices)
-      .leftJoin(clients, eq(invoices.client_id, clients.id))
-      .orderBy(desc(invoices.issue_date));
-      
-      res.json(allInvoices);
+      const invoices = await storage.getInvoices();
+      res.json(invoices);
     } catch (error) {
-      console.error("Error fetching invoices:", error);
-      res.status(500).json({ error: "Failed to fetch invoices" });
+      res.status(500).json({ message: "Error fetching invoices", error });
+    }
+  });
+
+  app.get("/api/invoices/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoiceData = await storage.getInvoiceWithItems(id);
+      
+      if (!invoiceData) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      res.json(invoiceData);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching invoice", error });
     }
   });
 
   app.post("/api/invoices", async (req: Request, res: Response) => {
     try {
       const { invoice, items } = req.body;
-      const validatedInvoice = insertInvoiceSchema.parse(invoice);
       
-      // Start a transaction to ensure both invoice and items are saved together
-      const result = await db.transaction(async (tx) => {
-        // Insert invoice
-        const [newInvoice] = await tx.insert(invoices)
-          .values(validatedInvoice)
-          .returning();
-        
-        // Insert invoice items
-        if (items && items.length > 0) {
-          const itemsWithInvoiceId = items.map((item: any) => ({
-            ...item,
-            invoice_id: newInvoice.id
-          }));
+      const invoiceValidation = validateRequest(insertInvoiceSchema, invoice);
+      if (!invoiceValidation.success) {
+        return res.status(400).json({ message: "Invoice validation error", errors: invoiceValidation.error });
+      }
+      
+      // Validate each item
+      const itemsValidation = items.map((item: any) => validateRequest(insertInvoiceItemSchema, item));
+      const hasItemErrors = itemsValidation.some(v => !v.success);
+      
+      if (hasItemErrors) {
+        const errors = itemsValidation
+          .filter((v: any) => !v.success)
+          .map((v: any, index: number) => ({ index, errors: v.error }));
           
-          await tx.insert(invoiceItems).values(itemsWithInvoiceId);
-        }
-        
-        return newInvoice;
-      });
+        return res.status(400).json({ message: "Item validation error", errors });
+      }
       
-      res.status(201).json(result);
+      const validatedItems = itemsValidation.map((v: any) => v.data);
+      
+      // Create invoice with items
+      const createdInvoice = await storage.createInvoice(invoiceValidation.data, validatedItems);
+      
+      // Create journal entry for this invoice
+      await createJournalEntryFromInvoice(createdInvoice.id);
+      
+      res.status(201).json(createdInvoice);
     } catch (error) {
-      console.error("Error creating invoice:", error);
-      res.status(400).json({ error: "Invalid invoice data" });
+      res.status(500).json({ message: "Error creating invoice", error });
     }
   });
 
-  // Expenses routes
+  // Create a journal entry from an invoice
+  async function createJournalEntryFromInvoice(invoiceId: number) {
+    try {
+      const invoiceData = await storage.getInvoiceWithItems(invoiceId);
+      if (!invoiceData) return;
+      
+      const { invoice } = invoiceData;
+      
+      // Create journal entry
+      const journalEntry = await storage.createJournalEntry(
+        {
+          date: invoice.issueDate,
+          reference: `Invoice #${invoice.invoiceNumber}`,
+          description: `Invoice created for client #${invoice.clientId}`,
+          sourceType: 'invoice',
+          sourceId: invoice.id
+        },
+        [
+          // Debit accounts receivable
+          {
+            accountId: 2, // Accounts Receivable (ID from sample data)
+            description: `Invoice #${invoice.invoiceNumber}`,
+            debit: invoice.total.toString(),
+            credit: "0"
+          },
+          // Credit revenue
+          {
+            accountId: 5, // Revenue account (ID from sample data)
+            description: `Invoice #${invoice.invoiceNumber}`,
+            debit: "0",
+            credit: invoice.total.toString()
+          }
+        ]
+      );
+      
+      return journalEntry;
+      
+    } catch (error) {
+      console.error("Error creating journal entry from invoice:", error);
+    }
+  }
+
+  app.put("/api/invoices/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertInvoiceSchema.partial(), req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const updatedInvoice = await storage.updateInvoice(id, validation.data);
+      
+      if (!updatedInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      res.json(updatedInvoice);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating invoice", error });
+    }
+  });
+
+  app.delete("/api/invoices/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteInvoice(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting invoice", error });
+    }
+  });
+
+  // Expenses API
   app.get("/api/expenses", async (req: Request, res: Response) => {
     try {
-      const allExpenses = await db.select().from(expenses).orderBy(desc(expenses.date));
-      res.json(allExpenses);
+      const expenses = await storage.getExpenses();
+      res.json(expenses);
     } catch (error) {
-      console.error("Error fetching expenses:", error);
-      res.status(500).json({ error: "Failed to fetch expenses" });
+      res.status(500).json({ message: "Error fetching expenses", error });
+    }
+  });
+
+  app.get("/api/expenses/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const expense = await storage.getExpense(id);
+      
+      if (!expense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      
+      res.json(expense);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching expense", error });
     }
   });
 
   app.post("/api/expenses", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertExpenseSchema.parse(req.body);
-      const [newExpense] = await db.insert(expenses).values(validatedData).returning();
-      res.status(201).json(newExpense);
+      const validation = validateRequest(insertExpenseSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const expense = await storage.createExpense(validation.data);
+      
+      // Create journal entry for this expense
+      await createJournalEntryFromExpense(expense.id);
+      
+      res.status(201).json(expense);
     } catch (error) {
-      console.error("Error creating expense:", error);
-      res.status(400).json({ error: "Invalid expense data" });
+      res.status(500).json({ message: "Error creating expense", error });
     }
   });
 
-  // Dashboard data route
-  app.get("/api/dashboard", async (req: Request, res: Response) => {
+  // Create a journal entry from an expense
+  async function createJournalEntryFromExpense(expenseId: number) {
     try {
-      // Total invoices by status
-      const invoiceCounts = await db
-        .select({
-          status: invoices.status,
-          count: sql<number>`count(*)`,
-          sum: sql<string>`sum(${invoices.total})`
-        })
-        .from(invoices)
-        .groupBy(invoices.status);
+      const expense = await storage.getExpense(expenseId);
+      if (!expense) return;
       
-      // Total expenses by status
-      const expenseCounts = await db
-        .select({
-          status: expenses.status,
-          count: sql<number>`count(*)`,
-          sum: sql<string>`sum(${expenses.amount})`
-        })
-        .from(expenses)
-        .groupBy(expenses.status);
+      // Create journal entry
+      const journalEntry = await storage.createJournalEntry(
+        {
+          date: expense.date,
+          reference: `Expense #${expense.id}`,
+          description: `Expense: ${expense.description}`,
+          sourceType: 'expense',
+          sourceId: expense.id
+        },
+        [
+          // Debit expense account
+          {
+            accountId: 6, // Expense account (ID from sample data)
+            description: expense.description,
+            debit: expense.amount.toString(),
+            credit: "0"
+          },
+          // Credit cash
+          {
+            accountId: 1, // Cash and Banks (ID from sample data)
+            description: expense.description,
+            debit: "0",
+            credit: expense.amount.toString()
+          }
+        ]
+      );
       
-      // Recent invoices
-      const recentInvoices = await db
-        .select({
-          id: invoices.id,
-          invoice_number: invoices.invoice_number,
-          client_name: clients.name,
-          issue_date: invoices.issue_date,
-          total: invoices.total,
-          status: invoices.status
-        })
-        .from(invoices)
-        .leftJoin(clients, eq(invoices.client_id, clients.id))
-        .orderBy(desc(invoices.issue_date))
-        .limit(5);
+      return journalEntry;
       
-      // Recent expenses
-      const recentExpenses = await db
-        .select()
-        .from(expenses)
-        .orderBy(desc(expenses.date))
-        .limit(5);
+    } catch (error) {
+      console.error("Error creating journal entry from expense:", error);
+    }
+  }
+
+  app.put("/api/expenses/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertExpenseSchema.partial(), req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const updatedExpense = await storage.updateExpense(id, validation.data);
+      
+      if (!updatedExpense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      
+      res.json(updatedExpense);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating expense", error });
+    }
+  });
+
+  app.delete("/api/expenses/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteExpense(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting expense", error });
+    }
+  });
+
+  // Chart of Accounts API
+  app.get("/api/accounts", async (req: Request, res: Response) => {
+    try {
+      const accounts = await storage.getAccounts();
+      res.json(accounts);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching accounts", error });
+    }
+  });
+
+  app.get("/api/accounts/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const account = await storage.getAccount(id);
+      
+      if (!account) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+      
+      res.json(account);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching account", error });
+    }
+  });
+
+  app.post("/api/accounts", async (req: Request, res: Response) => {
+    try {
+      const validation = validateRequest(insertAccountSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const account = await storage.createAccount(validation.data);
+      res.status(201).json(account);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating account", error });
+    }
+  });
+
+  app.put("/api/accounts/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertAccountSchema.partial(), req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const updatedAccount = await storage.updateAccount(id, validation.data);
+      
+      if (!updatedAccount) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+      
+      res.json(updatedAccount);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating account", error });
+    }
+  });
+
+  app.delete("/api/accounts/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteAccount(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting account", error });
+    }
+  });
+
+  // Journal Entries API
+  app.get("/api/journal-entries", async (req: Request, res: Response) => {
+    try {
+      const entries = await storage.getJournalEntries();
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching journal entries", error });
+    }
+  });
+
+  app.get("/api/journal-entries/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const entryData = await storage.getJournalEntryWithLines(id);
+      
+      if (!entryData) {
+        return res.status(404).json({ message: "Journal entry not found" });
+      }
+      
+      res.json(entryData);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching journal entry", error });
+    }
+  });
+
+  app.post("/api/journal-entries", async (req: Request, res: Response) => {
+    try {
+      const { entry, lines } = req.body;
+      
+      const entryValidation = validateRequest(insertJournalEntrySchema, entry);
+      if (!entryValidation.success) {
+        return res.status(400).json({ message: "Journal entry validation error", errors: entryValidation.error });
+      }
+      
+      // Validate each line
+      const linesValidation = lines.map((line: any) => validateRequest(insertJournalLineSchema, line));
+      const hasLineErrors = linesValidation.some(v => !v.success);
+      
+      if (hasLineErrors) {
+        const errors = linesValidation
+          .filter((v: any) => !v.success)
+          .map((v: any, index: number) => ({ index, errors: v.error }));
+          
+        return res.status(400).json({ message: "Line validation error", errors });
+      }
+      
+      const validatedLines = linesValidation.map((v: any) => v.data);
+      
+      // Validate that debits = credits
+      const totalDebit = validatedLines.reduce((sum: number, line: any) => 
+        sum + parseFloat(line.debit), 0);
+      const totalCredit = validatedLines.reduce((sum: number, line: any) => 
+        sum + parseFloat(line.credit), 0);
+        
+      // Using a small epsilon for floating point comparison
+      if (Math.abs(totalDebit - totalCredit) > 0.001) {
+        return res.status(400).json({ 
+          message: "Journal entry is not balanced", 
+          totalDebit, 
+          totalCredit 
+        });
+      }
+      
+      // Create journal entry with lines
+      const createdEntry = await storage.createJournalEntry(entryValidation.data, validatedLines);
+      
+      res.status(201).json(createdEntry);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating journal entry", error });
+    }
+  });
+
+  app.delete("/api/journal-entries/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteJournalEntry(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Journal entry not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting journal entry", error });
+    }
+  });
+
+  // Balance Sheet API
+  app.get("/api/reports/balance-sheet", async (req: Request, res: Response) => {
+    try {
+      // In a real implementation, this would aggregate account balances from journal entries
+      // For now, returning a mock structure
+      const accounts = await storage.getAccounts();
+      
+      const assets = accounts.filter(account => account.type === 'asset');
+      const liabilities = accounts.filter(account => account.type === 'liability');
+      const equity = accounts.filter(account => account.type === 'equity');
       
       res.json({
-        invoices: {
-          counts: invoiceCounts,
-          recent: recentInvoices
-        },
-        expenses: {
-          counts: expenseCounts,
-          recent: recentExpenses
-        }
+        asOfDate: new Date(),
+        assets: assets.map(a => ({ ...a, balance: Math.random() * 10000 })),
+        liabilities: liabilities.map(a => ({ ...a, balance: Math.random() * 5000 })),
+        equity: equity.map(a => ({ ...a, balance: Math.random() * 5000 }))
       });
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      res.status(500).json({ error: "Failed to fetch dashboard data" });
+      res.status(500).json({ message: "Error generating balance sheet", error });
+    }
+  });
+
+  // Income Statement API
+  app.get("/api/reports/income-statement", async (req: Request, res: Response) => {
+    try {
+      // In a real implementation, this would aggregate revenue and expense accounts from journal entries
+      const accounts = await storage.getAccounts();
+      
+      const revenue = accounts.filter(account => account.type === 'revenue');
+      const expenses = accounts.filter(account => account.type === 'expense');
+      
+      res.json({
+        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+        endDate: new Date(),
+        revenue: revenue.map(a => ({ ...a, balance: Math.random() * 10000 })),
+        expenses: expenses.map(a => ({ ...a, balance: Math.random() * 8000 }))
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error generating income statement", error });
     }
   });
 

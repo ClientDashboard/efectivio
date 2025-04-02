@@ -1,68 +1,59 @@
 import { Switch, Route } from "wouter";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+
+// Pages
+import LandingPage from "@/pages/landing-page";
+import DashboardPage from "@/pages/dashboard";
+import ClientsPage from "@/pages/clients";
+import ClientCreatePage from "@/pages/clients/create";
+import InvoicesPage from "@/pages/invoices";
+import InvoiceCreatePage from "@/pages/invoices/create";
+import ExpensesPage from "@/pages/expenses";
+import ExpenseCreatePage from "@/pages/expenses/create";
+import EntriesPage from "@/pages/accounting/entries";
+import ChartOfAccountsPage from "@/pages/accounting/chart-of-accounts";
+import JournalPage from "@/pages/accounting/journal";
+import BalanceSheetPage from "@/pages/accounting/balance-sheet";
+import IncomeStatementPage from "@/pages/accounting/income-statement";
+import SignInPage from "@/pages/auth/sign-in";
+import SignUpPage from "@/pages/auth/sign-up";
 import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/dashboard";
-import Clientes from "@/pages/clientes";
-import Facturas from "@/pages/facturas";
-import Gastos from "@/pages/gastos";
-import Productos from "@/pages/productos";
-import Asientos from "@/pages/asientos";
-import Contabilidad from "@/pages/contabilidad";
-import Login from "@/pages/login";
-import Register from "@/pages/register";
-import Layout from "@/components/layout/Layout";
-import { AuthProvider } from "@/lib/auth";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
+      {/* Public Pages */}
+      <Route path="/" component={LandingPage} />
       
-      <Route path="/">
-        <Layout>
-          <Dashboard />
-        </Layout>
-      </Route>
+      {/* Auth Pages */}
+      <Route path="/auth/sign-in" component={SignInPage} />
+      <Route path="/auth/sign-up" component={SignUpPage} />
       
-      <Route path="/clientes">
-        <Layout>
-          <Clientes />
-        </Layout>
-      </Route>
+      {/* Dashboard */}
+      <Route path="/dashboard" component={DashboardPage} />
       
-      <Route path="/facturas">
-        <Layout>
-          <Facturas />
-        </Layout>
-      </Route>
+      {/* Clients */}
+      <Route path="/clients" component={ClientsPage} />
+      <Route path="/clients/create" component={ClientCreatePage} />
       
-      <Route path="/gastos">
-        <Layout>
-          <Gastos />
-        </Layout>
-      </Route>
+      {/* Invoices */}
+      <Route path="/invoices" component={InvoicesPage} />
+      <Route path="/invoices/create" component={InvoiceCreatePage} />
       
-      <Route path="/productos">
-        <Layout>
-          <Productos />
-        </Layout>
-      </Route>
+      {/* Expenses */}
+      <Route path="/expenses" component={ExpensesPage} />
+      <Route path="/expenses/create" component={ExpenseCreatePage} />
       
-      <Route path="/asientos">
-        <Layout>
-          <Asientos />
-        </Layout>
-      </Route>
+      {/* Accounting */}
+      <Route path="/accounting/entries" component={EntriesPage} />
+      <Route path="/accounting/chart-of-accounts" component={ChartOfAccountsPage} />
+      <Route path="/accounting/journal" component={JournalPage} />
+      <Route path="/accounting/balance-sheet" component={BalanceSheetPage} />
+      <Route path="/accounting/income-statement" component={IncomeStatementPage} />
       
-      <Route path="/contabilidad">
-        <Layout>
-          <Contabilidad />
-        </Layout>
-      </Route>
-      
+      {/* Fallback */}
       <Route component={NotFound} />
     </Switch>
   );
@@ -71,10 +62,8 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router />
-        <Toaster />
-      </AuthProvider>
+      <Router />
+      <Toaster />
     </QueryClientProvider>
   );
 }
