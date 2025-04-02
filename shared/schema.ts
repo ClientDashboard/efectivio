@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -119,6 +119,39 @@ export const journalLines = pgTable("journal_lines", {
   credit: numeric("credit", { precision: 10, scale: 2 }).default("0").notNull(),
 });
 
+// Modelos para el portal de clientes y almacenamiento
+
+// Enum para categorías de archivos
+export const fileCategoryEnum = pgEnum("file_category", [
+  "invoice", "quote", "receipt", "contract", "report", "tax", "other"
+]);
+
+// Modelo de archivos
+export const files = pgTable("files", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  path: text("path").notNull(),
+  size: integer("size").notNull(),
+  mimeType: text("mime_type").notNull(),
+  clientId: integer("client_id"),
+  companyId: integer("company_id"),
+  category: fileCategoryEnum("category").default("other").notNull(),
+  userId: uuid("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modelo de invitaciones para clientes
+export const clientInvitations = pgTable("client_invitations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  clientId: integer("client_id").notNull(),
+  email: text("email").notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  userId: uuid("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas for validation
 export const insertUserSchema = createInsertSchema(users)
   .omit({ id: true, createdAt: true, updatedAt: true });
@@ -144,6 +177,12 @@ export const insertJournalEntrySchema = createInsertSchema(journalEntries)
 export const insertJournalLineSchema = createInsertSchema(journalLines)
   .omit({ id: true });
 
+export const insertFileSchema = createInsertSchema(files)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertClientInvitationSchema = createInsertSchema(clientInvitations)
+  .omit({ id: true, createdAt: true });
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -153,21 +192,28 @@ export type InsertClient = z.infer<typeof insertClientSchema>;
 
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
-export type InvoiceStatus = z.infer<typeof invoiceStatusEnum.enum>;
+export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue" | "cancelled";
 
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
 export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
 
 export type Expense = typeof expenses.$inferSelect;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
-export type ExpenseCategory = z.infer<typeof expenseCategoryEnum.enum>;
+export type ExpenseCategory = "office" | "travel" | "marketing" | "utilities" | "rent" | "salary" | "equipment" | "supplies" | "taxes" | "other";
 
 export type Account = typeof accounts.$inferSelect;
 export type InsertAccount = z.infer<typeof insertAccountSchema>;
-export type AccountType = z.infer<typeof accountTypeEnum.enum>;
+export type AccountType = "asset" | "liability" | "equity" | "revenue" | "expense";
 
 export type JournalEntry = typeof journalEntries.$inferSelect;
 export type InsertJournalEntry = z.infer<typeof insertJournalEntrySchema>;
 
 export type JournalLine = typeof journalLines.$inferSelect;
 export type InsertJournalLine = z.infer<typeof insertJournalLineSchema>;
+
+export type File = typeof files.$inferSelect;
+export type InsertFile = z.infer<typeof insertFileSchema>;
+export type FileCategory = "invoice" | "quote" | "receipt" | "contract" | "report" | "tax" | "other";
+
+export type ClientInvitation = typeof clientInvitations.$inferSelect;
+export type InsertClientInvitation = z.infer<typeof insertClientInvitationSchema>;

@@ -1,5 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { 
   insertClientSchema, 
@@ -9,10 +11,13 @@ import {
   insertAccountSchema,
   insertJournalEntrySchema,
   insertJournalLineSchema,
-  insertUserSchema
+  insertUserSchema,
+  insertFileSchema,
+  insertClientInvitationSchema,
+  FileCategory
 } from "@shared/schema";
 import { ZodError } from "zod";
-import { supabase, supabaseAdmin } from "./supabase";
+import { supabase, supabaseAdmin, STORAGE_BUCKETS, uploadFile, downloadFile, deleteFile } from "./supabase";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Helper function to handle validation errors
@@ -145,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate each item
       const itemsValidation = items.map((item: any) => validateRequest(insertInvoiceItemSchema, item));
-      const hasItemErrors = itemsValidation.some(v => !v.success);
+      const hasItemErrors = itemsValidation.some((v: any) => !v.success);
       
       if (hasItemErrors) {
         const errors = itemsValidation
@@ -479,7 +484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate each line
       const linesValidation = lines.map((line: any) => validateRequest(insertJournalLineSchema, line));
-      const hasLineErrors = linesValidation.some(v => !v.success);
+      const hasLineErrors = linesValidation.some((v: any) => !v.success);
       
       if (hasLineErrors) {
         const errors = linesValidation
@@ -724,6 +729,346 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error al obtener usuario:", error);
       res.status(500).json({ message: "Error al obtener usuario", error });
+    }
+  });
+
+  // Configurar Multer para manejar subida de archivos
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB límite
+    },
+  });
+
+  // Middleware para verificar autenticación
+  const requireAuth = async (req: Request, res: Response, next: Function) => {
+    try {
+      if (!req.headers.authorization) {
+        return res.status(401).json({ message: "No authorization token provided" });
+      }
+      
+      const jwt = req.headers.authorization.split(" ")[1];
+      const { data, error } = await supabase.auth.getUser(jwt);
+      
+      if (error || !data.user) {
+        return res.status(401).json({ message: "Invalid token", error });
+      }
+      
+      // Añadir el usuario a la request
+      (req as any).user = data.user;
+      next();
+    } catch (error) {
+      res.status(500).json({ message: "Error authenticating user", error });
+    }
+  };
+
+  // ===== API PARA GESTIÓN DE ARCHIVOS =====
+
+  // Subir un archivo
+  app.post("/api/files/upload", requireAuth, upload.single("file"), async (req: Request, res: Response) => {
+    try {
+      const file = req.file;
+      const { bucket, clientId, category, path } = req.body;
+      
+      if (!file) {
+        return res.status(400).json({ message: "No file provided" });
+      }
+      
+      // Verificar que el bucket es válido
+      if (!Object.values(STORAGE_BUCKETS).includes(bucket)) {
+        return res.status(400).json({ message: "Invalid bucket name" });
+      }
+      
+      // Verificar que la categoría es válida
+      // Aquí habría que añadir una validación más precisa
+      
+      const result = await uploadFile({
+        bucket,
+        file: file.buffer,
+        path: path || '',
+        contentType: file.mimetype,
+        clientId: clientId ? parseInt(clientId) : undefined,
+        userId: (req as any).user.id,
+        category: category || 'other',
+      });
+      
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Error uploading file", error });
+    }
+  });
+
+  // Obtener archivos de un cliente
+  app.get("/api/files/client/:clientId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      
+      const { data, error } = await supabaseAdmin
+        .from('files')
+        .select('*')
+        .eq('client_id', clientId);
+        
+      if (error) {
+        return res.status(500).json({ message: "Error fetching files", error });
+      }
+      
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching files", error });
+    }
+  });
+
+  // Obtener archivos por categoría
+  app.get("/api/files/category/:category", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const category = req.params.category;
+      
+      const { data, error } = await supabaseAdmin
+        .from('files')
+        .select('*')
+        .eq('category', category);
+        
+      if (error) {
+        return res.status(500).json({ message: "Error fetching files", error });
+      }
+      
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching files", error });
+    }
+  });
+
+  // Descargar un archivo
+  app.get("/api/files/:id/download", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const fileId = req.params.id;
+      
+      // Obtener información del archivo
+      const { data: file, error } = await supabaseAdmin
+        .from('files')
+        .select('*')
+        .eq('id', fileId)
+        .single();
+        
+      if (error || !file) {
+        return res.status(404).json({ message: "File not found", error });
+      }
+      
+      // Determinar el bucket
+      let bucket = STORAGE_BUCKETS.DOCUMENTS;
+      switch (file.category) {
+        case 'invoice':
+          bucket = STORAGE_BUCKETS.INVOICES;
+          break;
+        case 'receipt':
+          bucket = STORAGE_BUCKETS.RECEIPTS;
+          break;
+        case 'contract':
+          bucket = STORAGE_BUCKETS.CONTRACTS;
+          break;
+        default:
+          bucket = STORAGE_BUCKETS.DOCUMENTS;
+      }
+      
+      // Generar URL firmada
+      const { data: urlData, error: urlError } = await supabaseAdmin
+        .storage
+        .from(bucket)
+        .createSignedUrl(file.path, 60 * 10); // 10 minutos
+        
+      if (urlError) {
+        return res.status(500).json({ message: "Error generating download URL", error: urlError });
+      }
+      
+      res.json({ downloadUrl: urlData.signedUrl });
+    } catch (error) {
+      res.status(500).json({ message: "Error downloading file", error });
+    }
+  });
+
+  // Eliminar un archivo
+  app.delete("/api/files/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const fileId = req.params.id;
+      
+      // Obtener información del archivo
+      const { data: file, error } = await supabaseAdmin
+        .from('files')
+        .select('*')
+        .eq('id', fileId)
+        .single();
+        
+      if (error || !file) {
+        return res.status(404).json({ message: "File not found", error });
+      }
+      
+      // Verificar que el usuario tiene permisos
+      if (file.user_id !== (req as any).user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+      
+      // Determinar el bucket
+      let bucket = STORAGE_BUCKETS.DOCUMENTS;
+      switch (file.category) {
+        case 'invoice':
+          bucket = STORAGE_BUCKETS.INVOICES;
+          break;
+        case 'receipt':
+          bucket = STORAGE_BUCKETS.RECEIPTS;
+          break;
+        case 'contract':
+          bucket = STORAGE_BUCKETS.CONTRACTS;
+          break;
+        default:
+          bucket = STORAGE_BUCKETS.DOCUMENTS;
+      }
+      
+      // Eliminar el archivo
+      await deleteFile(bucket, file.path, fileId);
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting file", error });
+    }
+  });
+
+  // ===== API PARA PORTAL DE CLIENTES =====
+
+  // Generar invitación para cliente
+  app.post("/api/client-portal/invitations", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { clientId, email } = req.body;
+      
+      if (!clientId || !email) {
+        return res.status(400).json({ message: "Client ID and email are required" });
+      }
+      
+      // Generar token único
+      const token = `inv_${randomUUID().replace(/-/g, '')}`;
+      
+      // Calcular fecha de expiración (7 días)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      // Guardar invitación
+      const { data, error } = await supabaseAdmin
+        .from('client_invitations')
+        .insert({
+          client_id: clientId,
+          email,
+          token,
+          expires_at: expiresAt.toISOString(),
+          user_id: (req as any).user.id
+        })
+        .select()
+        .single();
+        
+      if (error) {
+        return res.status(500).json({ message: "Error creating invitation", error });
+      }
+      
+      // Aquí se podría enviar un email al cliente usando algún servicio de email
+      
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating invitation", error });
+    }
+  });
+
+  // Validar invitación para cliente
+  app.get("/api/client-portal/invitations/:token/validate", async (req: Request, res: Response) => {
+    try {
+      const token = req.params.token;
+      
+      const { data, error } = await supabaseAdmin
+        .from('client_invitations')
+        .select('*, clients(*)')
+        .eq('token', token)
+        .single();
+        
+      if (error || !data) {
+        return res.status(404).json({ message: "Invitation not found", error });
+      }
+      
+      // Verificar si la invitación ha expirado
+      if (new Date(data.expires_at) < new Date()) {
+        return res.status(400).json({ message: "Invitation has expired" });
+      }
+      
+      res.json({
+        invitation: data,
+        client: data.clients,
+        isValid: true
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error validating invitation", error });
+    }
+  });
+
+  // Registrar cliente usando invitación
+  app.post("/api/client-portal/register", async (req: Request, res: Response) => {
+    try {
+      const { token, email, password, fullName } = req.body;
+      
+      if (!token || !email || !password || !fullName) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Verificar la invitación
+      const { data: invitation, error: invError } = await supabaseAdmin
+        .from('client_invitations')
+        .select('*, clients(*)')
+        .eq('token', token)
+        .single();
+        
+      if (invError || !invitation) {
+        return res.status(404).json({ message: "Invitation not found", error: invError });
+      }
+      
+      // Verificar si la invitación ha expirado
+      if (new Date(invitation.expires_at) < new Date()) {
+        return res.status(400).json({ message: "Invitation has expired" });
+      }
+      
+      // Verificar que el email coincide con el de la invitación
+      if (invitation.email !== email) {
+        return res.status(400).json({ message: "Email does not match invitation" });
+      }
+      
+      // Registrar al usuario en Supabase
+      const { data, error } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName,
+          role: 'client',
+          client_id: invitation.client_id
+        }
+      });
+      
+      if (error) {
+        return res.status(500).json({ message: "Error creating user", error });
+      }
+      
+      // Eliminar la invitación ya que ha sido utilizada
+      await supabaseAdmin
+        .from('client_invitations')
+        .delete()
+        .eq('token', token);
+      
+      res.status(201).json({
+        message: "Client registered successfully",
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          role: 'client',
+          fullName,
+          clientId: invitation.client_id
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error registering client", error });
     }
   });
 
