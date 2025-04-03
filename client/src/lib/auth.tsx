@@ -48,17 +48,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // MODO DESARROLLO: Usuario demo
       // TODO: Para producción, reemplazar esto con la autenticación real de Clerk
       if (process.env.NODE_ENV === 'development' && email === "demo@efectivio.com" && password === "demo123") {
-      const newUser: User = {
-        id: "1",
-        name: "Juan Sánchez",
-        email,
-        role: "Administrador",
-        initials: "JS"
-      };
-      
-      localStorage.setItem("efectivio_user", JSON.stringify(newUser));
-      setUser(newUser);
-      setLocation("/");
+        const newUser: User = {
+          id: "1",
+          name: "Juan Sánchez",
+          email,
+          role: "Administrador",
+          initials: "JS"
+        };
+        
+        localStorage.setItem("efectivio_user", JSON.stringify(newUser));
+        setUser(newUser);
+        setLocation("/");
+      }
     } catch (error) {
       console.error("Login error:", error);
       throw error;
