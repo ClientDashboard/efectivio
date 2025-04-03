@@ -1,49 +1,49 @@
+
 import { useQuery } from '@tanstack/react-query';
 import IncomeExpenseChart from '../charts/IncomeExpenseChart';
 import CashFlowAnalysis from '../charts/CashFlowAnalysis';
 
 export default function DashboardOverview() {
-  const { data: dashboardData, isLoading } = useQuery({
+  const { data: dashboardData } = useQuery({
     queryKey: ['/api/dashboard'],
-    enabled: false, // Disabled until we have a real endpoint
+    enabled: true,
   });
 
-  // For now, we'll use static data
   const stats = [
     {
       id: 1,
       title: 'Ingresos Mensuales',
-      amount: 'B/. 24,500.00',
-      change: 12,
+      amount: dashboardData?.ingresos || 'B/. 0.00',
+      change: dashboardData?.ingresosChange || 0,
       isPositive: true,
       icon: 'ri-money-dollar-circle-line',
-      iconBgClass: 'bg-primary-50',
-      iconClass: 'text-primary-500'
+      iconBgClass: 'bg-emerald-50',
+      iconClass: 'text-emerald-500'
     },
     {
       id: 2,
       title: 'Gastos Mensuales',
-      amount: 'B/. 9,850.00',
-      change: 5,
+      amount: dashboardData?.gastos || 'B/. 0.00',
+      change: dashboardData?.gastosChange || 0,
       isPositive: false,
       icon: 'ri-shopping-bag-3-line',
-      iconBgClass: 'bg-accent-50',
-      iconClass: 'text-accent-500'
+      iconBgClass: 'bg-red-50',
+      iconClass: 'text-red-500'
     },
     {
       id: 3,
       title: 'Facturas Pendientes',
-      amount: 'B/. 12,380.00',
-      change: 3,
-      isPositive: true,
+      amount: dashboardData?.facturasPendientes || 'B/. 0.00',
+      change: dashboardData?.facturasPendientesChange || 0,
+      isPositive: null,
       icon: 'ri-bill-line',
-      iconBgClass: 'bg-red-50',
-      iconClass: 'text-error-500'
+      iconBgClass: 'bg-blue-50',
+      iconClass: 'text-blue-500'
     },
     {
       id: 4,
       title: 'ITBMS por Pagar',
-      amount: 'B/. 1,575.00',
+      amount: dashboardData?.itbms || 'B/. 0.00',
       change: null,
       isPositive: null,
       icon: 'ri-government-line',
@@ -56,19 +56,19 @@ export default function DashboardOverview() {
     <section className="mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {stats.map(stat => (
-          <div key={stat.id} className="bg-white rounded-lg shadow p-6 border border-gray-200">
+          <div key={stat.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
-              <span className={`w-10 h-10 rounded-full ${stat.iconBgClass} flex items-center justify-center`}>
+              <h3 className="text-sm font-medium text-gray-600">{stat.title}</h3>
+              <span className={`w-10 h-10 rounded-lg ${stat.iconBgClass} flex items-center justify-center`}>
                 <i className={`${stat.icon} text-xl ${stat.iconClass}`}></i>
               </span>
             </div>
-            <div className="flex items-end">
-              <span className="financial-figure text-2xl font-semibold">{stat.amount}</span>
+            <div className="flex items-baseline">
+              <span className="text-2xl font-semibold text-gray-900">{stat.amount}</span>
               {stat.change !== null && (
-                <span className={`ml-2 ${stat.isPositive ? 'text-secondary-500' : 'text-error-500'} flex items-center text-sm`}>
+                <span className={`ml-2 ${stat.isPositive ? 'text-emerald-500' : 'text-red-500'} flex items-center text-sm`}>
                   <i className={`${stat.isPositive ? 'ri-arrow-up-line' : 'ri-arrow-down-line'} mr-1`}></i>
-                  {stat.change}%
+                  {Math.abs(stat.change)}%
                 </span>
               )}
             </div>
@@ -77,8 +77,14 @@ export default function DashboardOverview() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <IncomeExpenseChart />
-        <CashFlowAnalysis />
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Ingresos vs Gastos</h3>
+          <IncomeExpenseChart />
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Flujo de Efectivo</h3>
+          <CashFlowAnalysis />
+        </div>
       </div>
     </section>
   );
