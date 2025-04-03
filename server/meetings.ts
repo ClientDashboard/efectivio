@@ -226,24 +226,53 @@ export async function getMeetingDetails(meetingId: number): Promise<{
 
 /**
  * Inicializa el bucket de almacenamiento para grabaciones
+ * 
+ * Nota: La creación de buckets en Supabase normalmente requiere permisos de administrador.
+ * En un entorno de producción, es recomendable crear los buckets manualmente desde la 
+ * interfaz de administración de Supabase.
  */
 export async function initializeMeetingStorageBucket(): Promise<void> {
-  const { data: buckets } = await supabase.storage.listBuckets();
-  
-  // Verificar si el bucket ya existe
-  const bucketExists = buckets?.some(bucket => bucket.name === RECORDINGS_BUCKET);
-  
-  if (!bucketExists) {
-    // Crear el bucket si no existe
-    const { error } = await supabase.storage.createBucket(RECORDINGS_BUCKET, {
-      public: false, // No hacemos el bucket público por seguridad
-    });
+  try {
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
-    if (error) {
-      console.error('Error creating recordings bucket:', error);
-      throw new Error(`Error al crear el bucket para grabaciones: ${error.message}`);
+    if (listError) {
+      console.warn('No se pudo verificar si el bucket existe:', listError.message);
+      return; // Continuamos con la ejecución aunque no podamos verificar
     }
     
-    console.log(`Bucket '${RECORDINGS_BUCKET}' creado exitosamente`);
+    // Verificar si el bucket ya existe
+    const bucketExists = buckets?.some(bucket => bucket.name === RECORDINGS_BUCKET);
+    
+    if (!bucketExists) {
+      console.warn(`El bucket '${RECORDINGS_BUCKET}' no existe. 
+      Por favor, cree manualmente este bucket desde la consola de Supabase 
+      para habilitar el almacenamiento de grabaciones de reuniones.`);
+      
+      // Intentamos crear el bucket, pero esto solo funcionará si el token tiene permisos de servicio
+      try {
+        const { error } = await supabase.storage.createBucket(RECORDINGS_BUCKET, {
+          public: false, // No hacemos el bucket público por seguridad
+        });
+        
+        if (error) {
+          console.warn(`No se pudo crear automáticamente el bucket: ${error.message}`);
+          console.info(`Para crear manualmente el bucket '${RECORDINGS_BUCKET}':
+          1. Inicie sesión en el proyecto de Supabase
+          2. Vaya a "Storage" en el menú lateral
+          3. Haga clic en "New Bucket"
+          4. Ingrese '${RECORDINGS_BUCKET}' como nombre
+          5. Desactive "Public bucket" para mayor seguridad`);
+        } else {
+          console.log(`Bucket '${RECORDINGS_BUCKET}' creado exitosamente`);
+        }
+      } catch (error: any) {
+        console.warn(`Error al intentar crear el bucket: ${error.message}`);
+      }
+    } else {
+      console.log(`El bucket '${RECORDINGS_BUCKET}' ya existe`);
+    }
+  } catch (error: any) {
+    console.warn(`Error durante la inicialización del bucket: ${error.message}`);
+    // No lanzamos el error para permitir que la aplicación continúe funcionando
   }
 }

@@ -23,10 +23,13 @@ import {
   insertTranscriptionSegmentSchema,
   insertMeetingIntegrationSchema,
   MeetingProvider,
-  FileCategory
+  FileCategory,
+  transcriptionSegments,
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { supabase, supabaseAdmin, STORAGE_BUCKETS, uploadFile, downloadFile, deleteFile } from "./supabase";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { 
   createMeeting,
   generateMeetingLink,
