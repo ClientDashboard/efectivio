@@ -44,7 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // Mock user for demonstration
+      
+      // Usuario demo para desarrollo
+      if (email === "demo@efectivio.com" && password === "demo123") {
       const newUser: User = {
         id: "1",
         name: "Juan Sánchez",

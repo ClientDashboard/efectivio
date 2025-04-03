@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { Redirect, Route } from 'wouter';
 import { Loader2 } from 'lucide-react';
@@ -12,7 +11,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
   // En desarrollo, permitimos acceso directo
   const isDevelopment = import.meta.env.DEV;
-  
+
   if (isDevelopment) {
     return <Route path={path}>{children}</Route>;
   }
