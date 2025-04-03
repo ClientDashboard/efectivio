@@ -1,0 +1,133 @@
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// shared/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  accountTypeEnum: () => accountTypeEnum,
+  accounts: () => accounts,
+  appointmentTypeEnum: () => appointmentTypeEnum,
+  appointments: () => appointments,
+  clientInvitations: () => clientInvitations,
+  clientPortalUsers: () => clientPortalUsers,
+  clients: () => clients,
+  expenseCategoryEnum: () => expenseCategoryEnum,
+  expenses: () => expenses,
+  fileCategoryEnum: () => fileCategoryEnum,
+  files: () => files,
+  insertAccountSchema: () => insertAccountSchema,
+  insertAppointmentSchema: () => insertAppointmentSchema,
+  insertClientInvitationSchema: () => insertClientInvitationSchema,
+  insertClientPortalUserSchema: () => insertClientPortalUserSchema,
+  insertClientSchema: () => insertClientSchema,
+  insertExpenseSchema: () => insertExpenseSchema,
+  insertFileSchema: () => insertFileSchema,
+  insertInvoiceItemSchema: () => insertInvoiceItemSchema,
+  insertInvoiceSchema: () => insertInvoiceSchema,
+  insertJournalEntrySchema: () => insertJournalEntrySchema,
+  insertJournalLineSchema: () => insertJournalLineSchema,
+  insertMeetingIntegrationSchema: () => insertMeetingIntegrationSchema,
+  insertMeetingSchema: () => insertMeetingSchema,
+  insertProjectSchema: () => insertProjectSchema,
+  insertTaskSchema: () => insertTaskSchema,
+  insertTimeEntrySchema: () => insertTimeEntrySchema,
+  insertTranscriptionSegmentSchema: () => insertTranscriptionSegmentSchema,
+  insertUserSchema: () => insertUserSchema,
+  invoiceItems: () => invoiceItems,
+  invoiceStatusEnum: () => invoiceStatusEnum,
+  invoices: () => invoices,
+  journalEntries: () => journalEntries,
+  journalLines: () => journalLines,
+  meetingIntegrations: () => meetingIntegrations,
+  meetingProviderEnum: () => meetingProviderEnum,
+  meetings: () => meetings,
+  projectStatusEnum: () => projectStatusEnum,
+  projects: () => projects,
+  taskPriorityEnum: () => taskPriorityEnum,
+  taskStatusEnum: () => taskStatusEnum,
+  tasks: () => tasks,
+  timeEntries: () => timeEntries,
+  transcriptionSegments: () => transcriptionSegments,
+  transcriptionStatusEnum: () => transcriptionStatusEnum,
+  users: () => users
+});
+import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum, uuid } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+var users, clients, invoiceStatusEnum, invoices, invoiceItems, expenseCategoryEnum, expenses, accountTypeEnum, accounts, journalEntries, journalLines, fileCategoryEnum, projectStatusEnum, taskPriorityEnum, taskStatusEnum, appointmentTypeEnum, files, clientInvitations, clientPortalUsers, projects, tasks, timeEntries, appointments, meetingProviderEnum, transcriptionStatusEnum, meetings, transcriptionSegments, meetingIntegrations, insertUserSchema, insertClientSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertExpenseSchema, insertAccountSchema, insertJournalEntrySchema, insertJournalLineSchema, insertFileSchema, insertClientInvitationSchema, insertClientPortalUserSchema, insertProjectSchema, insertTaskSchema, insertTimeEntrySchema, insertAppointmentSchema, insertMeetingSchema, insertTranscriptionSegmentSchema, insertMeetingIntegrationSchema;
+var init_schema = __esm({
+  "shared/schema.ts"() {
+    "use strict";
+    users = pgTable("users", {
+      id: serial("id").primaryKey(),
+      username: text("username").notNull().unique(),
+      password: text("password").notNull(),
+      email: text("email").notNull().unique(),
+      fullName: text("full_name"),
+      role: text("role").default("user").notNull(),
+      clerkId: text("clerk_id").unique(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    clients = pgTable("clients", {
+      id: serial("id").primaryKey(),
+      companyName: text("company_name").notNull(),
+      contactName: text("contact_name"),
+      email: text("email"),
+      phone: text("phone"),
+      address: text("address"),
+      taxId: text("tax_id"),
+      notes: text("notes"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    invoiceStatusEnum = pgEnum("invoice_status", [
+      "draft",
+      "sent",
+      "paid",
+      "overdue",
+      "cancelled"
+    ]);
+    invoices = pgTable("invoices", {
+      id: serial("id").primaryKey(),
+      invoiceNumber: text("invoice_number").notNull().unique(),
+      clientId: integer("client_id").notNull(),
+      issueDate: timestamp("issue_date").defaultNow().notNull(),
+      dueDate: timestamp("due_date").notNull(),
+      status: invoiceStatusEnum("status").default("draft").notNull(),
+      subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
+      taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0"),
+      total: numeric("total", { precision: 10, scale: 2 }).notNull(),
+      notes: text("notes"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    invoiceItems = pgTable("invoice_items", {
+      id: serial("id").primaryKey(),
+      invoiceId: integer("invoice_id").notNull(),
+      description: text("description").notNull(),
+      quantity: numeric("quantity", { precision: 10, scale: 2 }).notNull(),
+      unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+      amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+      taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0")
+    });
+    expenseCategoryEnum = pgEnum("expense_category", [
+      "office",
+      "travel",
+      "marketing",
+      "utilities",
+      "rent",
+      "salary",
+      "equipment",
+      "supplies",
+      "taxes",
+      "other"
+    ]);
+    expenses = pgTable("expenses", {
+      id: serial("id").primaryKey(),
