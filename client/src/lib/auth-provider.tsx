@@ -104,14 +104,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       return { success: true, error: null };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error en registro:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Error desconocido';
       toast({
         title: 'Error al registrarse',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
-      return { success: false, error: error.message };
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -138,14 +141,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       return { success: true, error: null };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error en inicio de sesión:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Error desconocido';
       toast({
         title: 'Error al iniciar sesión',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
-      return { success: false, error: error.message };
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -160,11 +166,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: 'Sesión cerrada',
         description: 'Has cerrado sesión exitosamente.',
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cerrar sesión:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Error desconocido';
       toast({
         title: 'Error al cerrar sesión',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -192,14 +201,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       return { success: true, error: null };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al restablecer contraseña:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Error desconocido';
       toast({
         title: 'Error al restablecer contraseña',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
-      return { success: false, error: error.message };
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -235,11 +247,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al actualizar perfil:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Error desconocido';
       toast({
         title: 'Error al actualizar perfil',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
       return false;

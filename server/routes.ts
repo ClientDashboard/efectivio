@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { randomUUID } from "crypto";
 import { storage } from "./storage";
+import { HfInference } from '@huggingface/inference';
 import { 
   insertClientSchema, 
   insertInvoiceSchema, 
@@ -1636,6 +1637,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({ message: "Error processing meeting data", error });
+    }
+  });
+
+  // Endpoint para analizar texto directamente con Hugging Face
+  app.post("/api/ai/analyze-text", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ error: 'Se requiere un texto para analizar' });
+      }
+      
+      // Crear un segmento de transcripción temporal para simular una reunión
+      // Esto nos permite reutilizar las funciones existentes para análisis de texto
+      const [tempSegment] = await db.insert(transcriptionSegments)
+        .values({
+          meetingId: -1, // ID no existente para indicar que es temporal
+          startTime: "0",
+          endTime: "0",
+          content: text,
+          speakerId: null
+        })
+        .returning();
+      
+      try {
+        // Extraer puntos clave y acciones del texto utilizando las funciones existentes
+        const result = await extractKeyPointsAndActions(tempSegment.meetingId);
+        
+        // Generar un resumen del texto
+        const summary = await generateMeetingSummary(tempSegment.meetingId);
+        
+        // Combinar los resultados
+        const analyzed = {
+          ...result,
+          summary
+        };
+        
+        res.json(analyzed);
+      } finally {
+        // Eliminar el segmento temporal de la base de datos
+        await db.delete(transcriptionSegments)
+          .where(eq(transcriptionSegments.id, tempSegment.id));
+      }
+    } catch (error: any) {
+      console.error('Error al analizar texto:', error);
+      res.status(500).json({ error: `Error al analizar texto: ${error.message}` });
+    }
+  });
+
+  // Endpoint para pruebas de análisis de texto (sin autenticación)
+  app.post("/api/test/analyze-text", async (req: Request, res: Response) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ error: 'Se requiere un texto para analizar' });
+      }
+      
+      // Usar el modelo de Hugging Face directamente para analizar el texto
+      const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
+      
+      const result = await hf.textGeneration({
+        model: 'google/gemma-7b',
+        inputs: `
+          Analiza el siguiente texto y extrae:
+          1. Puntos clave (máximo 3)
+          2. Un resumen conciso
+          3. Acciones recomendadas
+          
+          Texto:
+          ${text}
+          
+          Responde en formato JSON con las claves "keyPoints" (array), "summary" (string) y "actions" (array).
+        `,
+        parameters: {
+          max_new_tokens: 512,
+          return_full_text: false,
+        }
+      });
+      
+      // Intentar parsear la respuesta como JSON
+      try {
+        let jsonStr = result.generated_text.trim();
+        
+        // Encontrar el primer '{' y el último '}'
+        const startIdx = jsonStr.indexOf('{');
+        const endIdx = jsonStr.lastIndexOf('}') + 1;
+        
+        if (startIdx >= 0 && endIdx > startIdx) {
+          jsonStr = jsonStr.substring(startIdx, endIdx);
+        }
+        
+        const analyzed = JSON.parse(jsonStr);
+        res.json(analyzed);
+      } catch (parseError) {
+        // Si no se puede parsear, devolver el texto completo
+        res.json({ 
+          raw: result.generated_text,
+          error: 'No se pudo parsear la respuesta como JSON'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error al analizar texto (test):', error);
+      res.status(500).json({ error: `Error al analizar texto: ${error.message}` });
     }
   });
 

@@ -46,8 +46,11 @@ app.use((req, res, next) => {
   try {
     await initializeStorageBuckets();
     log('✅ Buckets de almacenamiento de Supabase inicializados');
-  } catch (error) {
-    log(`⚠️ No se pudieron inicializar los buckets de Supabase: ${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Error desconocido';
+    log(`⚠️ No se pudieron inicializar los buckets de Supabase: ${errorMessage}`);
   }
   
   const server = await registerRoutes(app);

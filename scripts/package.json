@@ -1,0 +1,15 @@
+{
+  "name": "efectivio-scripts",
+  "version": "1.0.0",
+  "description": "Scripts para configurar y administrar el sistema Efectivio",
+  "type": "module",
+  "scripts": {
+    "setup": "tsx setup-supabase.ts",
+    "create-buckets": "tsx create-buckets.ts",
+    "execute-sql": "tsx rest-sql-execute.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.6",
+    "dotenv": "^16.4.5"
+  }
+}

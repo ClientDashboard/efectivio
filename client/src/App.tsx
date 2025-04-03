@@ -21,6 +21,7 @@ import BalanceSheetPage from "@/pages/accounting/balance-sheet";
 import IncomeStatementPage from "@/pages/accounting/income-statement";
 import SignInPage from "@/pages/auth/sign-in";
 import SignUpPage from "@/pages/auth/sign-up";
+import TextAnalysisPage from "@/pages/ai/text-analysis";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -90,6 +91,9 @@ function Router() {
       <ProtectedRoute path="/accounting/income-statement">
         <IncomeStatementPage />
       </ProtectedRoute>
+      
+      {/* AI Tools */}
+      <Route path="/ai/text-analysis" component={TextAnalysisPage} />
       
       {/* Fallback para cualquier otra ruta */}
       <Route component={NotFound} />

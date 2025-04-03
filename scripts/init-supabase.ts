@@ -22,90 +22,48 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
+// Estas funciones ya no se necesitan - ahora usamos el enfoque direct SQL
+
 /**
- * Ejecuta una consulta SQL en Supabase
- * @param query Consulta SQL a ejecutar
- * @param description Descripción de la operación
+ * Ejecuta SQL directamente usando la API REST de Supabase
+ * @param sql Consulta SQL a ejecutar
  * @returns Promise<boolean> true si la operación fue exitosa
  */
-async function executeSQL(query: string, description: string): Promise<boolean> {
+async function executeSQLDirect(sql: string): Promise<boolean> {
   try {
-    const { error } = await supabase.rpc('pgexec', { sql: query });
+    // Dividir el script en instrucciones individuales
+    const statements = sql.split(';').filter(stmt => stmt.trim().length > 0);
     
-    if (error) {
-      console.error(`Error al ${description}:`, error);
-      return false;
+    console.log(`ℹ️ Ejecutando ${statements.length} instrucciones SQL...`);
+    
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i].trim() + ';';
+      
+      // Usar la API REST de PostgreSQL para ejecutar SQL directamente
+      const { data, error } = await supabase.rpc('pg_execute', { 
+        query: statement 
+      });
+      
+      if (error) {
+        console.error(`Error ejecutando SQL (${i+1}/${statements.length}):`, error);
+        console.log('SQL que causó el error:', statement);
+        
+        // Si es un error de tabla ya existe, continuamos
+        if (error.message?.includes('already exists')) {
+          console.log('La tabla ya existe, continuando...');
+          continue;
+        }
+        
+        // Para otros errores, detenemos la ejecución
+        return false;
+      }
     }
     
-    console.log(`✅ ${description} exitoso`);
     return true;
   } catch (error) {
-    console.error(`Error al ${description}:`, error);
+    console.error('Error al ejecutar SQL:', error);
     return false;
   }
-}
-
-/**
- * Crea una función pgexec personalizada en Supabase si no existe
- * Esta función permite ejecutar SQL desde JavaScript
- */
-async function createExecuteSQLFunction() {
-  console.log('Creando función pgexec...');
-  
-  const createFunctionSQL = `
-    CREATE OR REPLACE FUNCTION pgexec (sql text) RETURNS void AS $$
-    BEGIN
-      EXECUTE sql;
-    END;
-    $$ LANGUAGE plpgsql SECURITY DEFINER;
-  `;
-  
-  let pgexecError;
-  try {
-    const { error } = await supabase.rpc('pgexec', { sql: createFunctionSQL });
-    pgexecError = error;
-  } catch (error) {
-    pgexecError = { message: 'La función pgexec no existe todavía' };
-  }
-
-  if (pgexecError) {
-    console.log('La función pgexec no existe. Creándola con un SQL inicial...');
-    
-    // Como no existe la función, debemos crearla con una SQL directa
-    const { error } = await supabase.from('_postgrest_rpc').select('').limit(0);
-    
-    if (error) {
-      console.error('Error accediendo a Supabase:', error);
-      return false;
-    }
-    
-    // Usar Postgres REST para ejecutar SQL directamente
-    const response = await fetch(`${supabaseUrl}/rest/v1/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-        'Accept': 'application/json',
-        'Prefer': 'params=single-object',
-        'X-Client-Info': '@supabase/js',
-      },
-      body: JSON.stringify({
-        'query': createFunctionSQL
-      })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Error creando función pgexec:', errorData);
-      return false;
-    }
-    
-    console.log('✅ Función pgexec creada correctamente');
-    return true;
-  }
-  
-  console.log('✅ Función pgexec ya existe');
-  return true;
 }
 
 /**
@@ -114,10 +72,12 @@ async function createExecuteSQLFunction() {
 async function initializeSupabase() {
   console.log('🚀 Iniciando configuración de Supabase...');
   
-  // Crear función pgexec si no existe
-  const functionCreated = await createExecuteSQLFunction();
-  if (!functionCreated) {
-    console.error('❌ No se pudo crear la función pgexec');
+  // Primero verificar si podemos acceder a Supabase
+  const { data, error } = await supabase.from('profiles').select('count').limit(1);
+  
+  if (error && !error.message.includes('does not exist')) {
+    console.error('❌ Error conectando con Supabase:', error);
+    console.log('Por favor verifica tus credenciales de Supabase.');
     return;
   }
   
@@ -132,8 +92,76 @@ async function initializeSupabase() {
     return;
   }
   
+  // Crear primero la función pg_execute para ejecutar SQL
+  const createPgExecuteSQL = `
+    CREATE OR REPLACE FUNCTION pg_execute(query text) RETURNS json AS $$
+    DECLARE
+      result json;
+    BEGIN
+      EXECUTE query;
+      result := '{"success": true}'::json;
+      RETURN result;
+    EXCEPTION WHEN OTHERS THEN
+      result := json_build_object(
+        'success', false,
+        'error', SQLERRM,
+        'code', SQLSTATE
+      );
+      RETURN result;
+    END;
+    $$ LANGUAGE plpgsql SECURITY DEFINER;
+  `;
+  
+  // Intentamos crear la función pg_execute a través de la API REST
+  console.log('Creando función pg_execute...');
+  
+  try {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseServiceKey || ''}`,
+      'apikey': supabaseServiceKey || ''
+    };
+  
+    const response = await fetch(`${supabaseUrl}/rest/v1/rpc/pg_execute`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query: createPgExecuteSQL })
+    });
+    
+    if (!response.ok) {
+      // Si la función no existe, la creamos usando SQL directo
+      console.log('La función pg_execute no existe, creándola con SQL directo...');
+      
+      const createHeaders: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey || ''}`,
+        'apikey': supabaseServiceKey || '',
+        'Prefer': 'return=minimal'
+      };
+      
+      const createFunctionResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+        method: 'POST',
+        headers: createHeaders,
+        body: JSON.stringify({
+          query: createPgExecuteSQL
+        })
+      });
+      
+      if (!createFunctionResponse.ok) {
+        console.error('❌ No se pudo crear la función pg_execute');
+        return;
+      }
+    }
+  } catch (error) {
+    console.error('Error al crear la función pg_execute:', error);
+    return;
+  }
+  
+  console.log('✅ Función pg_execute disponible');
+  
   // Ejecutar el script SQL
-  const success = await executeSQL(sqlScript, 'configurar la base de datos');
+  console.log('Ejecutando script SQL...');
+  const success = await executeSQLDirect(sqlScript);
   
   if (success) {
     console.log('✅ Base de datos configurada correctamente');
