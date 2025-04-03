@@ -3,11 +3,15 @@ import { ClerkProvider as BaseClerkProvider, useAuth } from '@clerk/clerk-react'
 import { supabase } from './supabase';
 
 // Obtener la clave pública de Clerk desde las variables de entorno
-// Al utilizar Vite, necesitamos el prefijo VITE_
-const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
+const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!publishableKey) {
-  console.error('Falta la clave pública de Clerk. La autenticación no funcionará correctamente.');
+  throw new Error('ERROR: Falta VITE_CLERK_PUBLISHABLE_KEY en las variables de entorno');
+}
+
+// Validar que la clave sea válida
+if (!publishableKey.startsWith('pk_') && !publishableKey.startsWith('pk_test_')) {
+  throw new Error('ERROR: VITE_CLERK_PUBLISHABLE_KEY inválida');
 }
 
 type ClerkProviderProps = {
@@ -77,6 +81,9 @@ export function ClerkProvider({ children }: ClerkProviderProps) {
     <BaseClerkProvider
       publishableKey={publishableKey}
       appearance={{
+      onError={(error) => {
+        console.error('Error en Clerk:', error);
+      }}
         variables: {
           colorPrimary: '#39FFBD',
           colorBackground: '#062644',
