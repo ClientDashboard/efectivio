@@ -21,6 +21,7 @@ import BalanceSheetPage from "@/pages/accounting/balance-sheet";
 import IncomeStatementPage from "@/pages/accounting/income-statement";
 import SignInPage from "@/pages/auth/sign-in";
 import SignUpPage from "@/pages/auth/sign-up";
+import ResetPasswordPage from "@/pages/auth/reset-password";
 import TextAnalysisPage from "@/pages/ai/text-analysis";
 import NotFound from "@/pages/not-found";
 
@@ -38,6 +39,8 @@ function Router() {
       <PublicRoute path="/auth/sign-up">
         <SignUpPage />
       </PublicRoute>
+      
+      <Route path="/auth/reset-password" component={ResetPasswordPage} />
       
       {/* Rutas protegidas - Requieren autenticación */}
       <ProtectedRoute path="/dashboard">

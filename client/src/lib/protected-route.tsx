@@ -30,7 +30,7 @@ export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
         }
 
         if (!user) {
-          return <Redirect to="/auth/login" />;
+          return <Redirect to="/auth/sign-in" />;
         }
 
         return <>{children}</>;
