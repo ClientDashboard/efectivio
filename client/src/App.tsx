@@ -1,8 +1,9 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider, useAuth } from "./lib/auth-provider";
+import { AuthProvider } from "./lib/auth-provider";
+import { ProtectedRoute, PublicOnlyRoute } from "./lib/protected-route";
 
 // Pages
 import LandingPage from "@/pages/landing-page";
@@ -23,79 +24,102 @@ import SignUpPage from "@/pages/auth/sign-up";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const [location] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
-  
-  // Lista de rutas que requieren autenticación
-  const protectedRoutes = [
-    '/dashboard',
-    '/clients',
-    '/clients/create',
-    '/invoices',
-    '/invoices/create',
-    '/expenses',
-    '/expenses/create',
-    '/accounting/entries',
-    '/accounting/chart-of-accounts',
-    '/accounting/journal',
-    '/accounting/balance-sheet',
-    '/accounting/income-statement',
-  ];
-  
-  // Verificar si la ruta actual requiere autenticación
-  const requiresAuth = protectedRoutes.some(route => 
-    location === route || location.startsWith(`${route}/`)
-  );
-  
-  // Redirigir a login si se intenta acceder a una ruta protegida sin autenticación
-  if (requiresAuth && !isLoading && !isAuthenticated) {
-    window.location.href = '/auth/sign-in';
-    return null;
-  }
-  
-  // Mostrar las rutas protegidas si el usuario está autenticado
-  if (requiresAuth && isAuthenticated) {
-    return (
-      <Switch>
-        {/* Dashboard */}
-        <Route path="/dashboard" component={DashboardPage} />
-        
-        {/* Clients */}
-        <Route path="/clients" component={ClientsPage} />
-        <Route path="/clients/create" component={ClientCreatePage} />
-        
-        {/* Invoices */}
-        <Route path="/invoices" component={InvoicesPage} />
-        <Route path="/invoices/create" component={InvoiceCreatePage} />
-        
-        {/* Expenses */}
-        <Route path="/expenses" component={ExpensesPage} />
-        <Route path="/expenses/create" component={ExpenseCreatePage} />
-        
-        {/* Accounting */}
-        <Route path="/accounting/entries" component={EntriesPage} />
-        <Route path="/accounting/chart-of-accounts" component={ChartOfAccountsPage} />
-        <Route path="/accounting/journal" component={JournalPage} />
-        <Route path="/accounting/balance-sheet" component={BalanceSheetPage} />
-        <Route path="/accounting/income-statement" component={IncomeStatementPage} />
-        
-        {/* Fallback para rutas protegidas */}
-        <Route component={NotFound} />
-      </Switch>
-    );
-  }
-  
-  // Rutas públicas
   return (
     <Switch>
-      {/* Public Pages */}
+      {/* Rutas públicas */}
       <Route path="/" component={LandingPage} />
       
-      {/* Auth Pages - Usando páginas personalizadas que implementan los componentes de Clerk */}
-      <Route path="/auth/sign-in" component={SignInPage} />
-      <Route path="/auth/sign-up" component={SignUpPage} />
+      {/* Auth Pages - Solo accesibles si NO está autenticado */}
+      <Route path="/auth/sign-in">
+        <PublicOnlyRoute redirectTo="/dashboard">
+          <SignInPage />
+        </PublicOnlyRoute>
+      </Route>
       
-      {/* Fallback */}
+      <Route path="/auth/sign-up">
+        <PublicOnlyRoute redirectTo="/dashboard">
+          <SignUpPage />
+        </PublicOnlyRoute>
+      </Route>
+      
+      {/* Rutas protegidas - Requieren autenticación */}
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Clients */}
+      <Route path="/clients">
+        <ProtectedRoute>
+          <ClientsPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/clients/create">
+        <ProtectedRoute>
+          <ClientCreatePage />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Invoices */}
+      <Route path="/invoices">
+        <ProtectedRoute>
+          <InvoicesPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/invoices/create">
+        <ProtectedRoute>
+          <InvoiceCreatePage />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Expenses */}
+      <Route path="/expenses">
+        <ProtectedRoute>
+          <ExpensesPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/expenses/create">
+        <ProtectedRoute>
+          <ExpenseCreatePage />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Accounting */}
+      <Route path="/accounting/entries">
+        <ProtectedRoute>
+          <EntriesPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/accounting/chart-of-accounts">
+        <ProtectedRoute>
+          <ChartOfAccountsPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/accounting/journal">
+        <ProtectedRoute>
+          <JournalPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/accounting/balance-sheet">
+        <ProtectedRoute>
+          <BalanceSheetPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/accounting/income-statement">
+        <ProtectedRoute>
+          <IncomeStatementPage />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Fallback para cualquier otra ruta */}
       <Route component={NotFound} />
     </Switch>
   );

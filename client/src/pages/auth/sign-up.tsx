@@ -11,47 +11,40 @@ export default function SignUpPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [fullNameError, setFullNameError] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [passwordConfirmError, setPasswordConfirmError] = useState("");
   
-  // Usar nuestro hook de autenticación personalizado
-  const { register, isAuthenticated, isLoading } = useAuth();
+  // Usar nuestro hook de autenticación de Supabase
+  const { signUp, user, loading } = useAuth();
   
   useEffect(() => {
     // Redirigir si hay sesión activa
-    if (isAuthenticated) {
+    if (user) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, navigate]);
+  }, [user, navigate]);
   
   const validateForm = () => {
     let isValid = true;
     
-    if (fullName.length < 3) {
-      setFullNameError("El nombre completo debe tener al menos 3 caracteres");
+    if (name.trim().length < 3) {
+      setNameError("El nombre debe tener al menos 3 caracteres");
       isValid = false;
     } else {
-      setFullNameError("");
+      setNameError("");
     }
     
     if (!email.includes('@') || !email.includes('.')) {
-      setEmailError("Por favor ingresa un email válido");
+      setEmailError("Por favor ingresa un correo electrónico válido");
       isValid = false;
     } else {
       setEmailError("");
-    }
-    
-    if (username.length < 3) {
-      setUsernameError("El nombre de usuario debe tener al menos 3 caracteres");
-      isValid = false;
-    } else {
-      setUsernameError("");
     }
     
     if (password.length < 6) {
@@ -59,6 +52,13 @@ export default function SignUpPage() {
       isValid = false;
     } else {
       setPasswordError("");
+    }
+    
+    if (password !== passwordConfirm) {
+      setPasswordConfirmError("Las contraseñas no coinciden");
+      isValid = false;
+    } else {
+      setPasswordConfirmError("");
     }
     
     return isValid;
@@ -71,10 +71,22 @@ export default function SignUpPage() {
       return;
     }
     
-    // Utilizar la función register de nuestro AuthProvider
-    const success = await register(fullName, email, username, password);
-    if (success) {
-      navigate("/dashboard");
+    // Utilizar la función signUp de nuestro AuthProvider
+    const response = await signUp(email, password, { name });
+    
+    if (response && !response.error) {
+      toast({
+        title: "Registro exitoso",
+        description: "Tu cuenta ha sido creada correctamente. Revisa tu email para verificar tu cuenta.",
+        variant: "default",
+      });
+      navigate("/auth/sign-in"); // Redirigir al login después del registro
+    } else if (response && response.error) {
+      toast({
+        title: "Error al registrarse",
+        description: response.error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -87,7 +99,7 @@ export default function SignUpPage() {
           </svg>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Crear una nueva cuenta
+          Crea tu cuenta
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           ¿Ya tienes una cuenta?{" "}
@@ -104,24 +116,25 @@ export default function SignUpPage() {
           <CardContent className="pt-4">
             <form onSubmit={onSubmit} className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="fullName" className="block text-sm font-medium">
-                  Nombre completo
+                <label htmlFor="name" className="block text-sm font-medium">
+                  Nombre Completo
                 </label>
                 <div>
                   <Input 
-                    id="fullName"
-                    name="fullName"
-                    placeholder="Ingresa tu nombre completo" 
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    disabled={isLoading}
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="Tu nombre completo" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={loading}
                   />
-                  {fullNameError && (
-                    <p className="text-sm text-red-500 mt-1">{fullNameError}</p>
+                  {nameError && (
+                    <p className="text-sm text-red-500 mt-1">{nameError}</p>
                   )}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium">
                   Correo electrónico
@@ -134,29 +147,10 @@ export default function SignUpPage() {
                     placeholder="ejemplo@empresa.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                   {emailError && (
                     <p className="text-sm text-red-500 mt-1">{emailError}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="username" className="block text-sm font-medium">
-                  Nombre de usuario
-                </label>
-                <div>
-                  <Input 
-                    id="username"
-                    name="username"
-                    placeholder="Ingresa un nombre de usuario" 
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    disabled={isLoading}
-                  />
-                  {usernameError && (
-                    <p className="text-sm text-red-500 mt-1">{usernameError}</p>
                   )}
                 </div>
               </div>
@@ -170,10 +164,10 @@ export default function SignUpPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"} 
-                    placeholder="Crea una contraseña segura" 
+                    placeholder="Crea tu contraseña" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                   <button
                     type="button"
@@ -192,22 +186,40 @@ export default function SignUpPage() {
                 )}
               </div>
 
-              <div>
-                <Button
-                  type="submit"
-                  className="w-full flex justify-center py-2"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creando cuenta...
-                    </>
-                  ) : (
-                    "Crear cuenta"
-                  )}
-                </Button>
+              <div className="space-y-2">
+                <label htmlFor="passwordConfirm" className="block text-sm font-medium">
+                  Confirmar Contraseña
+                </label>
+                <div className="relative">
+                  <Input 
+                    id="passwordConfirm"
+                    name="passwordConfirm"
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Confirma tu contraseña" 
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+                {passwordConfirmError && (
+                  <p className="text-sm text-red-500 mt-1">{passwordConfirmError}</p>
+                )}
               </div>
+
+              <Button
+                type="submit"
+                className="w-full flex justify-center py-2"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creando cuenta...
+                  </>
+                ) : (
+                  "Registrarse"
+                )}
+              </Button>
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 pt-4 border-t">
@@ -221,7 +233,7 @@ export default function SignUpPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full" disabled={isLoading}>
+              <Button variant="outline" className="w-full" disabled={loading}>
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
                     <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
@@ -232,7 +244,7 @@ export default function SignUpPage() {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full" disabled={isLoading}>
+              <Button variant="outline" className="w-full" disabled={loading}>
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path
                     d="M16.318 13.714v5.484h-9.12v-5.484a2.7 2.7 0 0 1-1.98-2.598 2.7 2.7 0 0 1 1.98-2.598V2.121h9.12v6.397a2.7 2.7 0 0 1 1.98 2.598 2.7 2.7 0 0 1-1.98 2.598zm-7.26-1.62c-.24-.84 0-1.236 1.14-3.54.66-.78 1.74-1.26 2.82-1.26 1.326 0 2.394.72 2.82 1.26 1.14 2.304 1.38 2.7 1.14 3.54l-.12.564h-7.7l-.1-.564zM11.88 1.2H8.94v2.88h2.94V1.2zm0 4.8H8.94v3.84h2.94V6zm2.88 0h-2.94v3.84h2.94V6z"

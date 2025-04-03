@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeStorageBuckets } from "./supabase";
+import { syncViteEnvVars } from "./env-sync";
 
 const app = express();
 app.use(express.json());
@@ -38,6 +39,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Sincronizar variables de entorno para el frontend
+  syncViteEnvVars();
+  
   // Inicializar buckets de almacenamiento de Supabase
   await initializeStorageBuckets();
   

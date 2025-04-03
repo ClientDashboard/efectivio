@@ -16,15 +16,15 @@ export default function SignInPage() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   
-  // Usar nuestro hook de autenticación personalizado
-  const { login, isAuthenticated, isLoading } = useAuth();
+  // Usar nuestro hook de autenticación de Supabase
+  const { signIn, user, loading } = useAuth();
   
   useEffect(() => {
     // Redirigir si hay sesión activa
-    if (isAuthenticated) {
+    if (user) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, navigate]);
+  }, [user, navigate]);
   
   const validateForm = () => {
     let isValid = true;
@@ -53,9 +53,9 @@ export default function SignInPage() {
       return;
     }
     
-    // Utilizar la función login de nuestro AuthProvider
-    const success = await login(email, password);
-    if (success) {
+    // Utilizar la función signIn de nuestro AuthProvider
+    const response = await signIn(email, password);
+    if (response && !response.error) {
       navigate("/dashboard");
     }
   };
@@ -97,7 +97,7 @@ export default function SignInPage() {
                     placeholder="ejemplo@empresa.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                   {emailError && (
                     <p className="text-sm text-red-500 mt-1">{emailError}</p>
@@ -117,7 +117,7 @@ export default function SignInPage() {
                     placeholder="Ingresa tu contraseña" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                   <button
                     type="button"
@@ -159,9 +159,9 @@ export default function SignInPage() {
               <Button
                 type="submit"
                 className="w-full flex justify-center py-2"
-                disabled={isLoading}
+                disabled={loading}
               >
-                {isLoading ? (
+                {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Iniciando sesión...
@@ -183,7 +183,7 @@ export default function SignInPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full" disabled={isLoading}>
+              <Button variant="outline" className="w-full" disabled={loading}>
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
                     <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
@@ -194,7 +194,7 @@ export default function SignInPage() {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full" disabled={isLoading}>
+              <Button variant="outline" className="w-full" disabled={loading}>
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path
                     d="M16.318 13.714v5.484h-9.12v-5.484a2.7 2.7 0 0 1-1.98-2.598 2.7 2.7 0 0 1 1.98-2.598V2.121h9.12v6.397a2.7 2.7 0 0 1 1.98 2.598 2.7 2.7 0 0 1-1.98 2.598zm-7.26-1.62c-.24-.84 0-1.236 1.14-3.54.66-.78 1.74-1.26 2.82-1.26 1.326 0 2.394.72 2.82 1.26 1.14 2.304 1.38 2.7 1.14 3.54l-.12.564h-7.7l-.1-.564zM11.88 1.2H8.94v2.88h2.94V1.2zm0 4.8H8.94v3.84h2.94V6zm2.88 0h-2.94v3.84h2.94V6z"
