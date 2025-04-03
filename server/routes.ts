@@ -20,10 +20,26 @@ import {
   insertTimeEntrySchema,
   insertAppointmentSchema,
   insertMeetingSchema,
+  insertTranscriptionSegmentSchema,
+  insertMeetingIntegrationSchema,
+  MeetingProvider,
   FileCategory
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { supabase, supabaseAdmin, STORAGE_BUCKETS, uploadFile, downloadFile, deleteFile } from "./supabase";
+import { 
+  createMeeting,
+  generateMeetingLink,
+  uploadMeetingRecording,
+  processMeetingData,
+  getMeetingDetails,
+  initializeMeetingStorageBucket
+} from "./meetings";
+import {
+  transcribeAudio,
+  generateMeetingSummary,
+  extractKeyPointsAndActions
+} from "./ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Helper function to handle validation errors
@@ -1516,6 +1532,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending appointment reminder:", error);
       res.status(500).json({ message: "Error sending appointment reminder", error });
+    }
+  });
+
+  // API para Videoconferencias y Transcripciones
+
+  // Inicializar el bucket de almacenamiento para grabaciones al arrancar el servidor
+  initializeMeetingStorageBucket().catch(error => {
+    console.error("Error initializing meeting recordings bucket:", error);
+  });
+
+  // Crear una nueva reunión
+  app.post("/api/meetings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validation = validateRequest(insertMeetingSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const meeting = await createMeeting(validation.data);
+      res.status(201).json(meeting);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating meeting", error });
+    }
+  });
+
+  // Generar enlace para unirse a una reunión
+  app.post("/api/meetings/:id/generate-link", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const { provider, appointmentId } = req.body;
+      
+      if (!provider || !['google_meet', 'zoom', 'teams', 'other'].includes(provider)) {
+        return res.status(400).json({ message: "Invalid provider. Must be one of: google_meet, zoom, teams, other" });
+      }
+      
+      const result = await generateMeetingLink(
+        provider as MeetingProvider,
+        meetingId,
+        appointmentId || 0
+      );
+      
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Error generating meeting link", error });
+    }
+  });
+
+  // Subir una grabación de reunión
+  app.post("/api/meetings/:id/upload-recording", requireAuth, upload.single("recording"), async (req: Request, res: Response) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No recording file provided" });
+      }
+      
+      const recordingBuffer = req.file.buffer;
+      const fileName = req.file.originalname || `recording-${Date.now()}.mp3`;
+      
+      const recordingUrl = await uploadMeetingRecording(meetingId, recordingBuffer, fileName);
+      
+      res.status(200).json({ recordingUrl });
+    } catch (error) {
+      res.status(500).json({ message: "Error uploading recording", error });
+    }
+  });
+
+  // Obtener detalles de una reunión
+  app.get("/api/meetings/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const meetingDetails = await getMeetingDetails(meetingId);
+      
+      res.status(200).json(meetingDetails);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching meeting details", error });
+    }
+  });
+
+  // Procesar una reunión grabada para obtener resumen y puntos clave
+  app.post("/api/meetings/:id/process", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const result = await processMeetingData(meetingId);
+      
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Error processing meeting data", error });
+    }
+  });
+
+  // Obtener segmentos de transcripción de una reunión
+  app.get("/api/meetings/:id/transcription", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      
+      const segments = await db.select()
+        .from(transcriptionSegments)
+        .where(eq(transcriptionSegments.meetingId, meetingId))
+        .orderBy(transcriptionSegments.startTime);
+      
+      res.status(200).json(segments);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching transcription segments", error });
     }
   });
 
