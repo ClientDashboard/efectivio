@@ -1,0 +1,2600 @@
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// shared/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  accountTypeEnum: () => accountTypeEnum,
+  accounts: () => accounts,
+  appointmentTypeEnum: () => appointmentTypeEnum,
+  appointments: () => appointments,
+  clientInvitations: () => clientInvitations,
+  clientPortalUsers: () => clientPortalUsers,
+  clients: () => clients,
+  expenseCategoryEnum: () => expenseCategoryEnum,
+  expenses: () => expenses,
+  fileCategoryEnum: () => fileCategoryEnum,
+  files: () => files,
+  insertAccountSchema: () => insertAccountSchema,
+  insertAppointmentSchema: () => insertAppointmentSchema,
+  insertClientInvitationSchema: () => insertClientInvitationSchema,
+  insertClientPortalUserSchema: () => insertClientPortalUserSchema,
+  insertClientSchema: () => insertClientSchema,
+  insertExpenseSchema: () => insertExpenseSchema,
+  insertFileSchema: () => insertFileSchema,
+  insertInvoiceItemSchema: () => insertInvoiceItemSchema,
+  insertInvoiceSchema: () => insertInvoiceSchema,
+  insertJournalEntrySchema: () => insertJournalEntrySchema,
+  insertJournalLineSchema: () => insertJournalLineSchema,
+  insertMeetingIntegrationSchema: () => insertMeetingIntegrationSchema,
+  insertMeetingSchema: () => insertMeetingSchema,
+  insertProjectSchema: () => insertProjectSchema,
+  insertTaskSchema: () => insertTaskSchema,
+  insertTimeEntrySchema: () => insertTimeEntrySchema,
+  insertTranscriptionSegmentSchema: () => insertTranscriptionSegmentSchema,
+  insertUserSchema: () => insertUserSchema,
+  invoiceItems: () => invoiceItems,
+  invoiceStatusEnum: () => invoiceStatusEnum,
+  invoices: () => invoices,
+  journalEntries: () => journalEntries,
+  journalLines: () => journalLines,
+  meetingIntegrations: () => meetingIntegrations,
+  meetingProviderEnum: () => meetingProviderEnum,
+  meetings: () => meetings,
+  projectStatusEnum: () => projectStatusEnum,
+  projects: () => projects,
+  taskPriorityEnum: () => taskPriorityEnum,
+  taskStatusEnum: () => taskStatusEnum,
+  tasks: () => tasks,
+  timeEntries: () => timeEntries,
+  transcriptionSegments: () => transcriptionSegments,
+  transcriptionStatusEnum: () => transcriptionStatusEnum,
+  users: () => users
+});
+import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum, uuid } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+var users, clients, invoiceStatusEnum, invoices, invoiceItems, expenseCategoryEnum, expenses, accountTypeEnum, accounts, journalEntries, journalLines, fileCategoryEnum, projectStatusEnum, taskPriorityEnum, taskStatusEnum, appointmentTypeEnum, files, clientInvitations, clientPortalUsers, projects, tasks, timeEntries, appointments, meetingProviderEnum, transcriptionStatusEnum, meetings, transcriptionSegments, meetingIntegrations, insertUserSchema, insertClientSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertExpenseSchema, insertAccountSchema, insertJournalEntrySchema, insertJournalLineSchema, insertFileSchema, insertClientInvitationSchema, insertClientPortalUserSchema, insertProjectSchema, insertTaskSchema, insertTimeEntrySchema, insertAppointmentSchema, insertMeetingSchema, insertTranscriptionSegmentSchema, insertMeetingIntegrationSchema;
+var init_schema = __esm({
+  "shared/schema.ts"() {
+    "use strict";
+    users = pgTable("users", {
+      id: serial("id").primaryKey(),
+      username: text("username").notNull().unique(),
+      password: text("password").notNull(),
+      email: text("email").notNull().unique(),
+      fullName: text("full_name"),
+      role: text("role").default("user").notNull(),
+      clerkId: text("clerk_id").unique(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    clients = pgTable("clients", {
+      id: serial("id").primaryKey(),
+      companyName: text("company_name").notNull(),
+      contactName: text("contact_name"),
+      email: text("email"),
+      phone: text("phone"),
+      address: text("address"),
+      taxId: text("tax_id"),
+      notes: text("notes"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    invoiceStatusEnum = pgEnum("invoice_status", [
+      "draft",
+      "sent",
+      "paid",
+      "overdue",
+      "cancelled"
+    ]);
+    invoices = pgTable("invoices", {
+      id: serial("id").primaryKey(),
+      invoiceNumber: text("invoice_number").notNull().unique(),
+      clientId: integer("client_id").notNull(),
+      issueDate: timestamp("issue_date").defaultNow().notNull(),
+      dueDate: timestamp("due_date").notNull(),
+      status: invoiceStatusEnum("status").default("draft").notNull(),
+      subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
+      taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0"),
+      total: numeric("total", { precision: 10, scale: 2 }).notNull(),
+      notes: text("notes"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    invoiceItems = pgTable("invoice_items", {
+      id: serial("id").primaryKey(),
+      invoiceId: integer("invoice_id").notNull(),
+      description: text("description").notNull(),
+      quantity: numeric("quantity", { precision: 10, scale: 2 }).notNull(),
+      unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+      amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+      taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0")
+    });
+    expenseCategoryEnum = pgEnum("expense_category", [
+      "office",
+      "travel",
+      "marketing",
+      "utilities",
+      "rent",
+      "salary",
+      "equipment",
+      "supplies",
+      "taxes",
+      "other"
+    ]);
+    expenses = pgTable("expenses", {
+      id: serial("id").primaryKey(),
+      description: text("description").notNull(),
+      date: timestamp("date").defaultNow().notNull(),
+      amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+      category: expenseCategoryEnum("category").default("other").notNull(),
+      notes: text("notes"),
+      receipt: text("receipt_url"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    accountTypeEnum = pgEnum("account_type", [
+      "asset",
+      "liability",
+      "equity",
+      "revenue",
+      "expense"
+    ]);
+    accounts = pgTable("accounts", {
+      id: serial("id").primaryKey(),
+      code: text("code").notNull().unique(),
+      name: text("name").notNull(),
+      type: accountTypeEnum("type").notNull(),
+      description: text("description"),
+      parentId: integer("parent_id"),
+      isActive: boolean("is_active").default(true).notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    journalEntries = pgTable("journal_entries", {
+      id: serial("id").primaryKey(),
+      date: timestamp("date").defaultNow().notNull(),
+      reference: text("reference"),
+      description: text("description").notNull(),
+      sourceType: text("source_type"),
+      // 'invoice', 'expense', 'manual'
+      sourceId: integer("source_id"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    journalLines = pgTable("journal_lines", {
+      id: serial("id").primaryKey(),
+      journalEntryId: integer("journal_entry_id").notNull(),
+      accountId: integer("account_id").notNull(),
+      description: text("description"),
+      debit: numeric("debit", { precision: 10, scale: 2 }).default("0").notNull(),
+      credit: numeric("credit", { precision: 10, scale: 2 }).default("0").notNull()
+    });
+    fileCategoryEnum = pgEnum("file_category", [
+      "invoice",
+      "quote",
+      "receipt",
+      "contract",
+      "report",
+      "tax",
+      "other"
+    ]);
+    projectStatusEnum = pgEnum("project_status", [
+      "pending",
+      "in_progress",
+      "completed",
+      "cancelled",
+      "on_hold"
+    ]);
+    taskPriorityEnum = pgEnum("task_priority", [
+      "low",
+      "medium",
+      "high",
+      "urgent"
+    ]);
+    taskStatusEnum = pgEnum("task_status", [
+      "pending",
+      "in_progress",
+      "completed",
+      "cancelled"
+    ]);
+    appointmentTypeEnum = pgEnum("appointment_type", [
+      "meeting",
+      "call",
+      "video_call",
+      "other"
+    ]);
+    files = pgTable("files", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      name: text("name").notNull(),
+      path: text("path").notNull(),
+      size: integer("size").notNull(),
+      mimeType: text("mime_type").notNull(),
+      clientId: integer("client_id"),
+      projectId: integer("project_id"),
+      companyId: integer("company_id"),
+      category: fileCategoryEnum("category").default("other").notNull(),
+      userId: uuid("user_id").notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    clientInvitations = pgTable("client_invitations", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      clientId: integer("client_id").notNull(),
+      email: text("email").notNull(),
+      token: text("token").notNull().unique(),
+      expiresAt: timestamp("expires_at").notNull(),
+      userId: uuid("user_id").notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull()
+    });
+    clientPortalUsers = pgTable("client_portal_users", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      clientId: integer("client_id").notNull(),
+      email: text("email").notNull().unique(),
+      password: text("password").notNull(),
+      lastLogin: timestamp("last_login"),
+      isActive: boolean("is_active").default(true).notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    projects = pgTable("projects", {
+      id: serial("id").primaryKey(),
+      name: text("name").notNull(),
+      description: text("description"),
+      clientId: integer("client_id").notNull(),
+      startDate: timestamp("start_date").defaultNow().notNull(),
+      endDate: timestamp("end_date"),
+      status: projectStatusEnum("status").default("pending").notNull(),
+      progress: integer("progress").default(0).notNull(),
+      userId: uuid("user_id").notNull(),
+      // Creador/propietario del proyecto
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    tasks = pgTable("tasks", {
+      id: serial("id").primaryKey(),
+      title: text("title").notNull(),
+      description: text("description"),
+      projectId: integer("project_id").notNull(),
+      assignedTo: uuid("assigned_to").notNull(),
+      dueDate: timestamp("due_date"),
+      priority: taskPriorityEnum("priority").default("medium").notNull(),
+      status: taskStatusEnum("status").default("pending").notNull(),
+      estimatedHours: numeric("estimated_hours", { precision: 5, scale: 2 }),
+      actualHours: numeric("actual_hours", { precision: 5, scale: 2 }).default("0"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    timeEntries = pgTable("time_entries", {
+      id: serial("id").primaryKey(),
+      taskId: integer("task_id").notNull(),
+      userId: uuid("user_id").notNull(),
+      startTime: timestamp("start_time").notNull(),
+      endTime: timestamp("end_time"),
+      description: text("description"),
+      hours: numeric("hours", { precision: 5, scale: 2 }),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    appointments = pgTable("appointments", {
+      id: serial("id").primaryKey(),
+      title: text("title").notNull(),
+      description: text("description"),
+      clientId: integer("client_id").notNull(),
+      projectId: integer("project_id"),
+      startTime: timestamp("start_time").notNull(),
+      endTime: timestamp("end_time").notNull(),
+      location: text("location"),
+      type: appointmentTypeEnum("type").default("meeting").notNull(),
+      meetingUrl: text("meeting_url"),
+      // URL para reuniones de Google Meet
+      reminderSent: boolean("reminder_sent").default(false).notNull(),
+      userId: uuid("user_id").notNull(),
+      // Creador de la cita
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    meetingProviderEnum = pgEnum("meeting_provider", [
+      "google_meet",
+      "zoom",
+      "teams",
+      "other"
+    ]);
+    transcriptionStatusEnum = pgEnum("transcription_status", [
+      "pending",
+      "in_progress",
+      "completed",
+      "failed"
+    ]);
+    meetings = pgTable("meetings", {
+      id: serial("id").primaryKey(),
+      title: text("title").notNull(),
+      appointmentId: integer("appointment_id"),
+      projectId: integer("project_id"),
+      clientId: integer("client_id").notNull(),
+      provider: meetingProviderEnum("provider").default("google_meet").notNull(),
+      externalMeetingId: text("external_meeting_id"),
+      // ID de la reunión en Google Meet o Zoom
+      meetingUrl: text("meeting_url"),
+      // URL para unirse a la reunión
+      recordingUrl: text("recording_url"),
+      // URL de la grabación
+      recordingStatus: text("recording_status").default("not_started"),
+      transcriptionStatus: transcriptionStatusEnum("transcription_status").default("pending"),
+      transcription: text("transcription"),
+      // Transcripción completa del texto
+      summary: text("summary"),
+      // Resumen generado por AI
+      duration: integer("duration"),
+      // Duración en minutos
+      meetingDate: timestamp("meeting_date").notNull(),
+      startTime: timestamp("start_time"),
+      endTime: timestamp("end_time"),
+      participants: text("participants").array(),
+      // Lista de participantes
+      keyPoints: text("key_points").array(),
+      // Puntos clave identificados por AI
+      actionItems: text("action_items").array(),
+      // Acciones a realizar identificadas por AI
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    transcriptionSegments = pgTable("transcription_segments", {
+      id: serial("id").primaryKey(),
+      meetingId: integer("meeting_id").notNull(),
+      speakerName: text("speaker_name"),
+      speakerId: text("speaker_id"),
+      content: text("content").notNull(),
+      startTime: numeric("start_time", { precision: 10, scale: 3 }).notNull(),
+      // Tiempo de inicio en segundos
+      endTime: numeric("end_time", { precision: 10, scale: 3 }).notNull(),
+      // Tiempo de fin en segundos
+      createdAt: timestamp("created_at").defaultNow().notNull()
+    });
+    meetingIntegrations = pgTable("meeting_integrations", {
+      id: serial("id").primaryKey(),
+      userId: uuid("user_id").notNull(),
+      provider: meetingProviderEnum("provider").notNull(),
+      accessToken: text("access_token"),
+      // Token OAuth para autenticación
+      refreshToken: text("refresh_token"),
+      tokenExpiry: timestamp("token_expiry"),
+      settings: text("settings").array(),
+      // Configuraciones específicas por proveedor
+      isActive: boolean("is_active").default(true).notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
+    });
+    insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
+    insertClientSchema = createInsertSchema(clients).omit({ id: true, createdAt: true, updatedAt: true });
+    insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true, createdAt: true, updatedAt: true });
+    insertInvoiceItemSchema = createInsertSchema(invoiceItems).omit({ id: true });
+    insertExpenseSchema = createInsertSchema(expenses).omit({ id: true, createdAt: true, updatedAt: true });
+    insertAccountSchema = createInsertSchema(accounts).omit({ id: true, createdAt: true, updatedAt: true });
+    insertJournalEntrySchema = createInsertSchema(journalEntries).omit({ id: true, createdAt: true, updatedAt: true });
+    insertJournalLineSchema = createInsertSchema(journalLines).omit({ id: true });
+    insertFileSchema = createInsertSchema(files).omit({ id: true, createdAt: true, updatedAt: true });
+    insertClientInvitationSchema = createInsertSchema(clientInvitations).omit({ id: true, createdAt: true });
+    insertClientPortalUserSchema = createInsertSchema(clientPortalUsers).omit({ id: true, lastLogin: true, createdAt: true, updatedAt: true });
+    insertProjectSchema = createInsertSchema(projects).omit({ id: true, createdAt: true, updatedAt: true });
+    insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true, updatedAt: true });
+    insertTimeEntrySchema = createInsertSchema(timeEntries).omit({ id: true, createdAt: true, updatedAt: true });
+    insertAppointmentSchema = createInsertSchema(appointments).omit({ id: true, createdAt: true, updatedAt: true });
+    insertMeetingSchema = createInsertSchema(meetings).omit({ id: true, createdAt: true, updatedAt: true });
+    insertTranscriptionSegmentSchema = createInsertSchema(transcriptionSegments).omit({ id: true, createdAt: true });
+    insertMeetingIntegrationSchema = createInsertSchema(meetingIntegrations).omit({ id: true, createdAt: true, updatedAt: true });
+  }
+});
+
+// server/db.ts
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { Client } from "@neondatabase/serverless";
+var client, db;
+var init_db = __esm({
+  "server/db.ts"() {
+    "use strict";
+    init_schema();
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL is not set");
+    }
+    client = postgres(process.env.DATABASE_URL);
+    db = drizzle(client, { schema: schema_exports });
+  }
+});
+
+// server/storage-utils.ts
+var storage_utils_exports = {};
+__export(storage_utils_exports, {
+  createClientStorageStructure: () => createClientStorageStructure
+});
+import { createClient as createClient2 } from "@supabase/supabase-js";
+async function bucketExists(bucketName) {
+  try {
+    const { data, error } = await supabaseAdmin2.storage.getBucket(bucketName);
+    return !!data && !error;
+  } catch (error) {
+    console.error(`Error verificando bucket ${bucketName}:`, error);
+    return false;
+  }
+}
+async function createClientStorageStructure(clientId) {
+  console.log(`Creando estructura de almacenamiento para cliente ID: ${clientId}`);
+  const results = {};
+  for (const bucketName of CLIENT_STORAGE_BUCKETS) {
+    try {
+      const exists = await bucketExists(bucketName);
+      if (!exists) {
+        console.warn(`\u26A0\uFE0F El bucket ${bucketName} no existe. Omitiendo creaci\xF3n de carpeta.`);
+        results[bucketName] = false;
+        continue;
+      }
+      const placeholderFile = new Uint8Array([]);
+      const clientFolderPath = `${clientId}/.keep`;
+      const { data: existingFiles } = await supabaseAdmin2.storage.from(bucketName).list(clientId.toString());
+      if (existingFiles && existingFiles.length > 0) {
+        console.log(`\u2139\uFE0F La carpeta para el cliente ${clientId} ya existe en el bucket ${bucketName}.`);
+        results[bucketName] = true;
+        continue;
+      }
+      const { error } = await supabaseAdmin2.storage.from(bucketName).upload(clientFolderPath, placeholderFile, {
+        contentType: "text/plain",
+        upsert: true
+        // Cambiado a true para asegurar que se cree incluso si ya existe
+      });
+      if (error) {
+        console.error(`Error al crear carpeta en bucket ${bucketName} para cliente ${clientId}:`, error);
+        results[bucketName] = false;
+      } else {
+        console.log(`\u2705 Carpeta creada en bucket ${bucketName} para cliente ${clientId}`);
+        results[bucketName] = true;
+        await configureClientStorageAccess(bucketName, clientId);
+        const subfolders = ["facturas", "recibos", "contratos", "documentos", "otros"];
+        for (const subfolder of subfolders) {
+          const subfolderPath = `${clientId}/${subfolder}/.keep`;
+          await supabaseAdmin2.storage.from(bucketName).upload(subfolderPath, placeholderFile, {
+            contentType: "text/plain",
+            upsert: true
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Error general al crear carpeta en bucket ${bucketName}:`, error);
+      results[bucketName] = false;
+    }
+  }
+  return results;
+}
+async function configureClientStorageAccess(bucketName, clientId) {
+  try {
+    console.log(`Pol\xEDtica de almacenamiento para cliente ${clientId} en bucket ${bucketName} debe ser configurada`);
+  } catch (error) {
+    console.error(`Error al configurar pol\xEDticas para cliente ${clientId} en bucket ${bucketName}:`, error);
+  }
+}
+var supabaseAdmin2, CLIENT_STORAGE_BUCKETS;
+var init_storage_utils = __esm({
+  "server/storage-utils.ts"() {
+    "use strict";
+    supabaseAdmin2 = createClient2(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    CLIENT_STORAGE_BUCKETS = [
+      "documents",
+      "invoices",
+      "receipts",
+      "contracts"
+    ];
+  }
+});
+
+// server/webhooks/clerk.ts
+var clerk_exports = {};
+__export(clerk_exports, {
+  handleClerkWebhook: () => handleClerkWebhook
+});
+import { Webhook } from "svix";
+import { eq as eq4 } from "drizzle-orm";
+async function handleClerkWebhook(req, res) {
+  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+  if (!WEBHOOK_SECRET) {
+    console.error("Falta la clave secreta del webhook de Clerk");
+    return res.status(500).json({ error: "Error de configuraci\xF3n del servidor" });
+  }
+  const svixId = req.headers["svix-id"];
+  const svixTimestamp = req.headers["svix-timestamp"];
+  const svixSignature = req.headers["svix-signature"];
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return res.status(400).json({ error: "Faltan cabeceras de webhook" });
+  }
+  let payload;
+  try {
+    const webhook = new Webhook(WEBHOOK_SECRET);
+    payload = webhook.verify(
+      JSON.stringify(req.body),
+      {
+        "svix-id": svixId,
+        "svix-timestamp": svixTimestamp,
+        "svix-signature": svixSignature
+      }
+    );
+  } catch (err) {
+    console.error("Error al verificar la firma del webhook:", err);
+    return res.status(400).json({ error: "Firma de webhook inv\xE1lida" });
+  }
+  const eventType = payload.type;
+  try {
+    if (eventType === "user.created") {
+      await handleUserCreated(payload.data);
+    } else if (eventType === "user.updated") {
+      await handleUserUpdated(payload.data);
+    } else if (eventType === "user.deleted") {
+      await handleUserDeleted(payload.data);
+    }
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error(`Error al procesar evento ${eventType}:`, err);
+    return res.status(500).json({ error: "Error al procesar el evento" });
+  }
+}
+async function handleUserCreated(userData) {
+  const email = userData.email_addresses[0]?.email_address;
+  const username = userData.username || email?.split("@")[0] || `user_${userData.id}`;
+  const [existingUser] = await db.select().from(users).where(eq4(users.clerkId, userData.id)).limit(1);
+  if (existingUser) {
+    return;
+  }
+  await db.insert(users).values({
+    username,
+    email: email || "",
+    password: "",
+    // No almacenamos la contraseña, ya que Clerk se encarga de la autenticación
+    fullName: `${userData.first_name || ""} ${userData.last_name || ""}`.trim(),
+    clerkId: userData.id,
+    role: "user"
+  });
+  console.log(`Usuario creado con clerkId: ${userData.id}`);
+}
+async function handleUserUpdated(userData) {
+  const email = userData.email_addresses[0]?.email_address;
+  const fullName = `${userData.first_name || ""} ${userData.last_name || ""}`.trim();
+  await db.update(users).set({
+    email: email || "",
+    username: userData.username || email?.split("@")[0] || `user_${userData.id}`,
+    fullName
+  }).where(eq4(users.clerkId, userData.id));
+  console.log(`Usuario actualizado con clerkId: ${userData.id}`);
+}
+async function handleUserDeleted(userData) {
+  await db.delete(users).where(eq4(users.clerkId, userData.id));
+  console.log(`Usuario eliminado con clerkId: ${userData.id}`);
+}
+var init_clerk = __esm({
+  "server/webhooks/clerk.ts"() {
+    "use strict";
+    init_db();
+    init_schema();
+  }
+});
+
+// server/index.ts
+import express3 from "express";
+
+// server/routes.ts
+import express from "express";
+import { createServer } from "http";
+import multer from "multer";
+import { randomUUID } from "crypto";
+
+// server/storage.ts
+init_schema();
+init_db();
+import { eq, desc, sql } from "drizzle-orm";
+var DatabaseStorage = class {
+  // USERS
+  async getUser(id) {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+  async getUserByUsername(username) {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+  async getUserByClerkId(clerkId) {
+    if (!clerkId) return void 0;
+    const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+    return user;
+  }
+  async createUser(insertUser) {
+    const completeUser = {
+      ...insertUser,
+      // Asegurarnos de que los campos son consistentes con el esquema
+      fullName: insertUser.fullName ?? null,
+      role: insertUser.role ?? "user",
+      clerkId: insertUser.clerkId ?? null,
+      createdAt: /* @__PURE__ */ new Date(),
+      updatedAt: /* @__PURE__ */ new Date()
+    };
+    const [user] = await db.insert(users).values(completeUser).returning();
+    return user;
+  }
+  // CLIENTS
+  async getClients() {
+    return await db.select().from(clients).orderBy(desc(clients.createdAt));
+  }
+  async getClient(id) {
+    const [client2] = await db.select().from(clients).where(eq(clients.id, id));
+    return client2;
+  }
+  async createClient(insertClient) {
+    const completeClient = {
+      ...insertClient,
+      email: insertClient.email || null,
+      contactName: insertClient.contactName || null,
+      phone: insertClient.phone || null,
+      address: insertClient.address || null,
+      taxId: insertClient.taxId || null,
+      notes: insertClient.notes || null,
+      createdAt: /* @__PURE__ */ new Date(),
+      updatedAt: /* @__PURE__ */ new Date()
+    };
+    const [client2] = await db.insert(clients).values(completeClient).returning();
+    return client2;
+  }
+  async updateClient(id, clientData) {
+    const [updatedClient] = await db.update(clients).set({ ...clientData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(clients.id, id)).returning();
+    return updatedClient;
+  }
+  async deleteClient(id) {
+    const result = await db.delete(clients).where(eq(clients.id, id));
+    return !!result;
+  }
+  async searchClients(query) {
+    return await db.select().from(clients).where(
+      sql`LOWER(${clients.companyName}) LIKE LOWER(${"%" + query + "%"}) OR
+            LOWER(${clients.contactName}) LIKE LOWER(${"%" + query + "%"}) OR
+            LOWER(${clients.email}) LIKE LOWER(${"%" + query + "%"})`
+    ).orderBy(desc(clients.createdAt));
+  }
+  // INVOICES
+  async getInvoices() {
+    return await db.select().from(invoices).orderBy(desc(invoices.createdAt));
+  }
+  async getInvoice(id) {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    return invoice;
+  }
+  async getInvoiceWithItems(id) {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    if (!invoice) return void 0;
+    const items = await db.select().from(invoiceItems).where(eq(invoiceItems.invoiceId, id));
+    return { invoice, items };
+  }
+  async createInvoice(insertInvoice, items) {
+    return await db.transaction(async (tx) => {
+      const completeInvoice = {
+        ...insertInvoice,
+        status: insertInvoice.status || "draft",
+        taxAmount: insertInvoice.taxAmount || null,
+        notes: insertInvoice.notes || null,
+        createdAt: /* @__PURE__ */ new Date(),
+        updatedAt: /* @__PURE__ */ new Date()
+      };
+      const [invoice] = await tx.insert(invoices).values(completeInvoice).returning();
+      for (const item of items) {
+        const completeItem = {
+          ...item,
+          invoiceId: invoice.id,
+          taxRate: item.taxRate || null
+        };
+        await tx.insert(invoiceItems).values(completeItem);
+      }
+      return invoice;
+    });
+  }
+  async updateInvoice(id, invoiceData) {
+    const [updatedInvoice] = await db.update(invoices).set({ ...invoiceData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(invoices.id, id)).returning();
+    return updatedInvoice;
+  }
+  async deleteInvoice(id) {
+    await db.delete(invoiceItems).where(eq(invoiceItems.invoiceId, id));
+    const result = await db.delete(invoices).where(eq(invoices.id, id));
+    return !!result;
+  }
+  // EXPENSES
+  async getExpenses() {
+    return await db.select().from(expenses).orderBy(desc(expenses.createdAt));
+  }
+  async getExpense(id) {
+    const [expense] = await db.select().from(expenses).where(eq(expenses.id, id));
+    return expense;
+  }
+  async createExpense(insertExpense) {
+    const completeExpense = {
+      ...insertExpense,
+      date: insertExpense.date || /* @__PURE__ */ new Date(),
+      notes: insertExpense.notes || null,
+      category: insertExpense.category || "other",
+      receipt: insertExpense.receipt || null,
+      createdAt: /* @__PURE__ */ new Date(),
+      updatedAt: /* @__PURE__ */ new Date()
+    };
+    const [expense] = await db.insert(expenses).values(completeExpense).returning();
+    return expense;
+  }
+  async updateExpense(id, expenseData) {
+    const [updatedExpense] = await db.update(expenses).set({ ...expenseData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(expenses.id, id)).returning();
+    return updatedExpense;
+  }
+  async deleteExpense(id) {
+    const result = await db.delete(expenses).where(eq(expenses.id, id));
+    return !!result;
+  }
+  // ACCOUNTS (Chart of Accounts)
+  async getAccounts() {
+    return await db.select().from(accounts).orderBy(accounts.code);
+  }
+  async getAccount(id) {
+    const [account] = await db.select().from(accounts).where(eq(accounts.id, id));
+    return account;
+  }
+  async createAccount(insertAccount) {
+    const completeAccount = {
+      ...insertAccount,
+      description: insertAccount.description || null,
+      parentId: insertAccount.parentId || null,
+      isActive: insertAccount.isActive === void 0 ? true : insertAccount.isActive,
+      createdAt: /* @__PURE__ */ new Date(),
+      updatedAt: /* @__PURE__ */ new Date()
+    };
+    const [account] = await db.insert(accounts).values(completeAccount).returning();
+    return account;
+  }
+  async updateAccount(id, accountData) {
+    const [updatedAccount] = await db.update(accounts).set({ ...accountData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(accounts.id, id)).returning();
+    return updatedAccount;
+  }
+  async deleteAccount(id) {
+    const result = await db.delete(accounts).where(eq(accounts.id, id));
+    return !!result;
+  }
+  // JOURNAL ENTRIES
+  async getJournalEntries() {
+    return await db.select().from(journalEntries).orderBy(desc(journalEntries.date));
+  }
+  async getJournalEntry(id) {
+    const [entry] = await db.select().from(journalEntries).where(eq(journalEntries.id, id));
+    return entry;
+  }
+  async getJournalEntryWithLines(id) {
+    const [entry] = await db.select().from(journalEntries).where(eq(journalEntries.id, id));
+    if (!entry) return void 0;
+    const lines = await db.select().from(journalLines).where(eq(journalLines.journalEntryId, id));
+    return { entry, lines };
+  }
+  async createJournalEntry(insertEntry, insertLines) {
+    return await db.transaction(async (tx) => {
+      const completeEntry = {
+        ...insertEntry,
+        date: insertEntry.date || /* @__PURE__ */ new Date(),
+        reference: insertEntry.reference || null,
+        sourceType: insertEntry.sourceType || null,
+        sourceId: insertEntry.sourceId || null,
+        createdAt: /* @__PURE__ */ new Date(),
+        updatedAt: /* @__PURE__ */ new Date()
+      };
+      const [entry] = await tx.insert(journalEntries).values(completeEntry).returning();
+      for (const line of insertLines) {
+        const completeLine = {
+          ...line,
+          journalEntryId: entry.id,
+          description: line.description || null,
+          debit: line.debit || "0",
+          credit: line.credit || "0"
+        };
+        await tx.insert(journalLines).values(completeLine);
+      }
+      return entry;
+    });
+  }
+  async updateJournalEntry(id, entryData) {
+    const [updatedEntry] = await db.update(journalEntries).set({ ...entryData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(journalEntries.id, id)).returning();
+    return updatedEntry;
+  }
+  async deleteJournalEntry(id) {
+    await db.delete(journalLines).where(eq(journalLines.journalEntryId, id));
+    const result = await db.delete(journalEntries).where(eq(journalEntries.id, id));
+    return !!result;
+  }
+};
+var storage = new DatabaseStorage();
+
+// server/routes.ts
+init_schema();
+import { HfInference as HfInference2 } from "@huggingface/inference";
+import { ZodError } from "zod";
+
+// server/supabase.ts
+import { createClient } from "@supabase/supabase-js";
+var STORAGE_BUCKETS = {
+  DOCUMENTS: "documents",
+  INVOICES: "invoices",
+  RECEIPTS: "receipts",
+  CONTRACTS: "contracts",
+  PROFILES: "profiles",
+  MEETING_RECORDINGS: "meeting_recordings"
+};
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error("Error: SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY deben estar definidos en las variables de entorno");
+  process.exit(1);
+}
+var supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
+async function initializeStorageBuckets() {
+  const buckets = [
+    { name: "documents", public: false },
+    { name: "invoices", public: false },
+    { name: "receipts", public: false },
+    { name: "contracts", public: false },
+    { name: "profiles", public: true },
+    { name: "meeting_recordings", public: false }
+  ];
+  for (const bucket of buckets) {
+    const { data, error } = await supabaseAdmin.storage.getBucket(bucket.name);
+    if (error && error.message.includes("The resource was not found")) {
+      const { error: createError } = await supabaseAdmin.storage.createBucket(bucket.name, {
+        public: bucket.public,
+        fileSizeLimit: bucket.name === "meeting_recordings" ? 1024 * 1024 * 100 : 1024 * 1024 * 10,
+        // 100MB para grabaciones, 10MB para otros
+        allowedMimeTypes: bucket.name === "profiles" ? ["image/png", "image/jpeg", "image/jpg", "image/gif"] : void 0
+      });
+      if (createError) {
+        console.error(`Error al crear bucket ${bucket.name}:`, createError);
+      } else {
+        console.log(`\u2705 Bucket ${bucket.name} creado correctamente`);
+      }
+    } else if (error) {
+      console.error(`Error al verificar bucket ${bucket.name}:`, error);
+    } else {
+      console.log(`\u2139\uFE0F Bucket ${bucket.name} ya existe`);
+    }
+  }
+}
+function createFilePath(userId, clientId, category, filename) {
+  let path3 = userId;
+  if (clientId) {
+    path3 += `/${clientId}`;
+  }
+  path3 += `/${category}/${Date.now()}_${filename}`;
+  return path3;
+}
+async function uploadFile(bucketName, filePath, file, contentType) {
+  const { data, error } = await supabaseAdmin.storage.from(bucketName).upload(filePath, file, {
+    contentType,
+    upsert: true
+  });
+  if (error) {
+    console.error(`Error al subir archivo a ${bucketName}/${filePath}:`, error);
+    return void 0;
+  }
+  let url;
+  if (bucketName === "profiles") {
+    const { data: data2 } = supabaseAdmin.storage.from(bucketName).getPublicUrl(filePath);
+    url = data2.publicUrl;
+  } else {
+    const { data: data2 } = await supabaseAdmin.storage.from(bucketName).createSignedUrl(filePath, 60 * 60);
+    url = data2?.signedUrl || "";
+  }
+  return url;
+}
+async function deleteFile(bucketName, filePath) {
+  const { error } = await supabaseAdmin.storage.from(bucketName).remove([filePath]);
+  if (error) {
+    console.error(`Error al eliminar archivo de ${bucketName}/${filePath}:`, error);
+    return false;
+  }
+  return true;
+}
+
+// server/routes.ts
+init_db();
+import { eq as eq5 } from "drizzle-orm";
+
+// server/meetings.ts
+init_db();
+init_schema();
+import { eq as eq3 } from "drizzle-orm";
+
+// server/ai.ts
+init_db();
+init_schema();
+import { HfInference } from "@huggingface/inference";
+import { eq as eq2 } from "drizzle-orm";
+var hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
+async function transcribeAudio(audioBuffer, meetingId) {
+  try {
+    await db.update(meetings).set({ transcriptionStatus: "in_progress" }).where(eq2(meetings.id, meetingId));
+    const result = await hf.automaticSpeechRecognition({
+      model: "openai/whisper-large-v3",
+      data: audioBuffer
+    });
+    const segment = {
+      meetingId,
+      startTime: "0",
+      // Usar string para representar valores numéricos
+      endTime: "0",
+      // Usar string para representar valores numéricos
+      content: result.text,
+      // Usar content en lugar de text
+      speakerId: null
+      // No tenemos identificación de hablante
+    };
+    const [savedSegment] = await db.insert(transcriptionSegments).values(segment).returning();
+    await db.update(meetings).set({ transcriptionStatus: "completed" }).where(eq2(meetings.id, meetingId));
+    return [savedSegment];
+  } catch (error) {
+    console.error("Error during transcription:", error);
+    await db.update(meetings).set({ transcriptionStatus: "failed" }).where(eq2(meetings.id, meetingId));
+    throw new Error(`Error al transcribir audio: ${error.message}`);
+  }
+}
+async function generateMeetingSummary(meetingId) {
+  try {
+    const transcription = await db.select().from(transcriptionSegments).where(eq2(transcriptionSegments.meetingId, meetingId));
+    if (!transcription.length) {
+      throw new Error("No hay transcripci\xF3n disponible para esta reuni\xF3n");
+    }
+    const fullText = transcription.map((segment) => segment.content).join(" ");
+    const summaryResult = await hf.summarization({
+      model: "facebook/bart-large-cnn",
+      inputs: fullText,
+      parameters: {
+        max_length: 300,
+        min_length: 100
+      }
+    });
+    return summaryResult.summary_text;
+  } catch (error) {
+    console.error("Error generating meeting summary:", error);
+    throw new Error(`Error al generar resumen de la reuni\xF3n: ${error.message}`);
+  }
+}
+async function extractKeyPointsAndActions(meetingId) {
+  try {
+    const transcription = await db.select().from(transcriptionSegments).where(eq2(transcriptionSegments.meetingId, meetingId));
+    if (!transcription.length) {
+      throw new Error("No hay transcripci\xF3n disponible para esta reuni\xF3n");
+    }
+    const fullText = transcription.map((segment) => segment.content).join(" ");
+    const prompt = `
+    Analiza la siguiente transcripci\xF3n de una reuni\xF3n y extrae:
+    1. Los puntos clave discutidos (m\xE1ximo 5)
+    2. Las acciones acordadas para realizar (m\xE1ximo 5)
+    
+    Transcripci\xF3n:
+    ${fullText}
+    
+    Responde en formato JSON con las claves "keyPoints" y "actions", ambas como arrays de strings.
+    `;
+    const result = await hf.textGeneration({
+      model: "google/gemma-7b",
+      inputs: prompt,
+      parameters: {
+        max_new_tokens: 1024,
+        return_full_text: false
+      }
+    });
+    let jsonStr = result.generated_text.trim();
+    try {
+      const startIdx = jsonStr.indexOf("{");
+      const endIdx = jsonStr.lastIndexOf("}") + 1;
+      if (startIdx >= 0 && endIdx > startIdx) {
+        jsonStr = jsonStr.substring(startIdx, endIdx);
+      }
+      const parsed = JSON.parse(jsonStr);
+      return {
+        keyPoints: Array.isArray(parsed.keyPoints) ? parsed.keyPoints : [],
+        actions: Array.isArray(parsed.actions) ? parsed.actions : []
+      };
+    } catch (parseError) {
+      console.error("Error parsing AI response:", parseError);
+      return {
+        keyPoints: ["No se pudieron extraer puntos clave autom\xE1ticamente."],
+        actions: ["No se pudieron extraer acciones autom\xE1ticamente."]
+      };
+    }
+  } catch (error) {
+    console.error("Error extracting key points and actions:", error);
+    throw new Error(`Error al extraer puntos clave y acciones: ${error.message}`);
+  }
+}
+
+// server/meetings.ts
+var RECORDINGS_BUCKET = "meeting_recordings";
+async function createMeeting(meetingData) {
+  const [meeting] = await db.insert(meetings).values(meetingData).returning();
+  return meeting;
+}
+async function saveMeetingIntegration(integrationData) {
+  const [integration] = await db.insert(meetingIntegrations).values(integrationData).returning();
+  return integration;
+}
+async function generateMeetingLink(provider, meetingId, appointmentId) {
+  const mockMeetingId = `meeting-${Date.now()}-${meetingId}`;
+  let meetingUrl = "";
+  switch (provider) {
+    case "google_meet":
+      meetingUrl = `https://meet.google.com/${mockMeetingId}`;
+      break;
+    case "zoom":
+      meetingUrl = `https://zoom.us/j/${mockMeetingId}`;
+      break;
+    case "teams":
+      meetingUrl = `https://teams.microsoft.com/l/meetup-join/${mockMeetingId}`;
+      break;
+    default:
+      meetingUrl = `https://meeting.efectivio.com/${mockMeetingId}`;
+  }
+  await saveMeetingIntegration({
+    userId: "user-1",
+    // En un caso real, este sería el ID del usuario autenticado
+    provider,
+    accessToken: null,
+    // En un caso real, aquí iría el token
+    refreshToken: null,
+    // En un caso real, aquí iría el token de refresh
+    tokenExpiry: null,
+    // En un caso real, aquí iría la fecha de expiración
+    settings: [],
+    // Configuraciones por defecto
+    isActive: true
+  });
+  return {
+    meetingUrl,
+    meetingId: mockMeetingId
+  };
+}
+async function uploadMeetingRecording(meetingId, recording, fileName) {
+  const filePath = `meeting-${meetingId}/${fileName}`;
+  const { data, error } = await supabaseAdmin.storage.from(RECORDINGS_BUCKET).upload(filePath, recording, {
+    contentType: "audio/mpeg",
+    // O el tipo adecuado
+    cacheControl: "3600"
+  });
+  if (error) {
+    console.error("Error uploading meeting recording:", error);
+    throw new Error(`Error al subir la grabaci\xF3n: ${error.message}`);
+  }
+  const publicUrl = supabaseAdmin.storage.from(RECORDINGS_BUCKET).getPublicUrl(filePath).data.publicUrl;
+  await db.update(meetings).set({ recordingUrl: publicUrl }).where(eq3(meetings.id, meetingId));
+  try {
+    await transcribeAudio(recording, meetingId);
+  } catch (error2) {
+    console.error("Error starting transcription:", error2);
+  }
+  return publicUrl;
+}
+async function processMeetingData(meetingId) {
+  try {
+    const [meetingData] = await db.select().from(meetings).where(eq3(meetings.id, meetingId));
+    if (!meetingData) {
+      throw new Error("Reuni\xF3n no encontrada");
+    }
+    if (meetingData.transcriptionStatus !== "completed") {
+      throw new Error("La transcripci\xF3n a\xFAn no est\xE1 completa");
+    }
+    const summary = await generateMeetingSummary(meetingId);
+    const { keyPoints, actions } = await extractKeyPointsAndActions(meetingId);
+    await db.update(meetings).set({
+      summary,
+      keyPoints,
+      actionItems: actions
+    }).where(eq3(meetings.id, meetingId));
+    return {
+      summary,
+      keyPoints,
+      actions
+    };
+  } catch (error) {
+    console.error("Error processing meeting data:", error);
+    throw new Error(`Error al procesar los datos de la reuni\xF3n: ${error.message}`);
+  }
+}
+async function getMeetingDetails(meetingId) {
+  const [meeting] = await db.select().from(meetings).where(eq3(meetings.id, meetingId));
+  if (!meeting) {
+    throw new Error("Reuni\xF3n no encontrada");
+  }
+  const integrations = await db.select().from(meetingIntegrations).where(eq3(meetingIntegrations.userId, "user-1"));
+  const integration = integrations.length > 0 ? integrations[0] : null;
+  return {
+    meeting,
+    integration
+  };
+}
+async function initializeMeetingStorageBucket() {
+  try {
+    const { data: buckets, error: listError } = await supabaseAdmin.storage.listBuckets();
+    if (listError) {
+      console.warn("No se pudo verificar si el bucket existe:", listError.message);
+      return;
+    }
+    const bucketExists2 = buckets?.some((bucket) => bucket.name === RECORDINGS_BUCKET);
+    if (!bucketExists2) {
+      console.warn(`El bucket '${RECORDINGS_BUCKET}' no existe. 
+      Por favor, cree manualmente este bucket desde la consola de Supabase 
+      para habilitar el almacenamiento de grabaciones de reuniones.`);
+      try {
+        const { error } = await supabaseAdmin.storage.createBucket(RECORDINGS_BUCKET, {
+          public: false
+          // No hacemos el bucket público por seguridad
+        });
+        if (error) {
+          console.warn(`No se pudo crear autom\xE1ticamente el bucket: ${error.message}`);
+          console.info(`Para crear manualmente el bucket '${RECORDINGS_BUCKET}':
+          1. Inicie sesi\xF3n en el proyecto de Supabase
+          2. Vaya a "Storage" en el men\xFA lateral
+          3. Haga clic en "New Bucket"
+          4. Ingrese '${RECORDINGS_BUCKET}' como nombre
+          5. Desactive "Public bucket" para mayor seguridad`);
+        } else {
+          console.log(`Bucket '${RECORDINGS_BUCKET}' creado exitosamente`);
+        }
+      } catch (error) {
+        console.warn(`Error al intentar crear el bucket: ${error.message}`);
+      }
+    } else {
+      console.log(`El bucket '${RECORDINGS_BUCKET}' ya existe`);
+    }
+  } catch (error) {
+    console.warn(`Error durante la inicializaci\xF3n del bucket: ${error.message}`);
+  }
+}
+
+// server/routes.ts
+async function registerRoutes(app2) {
+  const validateRequest = (schema, data) => {
+    try {
+      return { success: true, data: schema.parse(data) };
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return {
+          success: false,
+          error: error.errors.map((e) => ({
+            path: e.path.join("."),
+            message: e.message
+          }))
+        };
+      }
+      return { success: false, error: "Unknown validation error" };
+    }
+  };
+  app2.get("/api/clients", async (req, res) => {
+    try {
+      const clients2 = await storage.getClients();
+      res.json(clients2);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching clients", error });
+    }
+  });
+  app2.get("/api/clients/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const client2 = await storage.getClient(id);
+      if (!client2) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      res.json(client2);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching client", error });
+    }
+  });
+  app2.post("/api/clients", async (req, res) => {
+    try {
+      const validation = validateRequest(insertClientSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const client2 = await storage.createClient(validation.data);
+      try {
+        const { createClientStorageStructure: createClientStorageStructure2 } = await Promise.resolve().then(() => (init_storage_utils(), storage_utils_exports));
+        const storageResult = await createClientStorageStructure2(client2.id);
+        console.log(`Resultado de creaci\xF3n de almacenamiento para cliente ${client2.id}:`, storageResult);
+      } catch (storageError) {
+        console.error(`Error al crear estructura de almacenamiento para cliente ${client2.id}:`, storageError);
+      }
+      res.status(201).json(client2);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating client", error });
+    }
+  });
+  app2.put("/api/clients/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertClientSchema.partial(), req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const updatedClient = await storage.updateClient(id, validation.data);
+      if (!updatedClient) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      res.json(updatedClient);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating client", error });
+    }
+  });
+  app2.delete("/api/clients/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteClient(id);
+      if (!success) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting client", error });
+    }
+  });
+  app2.get("/api/invoices", async (req, res) => {
+    try {
+      const invoices2 = await storage.getInvoices();
+      res.json(invoices2);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching invoices", error });
+    }
+  });
+  app2.get("/api/invoices/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoiceData = await storage.getInvoiceWithItems(id);
+      if (!invoiceData) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.json(invoiceData);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching invoice", error });
+    }
+  });
+  app2.post("/api/invoices", async (req, res) => {
+    try {
+      const { invoice, items } = req.body;
+      const invoiceValidation = validateRequest(insertInvoiceSchema, invoice);
+      if (!invoiceValidation.success) {
+        return res.status(400).json({ message: "Invoice validation error", errors: invoiceValidation.error });
+      }
+      const itemsValidation = items.map((item) => validateRequest(insertInvoiceItemSchema, item));
+      const hasItemErrors = itemsValidation.some((v) => !v.success);
+      if (hasItemErrors) {
+        const errors = itemsValidation.filter((v) => !v.success).map((v, index) => ({ index, errors: v.error }));
+        return res.status(400).json({ message: "Item validation error", errors });
+      }
+      const validatedItems = itemsValidation.map((v) => v.data);
+      const createdInvoice = await storage.createInvoice(invoiceValidation.data, validatedItems);
+      await createJournalEntryFromInvoice(createdInvoice.id);
+      res.status(201).json(createdInvoice);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating invoice", error });
+    }
+  });
+  async function createJournalEntryFromInvoice(invoiceId) {
+    try {
+      const invoiceData = await storage.getInvoiceWithItems(invoiceId);
+      if (!invoiceData) return;
+      const { invoice } = invoiceData;
+      const journalEntry = await storage.createJournalEntry(
+        {
+          date: invoice.issueDate,
+          reference: `Invoice #${invoice.invoiceNumber}`,
+          description: `Invoice created for client #${invoice.clientId}`,
+          sourceType: "invoice",
+          sourceId: invoice.id
+        },
+        [
+          // Debit accounts receivable
+          {
+            journalEntryId: 0,
+            // Será asignado por el sistema
+            accountId: 2,
+            // Accounts Receivable (ID from sample data)
+            description: `Invoice #${invoice.invoiceNumber}`,
+            debit: invoice.total.toString(),
+            credit: "0"
+          },
+          // Credit revenue
+          {
+            journalEntryId: 0,
+            // Será asignado por el sistema
+            accountId: 5,
+            // Revenue account (ID from sample data)
+            description: `Invoice #${invoice.invoiceNumber}`,
+            debit: "0",
+            credit: invoice.total.toString()
+          }
+        ]
+      );
+      return journalEntry;
+    } catch (error) {
+      console.error("Error creating journal entry from invoice:", error);
+    }
+  }
+  app2.put("/api/invoices/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertInvoiceSchema.partial(), req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const updatedInvoice = await storage.updateInvoice(id, validation.data);
+      if (!updatedInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.json(updatedInvoice);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating invoice", error });
+    }
+  });
+  app2.delete("/api/invoices/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteInvoice(id);
+      if (!success) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting invoice", error });
+    }
+  });
+  app2.get("/api/expenses", async (req, res) => {
+    try {
+      const expenses2 = await storage.getExpenses();
+      res.json(expenses2);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching expenses", error });
+    }
+  });
+  app2.get("/api/expenses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const expense = await storage.getExpense(id);
+      if (!expense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      res.json(expense);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching expense", error });
+    }
+  });
+  app2.post("/api/expenses", async (req, res) => {
+    try {
+      const validation = validateRequest(insertExpenseSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const expense = await storage.createExpense(validation.data);
+      await createJournalEntryFromExpense(expense.id);
+      res.status(201).json(expense);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating expense", error });
+    }
+  });
+  async function createJournalEntryFromExpense(expenseId) {
+    try {
+      const expense = await storage.getExpense(expenseId);
+      if (!expense) return;
+      const journalEntry = await storage.createJournalEntry(
+        {
+          date: expense.date,
+          reference: `Expense #${expense.id}`,
+          description: `Expense: ${expense.description}`,
+          sourceType: "expense",
+          sourceId: expense.id
+        },
+        [
+          // Debit expense account
+          {
+            journalEntryId: 0,
+            // Será asignado por el sistema
+            accountId: 6,
+            // Expense account (ID from sample data)
+            description: expense.description,
+            debit: expense.amount.toString(),
+            credit: "0"
+          },
+          // Credit cash
+          {
+            journalEntryId: 0,
+            // Será asignado por el sistema
+            accountId: 1,
+            // Cash and Banks (ID from sample data)
+            description: expense.description,
+            debit: "0",
+            credit: expense.amount.toString()
+          }
+        ]
+      );
+      return journalEntry;
+    } catch (error) {
+      console.error("Error creating journal entry from expense:", error);
+    }
+  }
+  app2.put("/api/expenses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertExpenseSchema.partial(), req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const updatedExpense = await storage.updateExpense(id, validation.data);
+      if (!updatedExpense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      res.json(updatedExpense);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating expense", error });
+    }
+  });
+  app2.delete("/api/expenses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteExpense(id);
+      if (!success) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting expense", error });
+    }
+  });
+  app2.get("/api/accounts", async (req, res) => {
+    try {
+      const accounts2 = await storage.getAccounts();
+      res.json(accounts2);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching accounts", error });
+    }
+  });
+  app2.get("/api/accounts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const account = await storage.getAccount(id);
+      if (!account) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+      res.json(account);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching account", error });
+    }
+  });
+  app2.post("/api/accounts", async (req, res) => {
+    try {
+      const validation = validateRequest(insertAccountSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const account = await storage.createAccount(validation.data);
+      res.status(201).json(account);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating account", error });
+    }
+  });
+  app2.put("/api/accounts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertAccountSchema.partial(), req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const updatedAccount = await storage.updateAccount(id, validation.data);
+      if (!updatedAccount) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+      res.json(updatedAccount);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating account", error });
+    }
+  });
+  app2.delete("/api/accounts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteAccount(id);
+      if (!success) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting account", error });
+    }
+  });
+  app2.get("/api/journal-entries", async (req, res) => {
+    try {
+      const entries = await storage.getJournalEntries();
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching journal entries", error });
+    }
+  });
+  app2.get("/api/journal-entries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const entryData = await storage.getJournalEntryWithLines(id);
+      if (!entryData) {
+        return res.status(404).json({ message: "Journal entry not found" });
+      }
+      res.json(entryData);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching journal entry", error });
+    }
+  });
+  app2.post("/api/journal-entries", async (req, res) => {
+    try {
+      const { entry, lines } = req.body;
+      const entryValidation = validateRequest(insertJournalEntrySchema, entry);
+      if (!entryValidation.success) {
+        return res.status(400).json({ message: "Journal entry validation error", errors: entryValidation.error });
+      }
+      const linesValidation = lines.map((line) => validateRequest(insertJournalLineSchema, line));
+      const hasLineErrors = linesValidation.some((v) => !v.success);
+      if (hasLineErrors) {
+        const errors = linesValidation.filter((v) => !v.success).map((v, index) => ({ index, errors: v.error }));
+        return res.status(400).json({ message: "Line validation error", errors });
+      }
+      const validatedLines = linesValidation.map((v) => v.data);
+      const totalDebit = validatedLines.reduce((sum, line) => sum + parseFloat(line.debit), 0);
+      const totalCredit = validatedLines.reduce((sum, line) => sum + parseFloat(line.credit), 0);
+      if (Math.abs(totalDebit - totalCredit) > 1e-3) {
+        return res.status(400).json({
+          message: "Journal entry is not balanced",
+          totalDebit,
+          totalCredit
+        });
+      }
+      const createdEntry = await storage.createJournalEntry(entryValidation.data, validatedLines);
+      res.status(201).json(createdEntry);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating journal entry", error });
+    }
+  });
+  app2.delete("/api/journal-entries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteJournalEntry(id);
+      if (!success) {
+        return res.status(404).json({ message: "Journal entry not found" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting journal entry", error });
+    }
+  });
+  app2.get("/api/reports/balance-sheet", async (req, res) => {
+    try {
+      const accounts2 = await storage.getAccounts();
+      const assets = accounts2.filter((account) => account.type === "asset");
+      const liabilities = accounts2.filter((account) => account.type === "liability");
+      const equity = accounts2.filter((account) => account.type === "equity");
+      res.json({
+        asOfDate: /* @__PURE__ */ new Date(),
+        assets: assets.map((a) => ({ ...a, balance: Math.random() * 1e4 })),
+        liabilities: liabilities.map((a) => ({ ...a, balance: Math.random() * 5e3 })),
+        equity: equity.map((a) => ({ ...a, balance: Math.random() * 5e3 }))
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error generating balance sheet", error });
+    }
+  });
+  app2.get("/api/reports/income-statement", async (req, res) => {
+    try {
+      const accounts2 = await storage.getAccounts();
+      const revenue = accounts2.filter((account) => account.type === "revenue");
+      const expenses2 = accounts2.filter((account) => account.type === "expense");
+      res.json({
+        startDate: new Date((/* @__PURE__ */ new Date()).setMonth((/* @__PURE__ */ new Date()).getMonth() - 1)),
+        endDate: /* @__PURE__ */ new Date(),
+        revenue: revenue.map((a) => ({ ...a, balance: Math.random() * 1e4 })),
+        expenses: expenses2.map((a) => ({ ...a, balance: Math.random() * 8e3 }))
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error generating income statement", error });
+    }
+  });
+  app2.post("/api/auth/register", async (req, res) => {
+    try {
+      const validation = validateRequest(insertUserSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          message: "Error de validaci\xF3n",
+          errors: validation.error
+        });
+      }
+      const { username, email, password, fullName } = validation.data;
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "El nombre de usuario ya est\xE1 en uso" });
+      }
+      const { data: supabaseUser, error: supabaseError } = await supabaseAdmin.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+            full_name: fullName
+          }
+        }
+      });
+      if (supabaseError) {
+        console.error("Error al registrar usuario en Supabase:", supabaseError);
+        return res.status(500).json({
+          message: "Error al registrar usuario",
+          error: supabaseError.message
+        });
+      }
+      const user = {
+        id: supabaseUser.user?.id,
+        username,
+        email,
+        fullName,
+        role: "user"
+      };
+      res.status(201).json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role
+      });
+    } catch (error) {
+      console.error("Error al registrar usuario:", error);
+      res.status(500).json({ message: "Error al registrar usuario", error });
+    }
+  });
+  app2.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const { data: sessionData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (authError) {
+        return res.status(401).json({ message: "Credenciales inv\xE1lidas", error: authError.message });
+      }
+      const supabaseUser = sessionData.session?.user;
+      const { data: profileData, error: profileError } = await supabaseAdmin.from("profiles").select("*").eq("id", supabaseUser?.id).single();
+      if (profileError) {
+        return res.status(404).json({ message: "Perfil de usuario no encontrado", error: profileError.message });
+      }
+      res.json({
+        id: supabaseUser?.id,
+        username: profileData.username || supabaseUser?.email,
+        email: supabaseUser?.email,
+        fullName: profileData.full_name,
+        role: profileData.role,
+        token: sessionData.session?.access_token
+      });
+    } catch (error) {
+      console.error("Error al iniciar sesi\xF3n:", error);
+      res.status(500).json({ message: "Error al iniciar sesi\xF3n", error });
+    }
+  });
+  app2.post("/api/auth/logout", async (req, res) => {
+    try {
+      const { error } = await supabaseAdmin.auth.signOut();
+      if (error) {
+        return res.status(500).json({ message: "Error al cerrar sesi\xF3n", error: error.message });
+      }
+      res.status(200).json({ message: "Sesi\xF3n cerrada correctamente" });
+    } catch (error) {
+      console.error("Error al cerrar sesi\xF3n:", error);
+      res.status(500).json({ message: "Error al cerrar sesi\xF3n", error });
+    }
+  });
+  app2.get("/api/auth/user", async (req, res) => {
+    try {
+      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        return res.status(401).json({ message: "No autenticado" });
+      }
+      const supabaseUser = sessionData.session.user;
+      const { data: profileData, error: profileError } = await supabaseAdmin.from("profiles").select("*").eq("id", supabaseUser.id).single();
+      if (profileError) {
+        return res.status(404).json({ message: "Perfil de usuario no encontrado", error: profileError.message });
+      }
+      res.json({
+        id: supabaseUser.id,
+        username: profileData.username || supabaseUser.email,
+        email: supabaseUser.email,
+        fullName: profileData.full_name,
+        role: profileData.role
+      });
+    } catch (error) {
+      console.error("Error al obtener usuario:", error);
+      res.status(500).json({ message: "Error al obtener usuario", error });
+    }
+  });
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024
+      // 10MB límite
+    }
+  });
+  const requireAuth = async (req, res, next) => {
+    try {
+      if (!req.headers.authorization) {
+        return res.status(401).json({ message: "No authorization token provided" });
+      }
+      const jwt = req.headers.authorization.split(" ")[1];
+      const { data, error } = await supabaseAdmin.auth.getUser(jwt);
+      if (error || !data.user) {
+        return res.status(401).json({ message: "Invalid token", error });
+      }
+      req.user = data.user;
+      next();
+    } catch (error) {
+      res.status(500).json({ message: "Error authenticating user", error });
+    }
+  };
+  app2.post("/api/files/upload", requireAuth, upload.single("file"), async (req, res) => {
+    try {
+      const file = req.file;
+      const { bucket, clientId, category, path: path3 } = req.body;
+      if (!file) {
+        return res.status(400).json({ message: "No file provided" });
+      }
+      if (!Object.values(STORAGE_BUCKETS).includes(bucket)) {
+        return res.status(400).json({ message: "Invalid bucket name" });
+      }
+      const userId = req.user.id;
+      const filePath = createFilePath(
+        userId,
+        clientId ? parseInt(clientId) : null,
+        category || "general",
+        file.originalname
+      );
+      const result = await uploadFile(
+        bucket,
+        filePath,
+        file.buffer,
+        file.mimetype
+      );
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Error uploading file", error });
+    }
+  });
+  app2.get("/api/files/client/:clientId", requireAuth, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { data, error } = await supabaseAdmin.from("files").select("*").eq("client_id", clientId);
+      if (error) {
+        return res.status(500).json({ message: "Error fetching files", error });
+      }
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching files", error });
+    }
+  });
+  app2.get("/api/files/category/:category", requireAuth, async (req, res) => {
+    try {
+      const category = req.params.category;
+      const { data, error } = await supabaseAdmin.from("files").select("*").eq("category", category);
+      if (error) {
+        return res.status(500).json({ message: "Error fetching files", error });
+      }
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching files", error });
+    }
+  });
+  app2.get("/api/files/:id/download", requireAuth, async (req, res) => {
+    try {
+      const fileId = req.params.id;
+      const { data: file, error } = await supabaseAdmin.from("files").select("*").eq("id", fileId).single();
+      if (error || !file) {
+        return res.status(404).json({ message: "File not found", error });
+      }
+      let bucket = STORAGE_BUCKETS.DOCUMENTS;
+      switch (file.category) {
+        case "invoice":
+          bucket = STORAGE_BUCKETS.INVOICES;
+          break;
+        case "receipt":
+          bucket = STORAGE_BUCKETS.RECEIPTS;
+          break;
+        case "contract":
+          bucket = STORAGE_BUCKETS.CONTRACTS;
+          break;
+        default:
+          bucket = STORAGE_BUCKETS.DOCUMENTS;
+      }
+      const { data: urlData, error: urlError } = await supabaseAdmin.storage.from(bucket).createSignedUrl(file.path, 60 * 10);
+      if (urlError) {
+        return res.status(500).json({ message: "Error generating download URL", error: urlError });
+      }
+      res.json({ downloadUrl: urlData.signedUrl });
+    } catch (error) {
+      res.status(500).json({ message: "Error downloading file", error });
+    }
+  });
+  app2.delete("/api/files/:id", requireAuth, async (req, res) => {
+    try {
+      const fileId = req.params.id;
+      const { data: file, error } = await supabaseAdmin.from("files").select("*").eq("id", fileId).single();
+      if (error || !file) {
+        return res.status(404).json({ message: "File not found", error });
+      }
+      if (file.user_id !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+      let bucket = STORAGE_BUCKETS.DOCUMENTS;
+      switch (file.category) {
+        case "invoice":
+          bucket = STORAGE_BUCKETS.INVOICES;
+          break;
+        case "receipt":
+          bucket = STORAGE_BUCKETS.RECEIPTS;
+          break;
+        case "contract":
+          bucket = STORAGE_BUCKETS.CONTRACTS;
+          break;
+        default:
+          bucket = STORAGE_BUCKETS.DOCUMENTS;
+      }
+      await deleteFile(bucket, file.path);
+      await supabaseAdmin.from("files").delete().eq("id", fileId);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting file", error });
+    }
+  });
+  app2.post("/api/client-portal/invitations", requireAuth, async (req, res) => {
+    try {
+      const { clientId, email } = req.body;
+      if (!clientId || !email) {
+        return res.status(400).json({ message: "Client ID and email are required" });
+      }
+      const token = `inv_${randomUUID().replace(/-/g, "")}`;
+      const expiresAt = /* @__PURE__ */ new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      const { data, error } = await supabaseAdmin.from("client_invitations").insert({
+        client_id: clientId,
+        email,
+        token,
+        expires_at: expiresAt.toISOString(),
+        user_id: req.user.id
+      }).select().single();
+      if (error) {
+        return res.status(500).json({ message: "Error creating invitation", error });
+      }
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating invitation", error });
+    }
+  });
+  app2.get("/api/client-portal/invitations/:token/validate", async (req, res) => {
+    try {
+      const token = req.params.token;
+      const { data, error } = await supabaseAdmin.from("client_invitations").select("*, clients(*)").eq("token", token).single();
+      if (error || !data) {
+        return res.status(404).json({ message: "Invitation not found", error });
+      }
+      if (new Date(data.expires_at) < /* @__PURE__ */ new Date()) {
+        return res.status(400).json({ message: "Invitation has expired" });
+      }
+      res.json({
+        invitation: data,
+        client: data.clients,
+        isValid: true
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error validating invitation", error });
+    }
+  });
+  app2.post("/api/client-portal/register", async (req, res) => {
+    try {
+      const { token, email, password, fullName } = req.body;
+      if (!token || !email || !password || !fullName) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      const { data: invitation, error: invError } = await supabaseAdmin.from("client_invitations").select("*, clients(*)").eq("token", token).single();
+      if (invError || !invitation) {
+        return res.status(404).json({ message: "Invitation not found", error: invError });
+      }
+      if (new Date(invitation.expires_at) < /* @__PURE__ */ new Date()) {
+        return res.status(400).json({ message: "Invitation has expired" });
+      }
+      if (invitation.email !== email) {
+        return res.status(400).json({ message: "Email does not match invitation" });
+      }
+      const { data, error } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName,
+          role: "client",
+          client_id: invitation.client_id
+        }
+      });
+      if (error) {
+        return res.status(500).json({ message: "Error creating user", error });
+      }
+      const clientId = invitation.client_id;
+      const { createClientStorageStructure: createClientStorageStructure2 } = await Promise.resolve().then(() => (init_storage_utils(), storage_utils_exports));
+      const storageResult = await createClientStorageStructure2(clientId);
+      console.log(`Resultado de creaci\xF3n de almacenamiento para cliente ${clientId}:`, storageResult);
+      await supabaseAdmin.from("client_invitations").delete().eq("token", token);
+      res.status(201).json({
+        message: "Client registered successfully",
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          role: "client",
+          fullName,
+          clientId: invitation.client_id
+        },
+        storageCreated: Object.values(storageResult).every((result) => result)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error registering client", error });
+    }
+  });
+  app2.get("/api/client-portal/projects", requireAuth, async (req, res) => {
+    try {
+      const { clientId } = req.query;
+      if (!clientId) {
+        return res.status(400).json({ message: "Client ID is required" });
+      }
+      const { data: projects2, error } = await supabaseAdmin.from("projects").select("*").eq("client_id", clientId);
+      if (error) {
+        return res.status(500).json({ message: "Error fetching projects", error });
+      }
+      res.json(projects2);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.status(500).json({ message: "Error fetching projects", error });
+    }
+  });
+  app2.get("/api/client-portal/projects/:id", requireAuth, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { data: project, error } = await supabaseAdmin.from("projects").select("*").eq("id", id).single();
+      if (error) {
+        return res.status(404).json({ message: "Project not found", error });
+      }
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      res.status(500).json({ message: "Error fetching project", error });
+    }
+  });
+  app2.post("/api/client-portal/projects", requireAuth, async (req, res) => {
+    try {
+      const validation = validateRequest(insertProjectSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const { data: project, error } = await supabaseAdmin.from("projects").insert(validation.data).select().single();
+      if (error) {
+        return res.status(500).json({ message: "Error creating project", error });
+      }
+      res.status(201).json(project);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      res.status(500).json({ message: "Error creating project", error });
+    }
+  });
+  app2.put("/api/client-portal/projects/:id", requireAuth, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const validation = validateRequest(insertProjectSchema.partial(), req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const { data: project, error } = await supabaseAdmin.from("projects").update(validation.data).eq("id", id).select().single();
+      if (error) {
+        return res.status(404).json({ message: "Project not found", error });
+      }
+      res.json(project);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      res.status(500).json({ message: "Error updating project", error });
+    }
+  });
+  app2.delete("/api/client-portal/projects/:id", requireAuth, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { error } = await supabaseAdmin.from("projects").delete().eq("id", id);
+      if (error) {
+        return res.status(404).json({ message: "Error deleting project", error });
+      }
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ message: "Error deleting project", error });
+    }
+  });
+  app2.get("/api/client-portal/tasks", requireAuth, async (req, res) => {
+    try {
+      const { projectId } = req.query;
+      if (!projectId) {
+        return res.status(400).json({ message: "Project ID is required" });
+      }
+      const { data: tasks2, error } = await supabaseAdmin.from("tasks").select("*").eq("project_id", projectId);
+      if (error) {
+        return res.status(500).json({ message: "Error fetching tasks", error });
+      }
+      res.json(tasks2);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Error fetching tasks", error });
+    }
+  });
+  app2.post("/api/client-portal/tasks", requireAuth, async (req, res) => {
+    try {
+      const validation = validateRequest(insertTaskSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const { data: task, error } = await supabaseAdmin.from("tasks").insert(validation.data).select().single();
+      if (error) {
+        return res.status(500).json({ message: "Error creating task", error });
+      }
+      await updateProjectProgress(validation.data.projectId);
+      res.status(201).json(task);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ message: "Error creating task", error });
+    }
+  });
+  app2.put("/api/client-portal/tasks/:id", requireAuth, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const validation = validateRequest(insertTaskSchema.partial(), req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const { data: currentTask } = await supabaseAdmin.from("tasks").select("project_id").eq("id", id).single();
+      if (!currentTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      const { data: task, error } = await supabaseAdmin.from("tasks").update(validation.data).eq("id", id).select().single();
+      if (error) {
+        return res.status(500).json({ message: "Error updating task", error });
+      }
+      await updateProjectProgress(currentTask.project_id);
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ message: "Error updating task", error });
+    }
+  });
+  async function updateProjectProgress(projectId) {
+    try {
+      const { data: tasks2 } = await supabaseAdmin.from("tasks").select("*").eq("project_id", projectId);
+      if (!tasks2 || tasks2.length === 0) return;
+      const completedTasks = tasks2.filter((task) => task.status === "completed");
+      const progressPercentage = Math.round(completedTasks.length / tasks2.length * 100);
+      await supabaseAdmin.from("projects").update({ progress: progressPercentage }).eq("id", projectId);
+    } catch (error) {
+      console.error("Error updating project progress:", error);
+    }
+  }
+  app2.delete("/api/client-portal/tasks/:id", requireAuth, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { data: currentTask } = await supabaseAdmin.from("tasks").select("project_id").eq("id", id).single();
+      if (!currentTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      const { error } = await supabaseAdmin.from("tasks").delete().eq("id", id);
+      if (error) {
+        return res.status(500).json({ message: "Error deleting task", error });
+      }
+      await updateProjectProgress(currentTask.project_id);
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Error deleting task", error });
+    }
+  });
+  app2.get("/api/client-portal/time-entries", requireAuth, async (req, res) => {
+    try {
+      const { taskId } = req.query;
+      if (!taskId) {
+        return res.status(400).json({ message: "Task ID is required" });
+      }
+      const { data: timeEntries2, error } = await supabaseAdmin.from("time_entries").select("*").eq("task_id", taskId);
+      if (error) {
+        return res.status(500).json({ message: "Error fetching time entries", error });
+      }
+      res.json(timeEntries2);
+    } catch (error) {
+      console.error("Error fetching time entries:", error);
+      res.status(500).json({ message: "Error fetching time entries", error });
+    }
+  });
+  app2.post("/api/client-portal/time-entries", requireAuth, async (req, res) => {
+    try {
+      const validation = validateRequest(insertTimeEntrySchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const { data: timeEntry, error } = await supabaseAdmin.from("time_entries").insert(validation.data).select().single();
+      if (error) {
+        return res.status(500).json({ message: "Error creating time entry", error });
+      }
+      if (validation.data.hours) {
+        const { data: task } = await supabaseAdmin.from("tasks").select("actual_hours").eq("id", validation.data.taskId).single();
+        if (task) {
+          const newHours = parseFloat(task.actual_hours || "0") + parseFloat(validation.data.hours.toString());
+          await supabaseAdmin.from("tasks").update({ actual_hours: newHours.toString() }).eq("id", validation.data.taskId);
+        }
+      }
+      res.status(201).json(timeEntry);
+    } catch (error) {
+      console.error("Error creating time entry:", error);
+      res.status(500).json({ message: "Error creating time entry", error });
+    }
+  });
+  app2.get("/api/client-portal/appointments", requireAuth, async (req, res) => {
+    try {
+      const { clientId, projectId, startDate, endDate } = req.query;
+      let query = supabaseAdmin.from("appointments").select("*");
+      if (clientId) {
+        query = query.eq("client_id", clientId);
+      } else if (projectId) {
+        query = query.eq("project_id", projectId);
+      } else {
+        return res.status(400).json({ message: "Client ID or Project ID is required" });
+      }
+      const { data: appointments2, error } = await query;
+      if (error) {
+        return res.status(500).json({ message: "Error fetching appointments", error });
+      }
+      let filteredAppointments = appointments2;
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        filteredAppointments = appointments2.filter((appointment) => {
+          const appointmentDate = new Date(appointment.start_time);
+          return appointmentDate >= start && appointmentDate <= end;
+        });
+      }
+      res.json(filteredAppointments);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+      res.status(500).json({ message: "Error fetching appointments", error });
+    }
+  });
+  app2.post("/api/client-portal/appointments", requireAuth, async (req, res) => {
+    try {
+      const validation = validateRequest(insertAppointmentSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const { data: appointment, error } = await supabaseAdmin.from("appointments").insert(validation.data).select().single();
+      if (error) {
+        return res.status(500).json({ message: "Error creating appointment", error });
+      }
+      res.status(201).json(appointment);
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+      res.status(500).json({ message: "Error creating appointment", error });
+    }
+  });
+  app2.post("/api/client-portal/appointments/:id/send-reminder", requireAuth, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { data: appointment, error } = await supabaseAdmin.from("appointments").select("*, clients(*)").eq("id", id).single();
+      if (error || !appointment) {
+        return res.status(404).json({ message: "Appointment not found", error });
+      }
+      await supabaseAdmin.from("appointments").update({ reminder_sent: true }).eq("id", id);
+      res.json({ message: "Reminder sent successfully" });
+    } catch (error) {
+      console.error("Error sending appointment reminder:", error);
+      res.status(500).json({ message: "Error sending appointment reminder", error });
+    }
+  });
+  initializeMeetingStorageBucket().catch((error) => {
+    console.error("Error initializing meeting recordings bucket:", error);
+  });
+  app2.post("/api/meetings", requireAuth, async (req, res) => {
+    try {
+      const validation = validateRequest(insertMeetingSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      const meeting = await createMeeting(validation.data);
+      res.status(201).json(meeting);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating meeting", error });
+    }
+  });
+  app2.post("/api/meetings/:id/generate-link", requireAuth, async (req, res) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const { provider, appointmentId } = req.body;
+      if (!provider || !["google_meet", "zoom", "teams", "other"].includes(provider)) {
+        return res.status(400).json({ message: "Invalid provider. Must be one of: google_meet, zoom, teams, other" });
+      }
+      const result = await generateMeetingLink(
+        provider,
+        meetingId,
+        appointmentId || 0
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Error generating meeting link", error });
+    }
+  });
+  app2.post("/api/meetings/:id/upload-recording", requireAuth, upload.single("recording"), async (req, res) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      if (!req.file) {
+        return res.status(400).json({ message: "No recording file provided" });
+      }
+      const recordingBuffer = req.file.buffer;
+      const fileName = req.file.originalname || `recording-${Date.now()}.mp3`;
+      const recordingUrl = await uploadMeetingRecording(meetingId, recordingBuffer, fileName);
+      res.status(200).json({ recordingUrl });
+    } catch (error) {
+      res.status(500).json({ message: "Error uploading recording", error });
+    }
+  });
+  app2.get("/api/meetings/:id", requireAuth, async (req, res) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const meetingDetails = await getMeetingDetails(meetingId);
+      res.status(200).json(meetingDetails);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching meeting details", error });
+    }
+  });
+  app2.post("/api/meetings/:id/process", requireAuth, async (req, res) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const result = await processMeetingData(meetingId);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Error processing meeting data", error });
+    }
+  });
+  app2.post("/api/ai/analyze-text", requireAuth, async (req, res) => {
+    try {
+      const { text: text2 } = req.body;
+      if (!text2 || typeof text2 !== "string") {
+        return res.status(400).json({ error: "Se requiere un texto para analizar" });
+      }
+      const [tempSegment] = await db.insert(transcriptionSegments).values({
+        meetingId: -1,
+        // ID no existente para indicar que es temporal
+        startTime: "0",
+        endTime: "0",
+        content: text2,
+        speakerId: null
+      }).returning();
+      try {
+        const result = await extractKeyPointsAndActions(tempSegment.meetingId);
+        const summary = await generateMeetingSummary(tempSegment.meetingId);
+        const analyzed = {
+          ...result,
+          summary
+        };
+        res.json(analyzed);
+      } finally {
+        await db.delete(transcriptionSegments).where(eq5(transcriptionSegments.id, tempSegment.id));
+      }
+    } catch (error) {
+      console.error("Error al analizar texto:", error);
+      res.status(500).json({ error: `Error al analizar texto: ${error.message}` });
+    }
+  });
+  app2.post("/api/test/analyze-text", async (req, res) => {
+    try {
+      const { text: text2 } = req.body;
+      if (!text2 || typeof text2 !== "string") {
+        return res.status(400).json({ error: "Se requiere un texto para analizar" });
+      }
+      const hf2 = new HfInference2(process.env.HUGGINGFACE_API_KEY);
+      const result = await hf2.textGeneration({
+        model: "google/gemma-7b",
+        inputs: `
+          Analiza el siguiente texto y extrae:
+          1. Puntos clave (m\xE1ximo 3)
+          2. Un resumen conciso
+          3. Acciones recomendadas
+          
+          Texto:
+          ${text2}
+          
+          Responde en formato JSON con las claves "keyPoints" (array), "summary" (string) y "actions" (array).
+        `,
+        parameters: {
+          max_new_tokens: 512,
+          return_full_text: false
+        }
+      });
+      try {
+        let jsonStr = result.generated_text.trim();
+        const startIdx = jsonStr.indexOf("{");
+        const endIdx = jsonStr.lastIndexOf("}") + 1;
+        if (startIdx >= 0 && endIdx > startIdx) {
+          jsonStr = jsonStr.substring(startIdx, endIdx);
+        }
+        const analyzed = JSON.parse(jsonStr);
+        res.json(analyzed);
+      } catch (parseError) {
+        res.json({
+          raw: result.generated_text,
+          error: "No se pudo parsear la respuesta como JSON"
+        });
+      }
+    } catch (error) {
+      console.error("Error al analizar texto (test):", error);
+      res.status(500).json({ error: `Error al analizar texto: ${error.message}` });
+    }
+  });
+  app2.get("/api/meetings/:id/transcription", requireAuth, async (req, res) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const segments = await db.select().from(transcriptionSegments).where(eq5(transcriptionSegments.meetingId, meetingId)).orderBy(transcriptionSegments.startTime);
+      res.status(200).json(segments);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching transcription segments", error });
+    }
+  });
+  app2.post("/api/webhooks/clerk", express.raw({ type: "application/json" }), async (req, res) => {
+    try {
+      const { handleClerkWebhook: handleClerkWebhook2 } = await Promise.resolve().then(() => (init_clerk(), clerk_exports));
+      return handleClerkWebhook2(req, res);
+    } catch (error) {
+      console.error("Error processing Clerk webhook:", error);
+      return res.status(500).json({ error: "Error processing webhook" });
+    }
+  });
+  const httpServer = createServer(app2);
+  return httpServer;
+}
+
+// server/vite.ts
+import express2 from "express";
+import fs from "fs";
+import path2 from "path";
+import { createServer as createViteServer, createLogger } from "vite";
+
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
+import path from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+var vite_config_default = defineConfig({
+  plugins: [
+    react(),
+    runtimeErrorOverlay(),
+    themePlugin(),
+    ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
+      await import("@replit/vite-plugin-cartographer").then(
+        (m) => m.cartographer()
+      )
+    ] : []
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets")
+    }
+  },
+  root: path.resolve(import.meta.dirname, "client"),
+  build: {
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    emptyOutDir: true
+  }
+});
+
+// server/vite.ts
+import { nanoid } from "nanoid";
+var viteLogger = createLogger();
+function log(message, source = "express") {
+  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+async function setupVite(app2, server) {
+  const serverOptions = {
+    middlewareMode: true,
+    hmr: { server },
+    allowedHosts: true
+  };
+  const vite = await createViteServer({
+    ...vite_config_default,
+    configFile: false,
+    customLogger: {
+      ...viteLogger,
+      error: (msg, options) => {
+        viteLogger.error(msg, options);
+        process.exit(1);
+      }
+    },
+    server: serverOptions,
+    appType: "custom"
+  });
+  app2.use(vite.middlewares);
+  app2.use("*", async (req, res, next) => {
+    const url = req.originalUrl;
+    try {
+      const clientTemplate = path2.resolve(
+        import.meta.dirname,
+        "..",
+        "client",
+        "index.html"
+      );
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`
+      );
+      const page = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (e) {
+      vite.ssrFixStacktrace(e);
+      next(e);
+    }
+  });
+}
+function serveStatic(app2) {
+  const distPath = path2.resolve(import.meta.dirname, "public");
+  if (!fs.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
+    );
+  }
+  app2.use(express2.static(distPath));
+  app2.use("*", (_req, res) => {
+    res.sendFile(path2.resolve(distPath, "index.html"));
+  });
+}
+
+// server/env-sync.ts
+import fs2 from "fs";
+import dotenv from "dotenv";
+function syncViteEnvVars() {
+  dotenv.config({ path: ".env.local" });
+  const clientEnvVars = [
+    {
+      source: "SUPABASE_URL",
+      target: "VITE_SUPABASE_URL"
+    },
+    {
+      source: "SUPABASE_ANON_KEY",
+      target: "VITE_SUPABASE_ANON_KEY"
+    },
+    {
+      source: "CLERK_PUBLISHABLE_KEY",
+      target: "VITE_CLERK_PUBLISHABLE_KEY"
+    },
+    {
+      source: "HUGGINGFACE_API_KEY",
+      target: "VITE_HUGGINGFACE_API_KEY"
+    }
+  ];
+  let missingVars = false;
+  clientEnvVars.forEach(({ source, target }) => {
+    if (process.env[source]) {
+      process.env[target] = process.env[source];
+    } else {
+      console.warn(`\u26A0\uFE0F Variable de entorno ${source} no est\xE1 definida, ${target} no estar\xE1 disponible`);
+      missingVars = true;
+    }
+  });
+  if (missingVars) {
+    console.warn("\u26A0\uFE0F Algunas variables de entorno no est\xE1n definidas. Es posible que ciertas funcionalidades no trabajen correctamente.");
+  }
+  let envContent = "";
+  try {
+    envContent = fs2.readFileSync(".env.local", "utf8");
+  } catch (error) {
+    console.warn("No se pudo leer el archivo .env.local, creando uno nuevo");
+    envContent = "";
+  }
+  let envChanged = false;
+  clientEnvVars.forEach(({ source, target }) => {
+    if (process.env[source] && !envContent.includes(`${target}=`)) {
+      envContent += `
+${target}=${process.env[source]}`;
+      envChanged = true;
+    }
+  });
+  if (envChanged) {
+    try {
+      fs2.writeFileSync(".env.local", envContent);
+      console.log("\u2705 Archivo .env.local actualizado con variables VITE_");
+    } catch (error) {
+      console.error("\u274C Error al escribir en .env.local:", error);
+    }
+  }
+}
+syncViteEnvVars();
+
+// server/index.ts
+var app = express3();
+app.use(express3.json());
+app.use(express3.urlencoded({ extended: false }));
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path3 = req.path;
+  let capturedJsonResponse = void 0;
+  const originalResJson = res.json;
+  res.json = function(bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path3.startsWith("/api")) {
+      let logLine = `${req.method} ${path3} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "\u2026";
+      }
+      log(logLine);
+    }
+  });
+  next();
+});
+(async () => {
+  syncViteEnvVars();
+  try {
+    await initializeStorageBuckets();
+    log("\u2705 Buckets de almacenamiento de Supabase inicializados");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+    log(`\u26A0\uFE0F No se pudieron inicializar los buckets de Supabase: ${errorMessage}`);
+  }
+  const server = await registerRoutes(app);
+  app.use((err, _req, res, _next) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+    throw err;
+  });
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+  const port = 5e3;
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
