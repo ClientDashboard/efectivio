@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 (async () => {
   // Sincronizar variables de entorno para el frontend
   syncViteEnvVars();
-  
+
   // Inicializar buckets de almacenamiento de Supabase
   try {
     await initializeStorageBuckets();
@@ -52,7 +52,7 @@ app.use((req, res, next) => {
       : 'Error desconocido';
     log(`⚠️ No se pudieron inicializar los buckets de Supabase: ${errorMessage}`);
   }
-  
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
