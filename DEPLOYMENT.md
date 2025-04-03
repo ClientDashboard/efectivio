@@ -34,8 +34,42 @@ Esta guía detalla los pasos necesarios para desplegar el sistema Efectivio en V
 4. Configura el proyecto:
    - Framework Preset: Vite
    - Build Command: `npm run build`
-   - Output Directory: `dist`
+   - Output Directory: `dist/public`
    - Install Command: `npm install`
+
+   O puedes usar el archivo `vercel.json` ya configurado que contiene los ajustes correctos:
+   ```json
+   {
+     "buildCommand": "npm run build",
+     "outputDirectory": "dist/public",
+     "installCommand": "npm install",
+     "framework": "vite",
+     "rewrites": [
+       {
+         "source": "/api/(.*)",
+         "destination": "/api/$1"
+       },
+       {
+         "source": "/(.*)",
+         "destination": "/index.html"
+       }
+     ],
+     "headers": [
+       {
+         "source": "/api/webhooks/(.*)",
+         "headers": [
+           {
+             "key": "Content-Type",
+             "value": "application/json"
+           }
+         ]
+       }
+     ],
+     "env": {
+       "NODE_ENV": "production"
+     }
+   }
+   ```
 
 5. Configura las variables de entorno:
 
@@ -57,6 +91,7 @@ Esta guía detalla los pasos necesarios para desplegar el sistema Efectivio en V
 
    # Hugging Face
    HUGGINGFACE_API_KEY=your-huggingface-api-key
+   VITE_HUGGINGFACE_API_KEY=your-huggingface-api-key
 
    # Seguridad
    SESSION_SECRET=random-secret-for-sessions
@@ -102,6 +137,25 @@ Si encuentras problemas durante el despliegue:
 2. Asegúrate de que todas las variables de entorno estén configuradas correctamente
 3. Verifica la conexión con la base de datos Supabase
 4. Comprueba la configuración de Clerk
+
+### Errores comunes:
+
+#### Error: "Clerk has been loaded with development keys"
+Este error significa que estás utilizando las claves de desarrollo de Clerk en producción. Para solucionarlo:
+
+1. Asegúrate de que la variable `VITE_CLERK_PUBLISHABLE_KEY` comience con `pk_live_` en lugar de `pk_test_`
+2. Inicia sesión en [Clerk Dashboard](https://dashboard.clerk.dev)
+3. Ve a la pestaña "API Keys"
+4. Cambia al modo "Production"
+5. Copia la clave "Publishable Key" y actualiza la variable de entorno en Vercel
+6. Redespliega la aplicación
+
+#### Error: "No Output Directory named 'dist' found after Build completed"
+Este error ocurre cuando Vercel no puede encontrar los archivos construidos. Para solucionarlo:
+
+1. Asegúrate de que la configuración de despliegue tenga el directorio de salida correcto: `dist/public`
+2. Verifica que el archivo `vercel.json` esté configurado correctamente con `"outputDirectory": "dist/public"`
+3. Redespliega la aplicación
 
 ## Actualizaciones Futuras
 
