@@ -28,15 +28,24 @@ export default function Sidebar() {
   const navigation = [
     { name: 'Dashboard', path: '/', icon: 'ri-dashboard-line' },
     { name: 'Clientes', path: '/clientes', icon: 'ri-user-line' },
+    { name: 'Cotizaciones', path: '/cotizaciones', icon: 'ri-file-list-3-line' },
     { name: 'Facturas', path: '/facturas', icon: 'ri-bill-line' },
     { name: 'Gastos', path: '/gastos', icon: 'ri-shopping-bag-3-line' },
     { name: 'Productos', path: '/productos', icon: 'ri-shopping-cart-line' },
   ];
 
+  const inventarioNavigation = [
+    { name: 'Inventario', path: '/inventario', icon: 'ri-stock-line' },
+    { name: 'Bodegas', path: '/bodegas', icon: 'ri-store-2-line' },
+    { name: 'Movimientos', path: '/movimientos', icon: 'ri-exchange-line' },
+  ];
+
   const contabilidadNavigation = [
-    { name: 'Asientos Contables', path: '/asientos', icon: 'ri-book-open-line' },
-    { name: 'Contabilidad', path: '/contabilidad', icon: 'ri-bar-chart-box-line' },
-    { name: 'Informes', path: '/informes', icon: 'ri-file-chart-line' },
+    { name: 'Plan Contable', path: '/contabilidad/cuentas', icon: 'ri-list-check' },
+    { name: 'Asientos', path: '/contabilidad/asientos', icon: 'ri-book-open-line' },
+    { name: 'Balance', path: '/contabilidad/balance', icon: 'ri-funds-line' },
+    { name: 'Estado de Resultados', path: '/contabilidad/resultados', icon: 'ri-line-chart-line' },
+    { name: 'Informes', path: '/contabilidad/informes', icon: 'ri-file-chart-line' },
   ];
 
   const configNavigation = [
@@ -87,6 +96,24 @@ export default function Sidebar() {
           </Link>
         ))}
         
+        <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Inventario</div>
+        
+        {inventarioNavigation.map((item) => (
+          <Link 
+            key={item.path}
+            href={item.path}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`sidebar-link flex items-center py-2 px-4 hover:bg-gray-100 transition-colors duration-200 ${
+              location === item.path 
+                ? 'active text-primary-500' 
+                : 'text-gray-700'
+            }`}
+          >
+            <i className={`${item.icon} mr-3 text-lg`}></i>
+            <span>{item.name}</span>
+          </Link>
+        ))}
+
         <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contabilidad</div>
         
         {contabilidadNavigation.map((item) => (
