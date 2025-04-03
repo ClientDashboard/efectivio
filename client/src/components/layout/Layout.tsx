@@ -11,13 +11,14 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
+  const isDevelopment = process.env.NODE_ENV === 'development'; // Add development flag
 
   useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!isLoading && !user && location !== '/login' && location !== '/register') {
+    // Redirect to login if not authenticated and not in development mode
+    if (!isLoading && !user && location !== '/login' && location !== '/register' && !isDevelopment) {
       setLocation('/login');
     }
-  }, [user, isLoading, location, setLocation]);
+  }, [user, isLoading, location, setLocation, isDevelopment]);
 
   if (isLoading) {
     return (
@@ -25,10 +26,6 @@ export default function Layout({ children }: LayoutProps) {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
-  }
-
-  if (!user) {
-    return <>{children}</>;
   }
 
   return (
@@ -46,13 +43,13 @@ export default function Layout({ children }: LayoutProps) {
             <i className="ri-notification-3-line text-xl"></i>
           </button>
           <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center font-medium">
-            {user.initials}
+            {user?.initials || 'U'} {/*added default value to avoid error if user is null*/}
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
+        {isDevelopment || user ? <Sidebar /> : null} {/* Conditionally render Sidebar */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-0">
           <Header />
           <div className="p-6">

@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import { Redirect, Route } from 'wouter';
 import { Loader2 } from 'lucide-react';
@@ -8,17 +9,16 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-/**
- * Componente de ruta protegida que verifica la autenticación con Clerk
- * 
- * Si el usuario no está autenticado, redirige a la página de login
- * Si se está cargando, muestra un spinner
- * Si está autenticado, renderiza los hijos
- */
 export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
+  // En desarrollo, permitimos acceso directo
+  const isDevelopment = import.meta.env.DEV;
+  
+  if (isDevelopment) {
+    return <Route path={path}>{children}</Route>;
+  }
+
   const { isLoaded, userId } = useAuth();
   const { isLoaded: isUserLoaded } = useUser();
-
   const isLoading = !isLoaded || !isUserLoaded;
 
   return (
@@ -42,17 +42,9 @@ export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
   );
 }
 
-/**
- * Componente de ruta pública que redirige a usuarios autenticados
- * 
- * Si el usuario está autenticado, redirige al dashboard
- * Si se está cargando, muestra un spinner
- * Si no está autenticado, renderiza los hijos
- */
 export function PublicRoute({ path, children }: ProtectedRouteProps) {
   const { isLoaded, userId } = useAuth();
   const { isLoaded: isUserLoaded } = useUser();
-
   const isLoading = !isLoaded || !isUserLoaded;
 
   return (
@@ -67,7 +59,7 @@ export function PublicRoute({ path, children }: ProtectedRouteProps) {
         }
 
         if (userId) {
-          return <Redirect to="/dashboard" />;
+          return <Redirect to="/" />;
         }
 
         return <>{children}</>;
