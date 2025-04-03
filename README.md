@@ -2,27 +2,22 @@
 
 Sistema integral de gestión contable y portal de clientes con funcionalidades avanzadas de IA.
 
-![Efectivio Logo](./public/logo.png)
+## Características Principales
 
-## Descripción
-
-Efectivio es un sistema de gestión contable completo desarrollado como aplicación web para empresas pequeñas y medianas. Ofrece:
-
-- Sistema completo de contabilidad con informes financieros
-- Portal de clientes para colaboración y gestión de proyectos
-- Soporte para múltiples divisas
-- Análisis financiero con visualización de datos
-- Transcripción y análisis de reuniones con IA
-- Almacenamiento seguro de documentos
+- Sistema completo de contabilidad
+- Portal de clientes
+- Análisis financiero
+- Integración con IA
+- Gestión de documentos
 
 ## Tecnologías
 
-- **Frontend**: React, TypeScript, TailwindCSS, Shadcn
-- **Backend**: Express.js, TypeScript
-- **Base de datos**: PostgreSQL con Drizzle ORM
-- **Autenticación**: Clerk
-- **Almacenamiento**: Supabase Storage
-- **IA**: Hugging Face API
+- Frontend: React + TypeScript
+- Backend: Express.js
+- Base de datos: PostgreSQL
+- Autenticación: Clerk
+- Almacenamiento: Supabase
+
 
 ## Requisitos
 
