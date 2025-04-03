@@ -81,9 +81,9 @@ export function ClerkProvider({ children }: ClerkProviderProps) {
     <BaseClerkProvider
       publishableKey={publishableKey}
       appearance={{
-      onError={(error) => {
-        console.error('Error en Clerk:', error);
-      }}
+        onError: (error) => {
+          console.error('Error en Clerk:', error);
+        },
         variables: {
           colorPrimary: '#39FFBD',
           colorBackground: '#062644',
