@@ -65,8 +65,16 @@ export default function DashboardCards({
   pendingInvoices,
   monthlyExpenses,
 }: DashboardCardsProps) {
+  const hasData = monthlySales > 0 || pendingInvoices > 0 || monthlyExpenses > 0;
+
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {!hasData && (
+        <div className="col-span-full bg-gray-50 rounded-lg p-8 text-center">
+          <p className="text-gray-500">No hay datos disponibles aún. Los indicadores se actualizarán automáticamente cuando comience a registrar transacciones.</p>
+        </div>
+      )}
+      {hasData && (
       <DashboardCard
         title="Ventas del mes"
         value={formatCurrency(monthlySales)}
@@ -96,6 +104,7 @@ export default function DashboardCards({
         linkHref="/expenses"
         linkText="Ver detalle"
       />
+    )}
     </div>
   );
 }
