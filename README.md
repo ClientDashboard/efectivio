@@ -1,48 +1,109 @@
 # Efectivio
 
-Sistema integral de gestión contable con portal de clientes para pequeñas y medianas empresas.
+Sistema integral de gestión contable y portal de clientes con funcionalidades avanzadas de IA.
+
+![Efectivio Logo](./public/logo.png)
 
 ## Descripción
 
-Efectivio es un sistema completo de gestión contable para pequeñas y medianas empresas que ofrece funcionalidades avanzadas de seguimiento financiero, portal de clientes y generación de informes robustos.
+Efectivio es un sistema de gestión contable completo desarrollado como aplicación web para empresas pequeñas y medianas. Ofrece:
 
-### Tecnologías Principales
+- Sistema completo de contabilidad con informes financieros
+- Portal de clientes para colaboración y gestión de proyectos
+- Soporte para múltiples divisas
+- Análisis financiero con visualización de datos
+- Transcripción y análisis de reuniones con IA
+- Almacenamiento seguro de documentos
 
-- Frontend: React.js con diseño responsivo
-- Backend: Express.js con TypeScript
-- Base de datos: PostgreSQL mediante Supabase
-- Autenticación: Clerk
-- Almacenamiento en la nube: Supabase Storage
-- Análisis de texto y transcripciones: API de Hugging Face
+## Tecnologías
 
-### Características Clave
+- **Frontend**: React, TypeScript, TailwindCSS, Shadcn
+- **Backend**: Express.js, TypeScript
+- **Base de datos**: PostgreSQL con Drizzle ORM
+- **Autenticación**: Clerk
+- **Almacenamiento**: Supabase Storage
+- **IA**: Hugging Face API
 
-- Sistema contable completo con facturación, gastos y libro mayor
-- Portal de clientes con gestión de proyectos y comunicación
-- Almacenamiento seguro de documentos para cada cliente
-- Transcripción automática de reuniones y generación de resúmenes
-- Informes financieros detallados
+## Requisitos
 
-## Instalación y Ejecución
+- Node.js v18+ y npm
+- Base de datos PostgreSQL
+- Cuenta en Clerk para autenticación
+- Proyecto en Supabase
+- Clave API de Hugging Face
 
-1. Clonar el repositorio:
+## Instalación
+
+1. Clona el repositorio:
    ```
    git clone https://github.com/ClientDashboard/efectivioweb.git
    cd efectivioweb
    ```
 
-2. Instalar dependencias:
+2. Instala las dependencias:
    ```
    npm install
    ```
 
-3. Configurar variables de entorno (crea un archivo .env.local basado en .env.example)
+3. Crea un archivo `.env` basado en `.env.example`:
+   ```
+   cp .env.example .env
+   ```
 
-4. Ejecutar la aplicación en desarrollo:
+4. Configura las variables de entorno en el archivo `.env` con tus credenciales.
+
+5. Inicializa la base de datos:
+   ```
+   npm run db:push
+   ```
+
+6. Inicia el servidor de desarrollo:
    ```
    npm run dev
    ```
 
+## Estructura del Proyecto
+
+- `/client/`: Código del frontend
+  - `/src/components/`: Componentes React
+  - `/src/pages/`: Páginas de la aplicación
+  - `/src/lib/`: Funciones utilitarias
+  - `/src/hooks/`: Custom hooks de React
+  
+- `/server/`: Código del backend
+  - `/routes.ts`: Definición de rutas API
+  - `/db.ts`: Configuración de la base de datos
+  - `/storage.ts`: Acceso al almacenamiento
+  - `/ai.ts`: Funcionalidades de IA
+  - `/webhooks/`: Manejadores de webhooks
+
+- `/shared/`: Código compartido
+  - `/schema.ts`: Esquema de la base de datos
+
+## Funcionalidades Principales
+
+### Sistema Contable
+- Gestión de clientes
+- Facturación
+- Control de gastos
+- Asientos contables
+- Balance general y estado de resultados
+
+### Portal de Clientes
+- Registro e inicio de sesión de clientes
+- Gestión de proyectos y tareas
+- Registro de horas trabajadas
+- Agendamiento de citas
+
+### IA y Análisis
+- Transcripción automática de reuniones
+- Generación de resúmenes y extracción de puntos clave
+- Análisis de textos con IA
+
 ## Licencia
 
-Todos los derechos reservados. Este software es propiedad de Efectivio.
+Este proyecto está bajo licencia [MIT](LICENSE).
+
+## Contacto
+
+Para más información, contacta a [tu@correo.com](mailto:tu@correo.com).
