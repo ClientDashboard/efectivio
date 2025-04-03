@@ -247,6 +247,16 @@ export const appointments = pgTable("appointments", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Enum para proveedores de videollamadas
+export const meetingProviderEnum = pgEnum("meeting_provider", [
+  "google_meet", "zoom", "teams", "other"
+]);
+
+// Enum para el estado de la transcripción
+export const transcriptionStatusEnum = pgEnum("transcription_status", [
+  "pending", "in_progress", "completed", "failed"
+]);
+
 // Modelo para reuniones grabadas
 export const meetings = pgTable("meetings", {
   id: serial("id").primaryKey(),
@@ -254,12 +264,47 @@ export const meetings = pgTable("meetings", {
   appointmentId: integer("appointment_id"),
   projectId: integer("project_id"),
   clientId: integer("client_id").notNull(),
-  recordingUrl: text("recording_url"),
+  provider: meetingProviderEnum("provider").default("google_meet").notNull(),
+  externalMeetingId: text("external_meeting_id"), // ID de la reunión en Google Meet o Zoom
+  meetingUrl: text("meeting_url"), // URL para unirse a la reunión
+  recordingUrl: text("recording_url"), // URL de la grabación
+  recordingStatus: text("recording_status").default("not_started"),
+  transcriptionStatus: transcriptionStatusEnum("transcription_status").default("pending"),
+  transcription: text("transcription"), // Transcripción completa del texto
   summary: text("summary"), // Resumen generado por AI
   duration: integer("duration"), // Duración en minutos
   meetingDate: timestamp("meeting_date").notNull(),
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
   participants: text("participants").array(), // Lista de participantes
   keyPoints: text("key_points").array(), // Puntos clave identificados por AI
+  actionItems: text("action_items").array(), // Acciones a realizar identificadas por AI
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modelo para segmentos de transcripción en tiempo real
+export const transcriptionSegments = pgTable("transcription_segments", {
+  id: serial("id").primaryKey(),
+  meetingId: integer("meeting_id").notNull(),
+  speakerName: text("speaker_name"),
+  speakerId: text("speaker_id"),
+  content: text("content").notNull(),
+  startTime: numeric("start_time", { precision: 10, scale: 3 }).notNull(), // Tiempo de inicio en segundos
+  endTime: numeric("end_time", { precision: 10, scale: 3 }).notNull(), // Tiempo de fin en segundos
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Modelo para integración con proveedores de videollamadas
+export const meetingIntegrations = pgTable("meeting_integrations", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id").notNull(),
+  provider: meetingProviderEnum("provider").notNull(),
+  accessToken: text("access_token"), // Token OAuth para autenticación
+  refreshToken: text("refresh_token"),
+  tokenExpiry: timestamp("token_expiry"),
+  settings: text("settings").array(), // Configuraciones específicas por proveedor
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -311,6 +356,12 @@ export const insertAppointmentSchema = createInsertSchema(appointments)
   .omit({ id: true, createdAt: true, updatedAt: true });
 
 export const insertMeetingSchema = createInsertSchema(meetings)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertTranscriptionSegmentSchema = createInsertSchema(transcriptionSegments)
+  .omit({ id: true, createdAt: true });
+
+export const insertMeetingIntegrationSchema = createInsertSchema(meetingIntegrations)
   .omit({ id: true, createdAt: true, updatedAt: true });
 
 // Types
@@ -369,3 +420,11 @@ export type AppointmentType = "meeting" | "call" | "video_call" | "other";
 
 export type Meeting = typeof meetings.$inferSelect;
 export type InsertMeeting = z.infer<typeof insertMeetingSchema>;
+export type MeetingProvider = "google_meet" | "zoom" | "teams" | "other";
+export type TranscriptionStatus = "pending" | "in_progress" | "completed" | "failed";
+
+export type TranscriptionSegment = typeof transcriptionSegments.$inferSelect;
+export type InsertTranscriptionSegment = z.infer<typeof insertTranscriptionSegmentSchema>;
+
+export type MeetingIntegration = typeof meetingIntegrations.$inferSelect;
+export type InsertMeetingIntegration = z.infer<typeof insertMeetingIntegrationSchema>;
