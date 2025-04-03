@@ -9,10 +9,12 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
-  // En desarrollo, permitimos acceso directo
+  // MODO DESARROLLO: Acceso directo permitido
+  // TODO: Remover esta sección para producción
   const isDevelopment = import.meta.env.DEV;
-
+  
   if (isDevelopment) {
+    console.warn('⚠️ Modo desarrollo: Autenticación bypaseada');
     return <Route path={path}>{children}</Route>;
   }
 

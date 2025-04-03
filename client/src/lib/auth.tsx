@@ -45,8 +45,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       
-      // Usuario demo para desarrollo
-      if (email === "demo@efectivio.com" && password === "demo123") {
+      // MODO DESARROLLO: Usuario demo
+      // TODO: Para producción, reemplazar esto con la autenticación real de Clerk
+      if (process.env.NODE_ENV === 'development' && email === "demo@efectivio.com" && password === "demo123") {
       const newUser: User = {
         id: "1",
         name: "Juan Sánchez",
