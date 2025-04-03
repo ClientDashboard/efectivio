@@ -179,16 +179,95 @@ export default function SignUpPage() {
             </Form>
           ) : (
             <div className="flex flex-col items-center space-y-4">
-              <p className="text-center text-muted-foreground">
+              <p className="text-center text-muted-foreground mb-4">
                 Hemos enviado un código de verificación a tu correo electrónico.
-                Por favor, sigue las instrucciones para completar tu registro.
+                Ingresa el código a continuación para completar tu registro:
               </p>
-              <Button
-                onClick={() => navigate('/auth/sign-in')}
-                className="w-full"
-              >
-                Ir a Iniciar Sesión
-              </Button>
+              
+              <div className="w-full">
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const code = (e.target as any).code.value;
+                    
+                    if (!code || code.length < 6) {
+                      toast({
+                        title: "Código inválido",
+                        description: "Por favor ingresa el código completo que recibiste",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    
+                    setIsPending(true);
+                    
+                    try {
+                      const completeSignUp = await signUp.attemptEmailAddressVerification({
+                        code,
+                      });
+                      
+                      if (completeSignUp.status === "complete") {
+                        toast({
+                          title: "Verificación exitosa",
+                          description: "Tu cuenta ha sido verificada correctamente"
+                        });
+                        
+                        navigate("/auth/sign-in");
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "No se pudo verificar tu cuenta. Por favor intenta nuevamente.",
+                          variant: "destructive"
+                        });
+                      }
+                    } catch (err: any) {
+                      toast({
+                        title: "Error de verificación",
+                        description: err.errors?.[0]?.message || "Código inválido o expirado",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setIsPending(false);
+                    }
+                  }}
+                  className="space-y-4 w-full"
+                >
+                  <div className="space-y-2">
+                    <label htmlFor="code" className="text-sm font-medium">
+                      Código de verificación
+                    </label>
+                    <Input
+                      id="code"
+                      name="code"
+                      placeholder="Ingresa el código de 6 dígitos"
+                      maxLength={6}
+                      disabled={isPending}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Verificando...
+                      </>
+                    ) : (
+                      'Verificar correo'
+                    )}
+                  </Button>
+                </form>
+                
+                <div className="mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/auth/sign-in')}
+                    className="w-full"
+                  >
+                    Cancelar y volver a Iniciar Sesión
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
