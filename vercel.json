@@ -1,6 +1,6 @@
 {
-  "buildCommand": "vite build && cp -r dist/public/* dist/",
-  "outputDirectory": "dist",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/client",
   "installCommand": "npm install",
   "framework": "vite",
   "rewrites": [
