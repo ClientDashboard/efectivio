@@ -1,0 +1,188 @@
+[15:39:15.134] Cloning github.com/ClientDashboard/efectivio (Branch: main, Commit: 913f364)
+[15:39:15.330] Previous build caches not available
+[15:39:15.623] Cloning completed: 489.000ms
+[15:39:15.844] Running build in Washington, D.C., USA (East) – iad1
+[15:39:16.017] Running "vercel build"
+[15:39:16.398] Vercel CLI 41.4.1
+[15:39:17.013] Running "install" command: `npm install`...
+[15:39:20.659] npm warn deprecated uuid@3.3.2: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+[15:39:21.179] npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+[15:39:22.955] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[15:39:22.976] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[15:39:23.889] npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+[15:39:32.376] 
+[15:39:32.378] added 747 packages, and audited 748 packages in 15s
+[15:39:32.380] 
+[15:39:32.381] 79 packages are looking for funding
+[15:39:32.381]   run `npm fund` for details
+[15:39:32.418] 
+[15:39:32.418] 15 vulnerabilities (11 moderate, 4 high)
+[15:39:32.419] 
+[15:39:32.419] To address issues that do not require attention, run:
+[15:39:32.419]   npm audit fix
+[15:39:32.419] 
+[15:39:32.419] To address all issues (including breaking changes), run:
+[15:39:32.420]   npm audit fix --force
+[15:39:32.420] 
+[15:39:32.420] Run `npm audit` for details.
+[15:39:32.693] 
+[15:39:32.694] > rest-express@1.0.0 build
+[15:39:32.694] > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+[15:39:32.695] 
+[15:39:33.090] [36mvite v5.4.14 [32mbuilding for production...[36m[39m
+[15:39:33.146] transforming...
+[15:39:33.434] Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+[15:39:33.435]   npx update-browserslist-db@latest
+[15:39:33.435]   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[15:39:43.664] [32m✓[39m 3511 modules transformed.
+[15:39:44.086] rendering chunks...
+[15:39:44.591] computing gzip size...
+[15:39:44.624] [2m../dist/public/[22m[32mindex.html                                                [39m[1m[2m    1.80 kB[22m[1m[22m[2m │ gzip:   0.73 kB[22m
+[15:39:44.624] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-400-normal-DMkecbls.woff2         [39m[1m[2m    4.97 kB[22m[1m[22m
+[15:39:44.625] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-300-normal-Bdr24Bqb.woff2         [39m[1m[2m    5.06 kB[22m[1m[22m
+[15:39:44.625] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-600-normal-Cc8MFFhd.woff2         [39m[1m[2m    5.10 kB[22m[1m[22m
+[15:39:44.625] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-500-normal-DOriooB6.woff2         [39m[1m[2m    5.11 kB[22m[1m[22m
+[15:39:44.625] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-700-normal-CGpBpxLq.woff2         [39m[1m[2m    5.20 kB[22m[1m[22m
+[15:39:44.625] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-400-normal-Bput3-QP.woff2          [39m[1m[2m    5.23 kB[22m[1m[22m
+[15:39:44.625] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-300-normal-Bzbb9qoQ.woff2          [39m[1m[2m    5.39 kB[22m[1m[22m
+[15:39:44.626] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-500-normal-B6guLgqG.woff2          [39m[1m[2m    5.40 kB[22m[1m[22m
+[15:39:44.626] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-700-normal-SzCdnevJ.woff2          [39m[1m[2m    5.42 kB[22m[1m[22m
+[15:39:44.626] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-600-normal-Cnui8OiR.woff2          [39m[1m[2m    5.43 kB[22m[1m[22m
+[15:39:44.626] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-400-normal-BUNmGMP1.woff          [39m[1m[2m    6.68 kB[22m[1m[22m
+[15:39:44.626] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-500-normal-DQPw2Hwd.woff          [39m[1m[2m    6.77 kB[22m[1m[22m
+[15:39:44.627] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-300-normal-B710x6d6.woff          [39m[1m[2m    6.79 kB[22m[1m[22m
+[15:39:44.627] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-700-normal-dAnkLlTo.woff          [39m[1m[2m    6.82 kB[22m[1m[22m
+[15:39:44.629] [2m../dist/public/[22m[2massets/[22m[32minter-vietnamese-600-normal-Cm6aH8_k.woff          [39m[1m[2m    6.83 kB[22m[1m[22m
+[15:39:44.629] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-400-normal-DCpCPQOf.woff           [39m[1m[2m    7.14 kB[22m[1m[22m
+[15:39:44.629] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-300-normal-BHRnjIck.woff           [39m[1m[2m    7.21 kB[22m[1m[22m
+[15:39:44.629] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-500-normal-M2hEX8vc.woff           [39m[1m[2m    7.27 kB[22m[1m[22m
+[15:39:44.629] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-700-normal-DXvzx4Na.woff           [39m[1m[2m    7.30 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32minter-greek-ext-600-normal-C9WLioJ8.woff           [39m[1m[2m    7.30 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-300-normal-CU6Jc0lu.woff     [39m[1m[2m    7.48 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-500-normal-BwdMGj7V.woff     [39m[1m[2m    7.48 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-400-normal-B33MQ3yC.woff     [39m[1m[2m    7.50 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-600-normal-CdMhFqNs.woff     [39m[1m[2m    7.53 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-700-normal-DUoPxeMJ.woff     [39m[1m[2m    7.53 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-800-normal-ftT3KYNK.woff     [39m[1m[2m    7.54 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-400-normal-BLGc9T1a.woff2           [39m[1m[2m    7.71 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-300-normal-dyDOfQEI.woff2    [39m[1m[2m    7.79 kB[22m[1m[22m
+[15:39:44.630] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-300-normal-DuKDqihX.woff2           [39m[1m[2m    7.81 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32minter-greek-400-normal-DxZsaF_h.woff2              [39m[1m[2m    7.84 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32minter-greek-300-normal-_k6LbL93.woff2              [39m[1m[2m    7.87 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-500-normal-Bs8uzZ4q.woff2    [39m[1m[2m    7.88 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-500-normal-D4Vwzodn.woff2           [39m[1m[2m    7.90 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32minter-greek-500-normal-CeQXL5ds.woff2              [39m[1m[2m    7.90 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-400-normal-CgEMIOQI.woff2    [39m[1m[2m    7.92 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32minter-greek-700-normal-Cxpycf-U.woff2              [39m[1m[2m    7.93 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-600-normal-DPiqdaMz.woff2    [39m[1m[2m    7.95 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-800-normal-DiIWv5hQ.woff2    [39m[1m[2m    7.95 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-vietnamese-700-normal-D8RPk-a5.woff2    [39m[1m[2m    7.95 kB[22m[1m[22m
+[15:39:44.631] [2m../dist/public/[22m[2massets/[22m[32minter-greek-600-normal-Dhlb-90d.woff2              [39m[1m[2m    7.96 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-600-normal-BGBWG807.woff2           [39m[1m[2m    7.97 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-700-normal-bGtGjVdZ.woff2           [39m[1m[2m    8.00 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32mdark-logo-YlO_x03m.png                             [39m[1m[2m    9.50 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-greek-400-normal-BZzXV7-1.woff               [39m[1m[2m    9.96 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-greek-700-normal-BRYTaFLL.woff               [39m[1m[2m   10.03 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-greek-300-normal-t-A5Zxgo.woff               [39m[1m[2m   10.04 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-greek-500-normal-d_eO-yCQ.woff               [39m[1m[2m   10.04 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-greek-600-normal-CwicyhtI.woff               [39m[1m[2m   10.08 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-400-normal-ZzOtrSSW.woff            [39m[1m[2m   10.14 kB[22m[1m[22m
+[15:39:44.632] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-300-normal-CpVW2Piz.woff            [39m[1m[2m   10.20 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-400-normal-Dc4VJyIJ.woff2       [39m[1m[2m   10.22 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32mprimary-logo-P_YSaktU.png                          [39m[1m[2m   10.27 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-700-normal-Bc8_fv8J.woff            [39m[1m[2m   10.29 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-500-normal-DH2hs3aW.woff            [39m[1m[2m   10.30 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-600-normal-BuzJQFbW.woff            [39m[1m[2m   10.32 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-300-normal-B8-SKPy6.woff2       [39m[1m[2m   10.34 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-500-normal-BShVwWPj.woff2       [39m[1m[2m   10.44 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-600-normal-CaqZN2hq.woff2       [39m[1m[2m   10.46 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-700-normal-ClVoMEGq.woff2       [39m[1m[2m   10.46 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-300-normal-Cdljtrf0.woff       [39m[1m[2m   10.95 kB[22m[1m[22m
+[15:39:44.633] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-400-normal-BNZrkLa0.woff2      [39m[1m[2m   10.98 kB[22m[1m[22m
+[15:39:44.634] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-400-normal-DpKvHuFb.woff       [39m[1m[2m   11.00 kB[22m[1m[22m
+[15:39:44.634] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-300-normal-DK9HGdYA.woff2      [39m[1m[2m   11.02 kB[22m[1m[22m
+[15:39:44.634] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-800-normal-CLtp-TCj.woff       [39m[1m[2m   11.02 kB[22m[1m[22m
+[15:39:44.634] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-700-normal-CF3jbqy3.woff       [39m[1m[2m   11.03 kB[22m[1m[22m
+[15:39:44.634] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-500-normal-DGLvxxza.woff       [39m[1m[2m   11.07 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-600-normal-DMdmdRvE.woff       [39m[1m[2m   11.08 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-500-normal-CEcnig0T.woff2      [39m[1m[2m   11.11 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-800-normal-Ig6d_s0p.woff2      [39m[1m[2m   11.15 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-600-normal-CFBuNk4A.woff2      [39m[1m[2m   11.16 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-700-normal-DO8I1zZZ.woff2      [39m[1m[2m   11.21 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-300-normal-DChc9K-m.woff2  [39m[1m[2m   11.82 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-400-normal-C8cdMEH1.woff2  [39m[1m[2m   11.92 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-500-normal-B-4z8kjO.woff2  [39m[1m[2m   12.02 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-800-normal-CLeBDsrR.woff2  [39m[1m[2m   12.05 kB[22m[1m[22m
+[15:39:44.640] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-700-normal-D3s9QaN5.woff2  [39m[1m[2m   12.07 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-600-normal-DBK1zJ_f.woff2  [39m[1m[2m   12.09 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-300-normal-BUhAmN3z.woff   [39m[1m[2m   12.63 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-400-normal-BWKiD3Kv.woff   [39m[1m[2m   12.66 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-500-normal-CKCwqKK0.woff   [39m[1m[2m   12.66 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-800-normal-D-HnP27I.woff   [39m[1m[2m   12.67 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-700-normal-B5jSujIz.woff   [39m[1m[2m   12.68 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-cyrillic-ext-600-normal-BV6JCa8K.woff   [39m[1m[2m   12.68 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-400-normal-BPnxn4xp.woff        [39m[1m[2m   14.19 kB[22m[1m[22m
+[15:39:44.641] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-300-normal-CxBffQcw.woff        [39m[1m[2m   14.28 kB[22m[1m[22m
+[15:39:44.642] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-500-normal-CUiC4oBV.woff        [39m[1m[2m   14.34 kB[22m[1m[22m
+[15:39:44.642] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-700-normal-Ced3hgUT.woff        [39m[1m[2m   14.34 kB[22m[1m[22m
+[15:39:44.642] [2m../dist/public/[22m[2massets/[22m[32minter-cyrillic-ext-600-normal-Bt9VVOA-.woff        [39m[1m[2m   14.35 kB[22m[1m[22m
+[15:39:44.642] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-300-normal-nZUFlRvk.woff2         [39m[1m[2m   18.62 kB[22m[1m[22m
+[15:39:44.642] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-600-normal-CjtsKS3e.woff2         [39m[1m[2m   18.68 kB[22m[1m[22m
+[15:39:44.643] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-500-normal-DBGu5uxW.woff2         [39m[1m[2m   18.74 kB[22m[1m[22m
+[15:39:44.643] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-400-normal-CIMKXMQI.woff2         [39m[1m[2m   18.79 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-700-normal-BYRy5CoC.woff2         [39m[1m[2m   18.84 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-800-normal-Cp9CdP19.woff2         [39m[1m[2m   19.04 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-600-normal-CoQZtLyZ.woff          [39m[1m[2m   20.44 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-500-normal-DiPDK1if.woff          [39m[1m[2m   20.53 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-700-normal-DHOpyQza.woff          [39m[1m[2m   20.60 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-400-normal-Sf4eHQyG.woff          [39m[1m[2m   20.61 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-300-normal-Dq5pPQuD.woff          [39m[1m[2m   20.70 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-800-normal-CwdtYla9.woff          [39m[1m[2m   20.78 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32minter-latin-400-normal-BOOGhInR.woff2              [39m[1m[2m   23.69 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32minter-latin-300-normal-CvRFFuZy.woff2              [39m[1m[2m   24.06 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32minter-latin-600-normal-D273HNI0.woff2              [39m[1m[2m   24.30 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32minter-latin-700-normal-Sckx8rpT.woff2              [39m[1m[2m   24.35 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32minter-latin-500-normal-D2bGa7uu.woff2              [39m[1m[2m   24.37 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-400-normal-hnt3BR84.woff2          [39m[1m[2m   30.68 kB[22m[1m[22m
+[15:39:44.644] [2m../dist/public/[22m[2massets/[22m[32minter-latin-400-normal-gitzw0hO.woff               [39m[1m[2m   31.20 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-300-normal-C2kLfG2J.woff2          [39m[1m[2m   31.47 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-300-normal-ORCTF8i-.woff               [39m[1m[2m   31.54 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-500-normal-CIS2RHJS.woff2          [39m[1m[2m   31.76 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-500-normal-deR1Tlfd.woff               [39m[1m[2m   31.77 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-600-normal-B5cFAncS.woff               [39m[1m[2m   31.78 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-700-normal-CzikT_rs.woff2          [39m[1m[2m   31.79 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-700-normal-B8MtJ_2k.woff               [39m[1m[2m   31.83 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-600-normal-BnYJhD27.woff2          [39m[1m[2m   31.97 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-300-normal-UC_9RREF.woff2     [39m[1m[2m   32.04 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-400-normal-Cd0_BKvP.woff2     [39m[1m[2m   32.26 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-500-normal-Dl9DnvF-.woff2     [39m[1m[2m   32.33 kB[22m[1m[22m
+[15:39:44.645] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-600-normal-Cdwl3Fm3.woff2     [39m[1m[2m   33.18 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-700-normal-DTfQ8iG5.woff2     [39m[1m[2m   33.37 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-800-normal-DfsuAC1q.woff2     [39m[1m[2m   33.78 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-300-normal-BBPJwba_.woff      [39m[1m[2m   40.50 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-500-normal-CJMevy18.woff      [39m[1m[2m   40.64 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-400-normal-Cy-iUbkq.woff      [39m[1m[2m   40.68 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-600-normal-BxCz31zx.woff      [39m[1m[2m   41.36 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-700-normal-DdSde0HZ.woff      [39m[1m[2m   41.63 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32mmontserrat-latin-ext-800-normal-lLvDuRkp.woff      [39m[1m[2m   41.96 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-400-normal-C1t-h-pH.woff           [39m[1m[2m   42.88 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-500-normal-UMdmhHu2.woff           [39m[1m[2m   43.84 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-300-normal-n8Ps4oXY.woff           [39m[1m[2m   43.90 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-700-normal-6V9MnIL5.woff           [39m[1m[2m   43.94 kB[22m[1m[22m
+[15:39:44.646] [2m../dist/public/[22m[2massets/[22m[32minter-latin-ext-600-normal-CAF0vJDd.woff           [39m[1m[2m   43.98 kB[22m[1m[22m
+[15:39:44.648] [2m../dist/public/[22m[2massets/[22m[35mindex-X0BByn_F.css                                 [39m[1m[2m  101.11 kB[22m[1m[22m[2m │ gzip:  15.61 kB[22m
+[15:39:44.648] [2m../dist/public/[22m[2massets/[22m[36mbrowser-raGeyRk6.js                                [39m[1m[2m    0.30 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[15:39:44.648] [2m../dist/public/[22m[2massets/[22m[36mindex-CX8VYC3l.js                                  [39m[1m[33m1,154.51 kB[39m[22m[2m │ gzip: 326.33 kB[22m
+[15:39:44.649] [32m✓ built in 11.52s[39m
+[15:39:44.649] [33m
+[15:39:44.649] (!) Some chunks are larger than 500 kB after minification. Consider:
+[15:39:44.649] - Using dynamic import() to code-split the application
+[15:39:44.649] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[15:39:44.649] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[15:39:44.716] 
+[15:39:44.716]   dist/index.js  96.5kb
+[15:39:44.716] 
+[15:39:44.716] ⚡ Done in 14ms
+[15:39:44.749] Error: No Output Directory named "client" found after the Build completed. You can configure the Output Directory in your Project Settings.
+[15:39:44.750] Learn More: https://vercel.link/missing-public-directory
+[15:39:45.161] 
