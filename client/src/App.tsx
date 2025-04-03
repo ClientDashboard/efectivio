@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./lib/auth-provider";
-import { ProtectedRoute, PublicOnlyRoute } from "./lib/protected-route";
+import { ProtectedRoute, PublicRoute } from "./lib/protected-route";
 
 // Pages
 import LandingPage from "@/pages/landing-page";
@@ -30,94 +30,66 @@ function Router() {
       <Route path="/" component={LandingPage} />
       
       {/* Auth Pages - Solo accesibles si NO está autenticado */}
-      <Route path="/auth/sign-in">
-        <PublicOnlyRoute redirectTo="/dashboard">
-          <SignInPage />
-        </PublicOnlyRoute>
-      </Route>
+      <PublicRoute path="/auth/sign-in">
+        <SignInPage />
+      </PublicRoute>
       
-      <Route path="/auth/sign-up">
-        <PublicOnlyRoute redirectTo="/dashboard">
-          <SignUpPage />
-        </PublicOnlyRoute>
-      </Route>
+      <PublicRoute path="/auth/sign-up">
+        <SignUpPage />
+      </PublicRoute>
       
       {/* Rutas protegidas - Requieren autenticación */}
-      <Route path="/dashboard">
-        <ProtectedRoute>
-          <DashboardPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/dashboard">
+        <DashboardPage />
+      </ProtectedRoute>
       
       {/* Clients */}
-      <Route path="/clients">
-        <ProtectedRoute>
-          <ClientsPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/clients">
+        <ClientsPage />
+      </ProtectedRoute>
       
-      <Route path="/clients/create">
-        <ProtectedRoute>
-          <ClientCreatePage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/clients/create">
+        <ClientCreatePage />
+      </ProtectedRoute>
       
       {/* Invoices */}
-      <Route path="/invoices">
-        <ProtectedRoute>
-          <InvoicesPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/invoices">
+        <InvoicesPage />
+      </ProtectedRoute>
       
-      <Route path="/invoices/create">
-        <ProtectedRoute>
-          <InvoiceCreatePage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/invoices/create">
+        <InvoiceCreatePage />
+      </ProtectedRoute>
       
       {/* Expenses */}
-      <Route path="/expenses">
-        <ProtectedRoute>
-          <ExpensesPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/expenses">
+        <ExpensesPage />
+      </ProtectedRoute>
       
-      <Route path="/expenses/create">
-        <ProtectedRoute>
-          <ExpenseCreatePage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/expenses/create">
+        <ExpenseCreatePage />
+      </ProtectedRoute>
       
       {/* Accounting */}
-      <Route path="/accounting/entries">
-        <ProtectedRoute>
-          <EntriesPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/accounting/entries">
+        <EntriesPage />
+      </ProtectedRoute>
       
-      <Route path="/accounting/chart-of-accounts">
-        <ProtectedRoute>
-          <ChartOfAccountsPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/accounting/chart-of-accounts">
+        <ChartOfAccountsPage />
+      </ProtectedRoute>
       
-      <Route path="/accounting/journal">
-        <ProtectedRoute>
-          <JournalPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/accounting/journal">
+        <JournalPage />
+      </ProtectedRoute>
       
-      <Route path="/accounting/balance-sheet">
-        <ProtectedRoute>
-          <BalanceSheetPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/accounting/balance-sheet">
+        <BalanceSheetPage />
+      </ProtectedRoute>
       
-      <Route path="/accounting/income-statement">
-        <ProtectedRoute>
-          <IncomeStatementPage />
-        </ProtectedRoute>
-      </Route>
+      <ProtectedRoute path="/accounting/income-statement">
+        <IncomeStatementPage />
+      </ProtectedRoute>
       
       {/* Fallback para cualquier otra ruta */}
       <Route component={NotFound} />

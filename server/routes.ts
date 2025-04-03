@@ -27,7 +27,7 @@ import {
   transcriptionSegments,
 } from "@shared/schema";
 import { ZodError } from "zod";
-import { supabase, supabaseAdmin, STORAGE_BUCKETS, uploadFile, downloadFile, deleteFile } from "./supabase";
+import { supabaseAdmin, uploadFile, deleteFile, getSignedUrl, createFilePath, STORAGE_BUCKETS } from "./supabase";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { 
@@ -627,7 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Registrar usuario en Supabase
-      const { data: supabaseUser, error: supabaseError } = await supabase.auth.signUp({
+      const { data: supabaseUser, error: supabaseError } = await supabaseAdmin.auth.signUp({
         email,
         password,
         options: {
@@ -675,7 +675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, password } = req.body;
 
       // Autenticar con Supabase
-      const { data: sessionData, error: authError } = await supabase.auth.signInWithPassword({
+      const { data: sessionData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
         email,
         password
       });
@@ -688,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const supabaseUser = sessionData.session?.user;
       
       // Consultar la tabla de perfiles para obtener información adicional
-      const { data: profileData, error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await supabaseAdmin
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser?.id)
@@ -714,7 +714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", async (req: Request, res: Response) => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabaseAdmin.auth.signOut();
       
       if (error) {
         return res.status(500).json({ message: "Error al cerrar sesión", error: error.message });
@@ -729,7 +729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/user", async (req: Request, res: Response) => {
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.getSession();
       
       if (sessionError || !sessionData.session) {
         return res.status(401).json({ message: "No autenticado" });
@@ -738,7 +738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const supabaseUser = sessionData.session.user;
       
       // Consultar la tabla de perfiles para obtener información adicional
-      const { data: profileData, error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await supabaseAdmin
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser.id)
@@ -777,7 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const jwt = req.headers.authorization.split(" ")[1];
-      const { data, error } = await supabase.auth.getUser(jwt);
+      const { data, error } = await supabaseAdmin.auth.getUser(jwt);
       
       if (error || !data.user) {
         return res.status(401).json({ message: "Invalid token", error });
@@ -811,15 +811,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verificar que la categoría es válida
       // Aquí habría que añadir una validación más precisa
       
-      const result = await uploadFile({
+      // Crear una ruta de archivo apropiada
+      const userId = (req as any).user.id;
+      const filePath = createFilePath(
+        userId,
+        clientId ? parseInt(clientId) : null, 
+        category || 'general', 
+        file.originalname
+      );
+      
+      const result = await uploadFile(
         bucket,
-        file: file.buffer,
-        path: path || '',
-        contentType: file.mimetype,
-        clientId: clientId ? parseInt(clientId) : undefined,
-        userId: (req as any).user.id,
-        category: category || 'other',
-      });
+        filePath,
+        file.buffer,
+        file.mimetype
+      );
       
       res.status(201).json(result);
     } catch (error) {
@@ -953,7 +959,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Eliminar el archivo
-      await deleteFile(bucket, file.path, fileId);
+      await deleteFile(bucket, file.path);
+      
+      // Eliminar el registro de la base de datos
+      await supabaseAdmin
+        .from('files')
+        .delete()
+        .eq('id', fileId);
       
       res.status(204).end();
     } catch (error) {
@@ -1110,7 +1122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Client ID is required" });
       }
       
-      const { data: projects, error } = await supabase
+      const { data: projects, error } = await supabaseAdmin
         .from('projects')
         .select('*')
         .eq('client_id', clientId);
@@ -1130,7 +1142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = req.params.id;
       
-      const { data: project, error } = await supabase
+      const { data: project, error } = await supabaseAdmin
         .from('projects')
         .select('*')
         .eq('id', id)
@@ -1155,7 +1167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Validation error", errors: validation.error });
       }
       
-      const { data: project, error } = await supabase
+      const { data: project, error } = await supabaseAdmin
         .from('projects')
         .insert(validation.data)
         .select()
@@ -1181,7 +1193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Validation error", errors: validation.error });
       }
       
-      const { data: project, error } = await supabase
+      const { data: project, error } = await supabaseAdmin
         .from('projects')
         .update(validation.data)
         .eq('id', id)
@@ -1203,7 +1215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = req.params.id;
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('projects')
         .delete()
         .eq('id', id);
@@ -1228,7 +1240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Project ID is required" });
       }
       
-      const { data: tasks, error } = await supabase
+      const { data: tasks, error } = await supabaseAdmin
         .from('tasks')
         .select('*')
         .eq('project_id', projectId);
@@ -1252,7 +1264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Validation error", errors: validation.error });
       }
       
-      const { data: task, error } = await supabase
+      const { data: task, error } = await supabaseAdmin
         .from('tasks')
         .insert(validation.data)
         .select()
@@ -1282,7 +1294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Obtener la tarea actual para conocer su proyecto
-      const { data: currentTask } = await supabase
+      const { data: currentTask } = await supabaseAdmin
         .from('tasks')
         .select('project_id')
         .eq('id', id)
@@ -1292,7 +1304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Task not found" });
       }
       
-      const { data: task, error } = await supabase
+      const { data: task, error } = await supabaseAdmin
         .from('tasks')
         .update(validation.data)
         .eq('id', id)
@@ -1317,7 +1329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   async function updateProjectProgress(projectId: number) {
     try {
       // Obtener todas las tareas del proyecto
-      const { data: tasks } = await supabase
+      const { data: tasks } = await supabaseAdmin
         .from('tasks')
         .select('*')
         .eq('project_id', projectId);
@@ -1329,7 +1341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const progressPercentage = Math.round((completedTasks.length / tasks.length) * 100);
       
       // Actualizar el progreso del proyecto
-      await supabase
+      await supabaseAdmin
         .from('projects')
         .update({ progress: progressPercentage })
         .eq('id', projectId);
@@ -1343,7 +1355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = req.params.id;
       
       // Obtener la tarea actual para conocer su proyecto
-      const { data: currentTask } = await supabase
+      const { data: currentTask } = await supabaseAdmin
         .from('tasks')
         .select('project_id')
         .eq('id', id)
@@ -1353,7 +1365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Task not found" });
       }
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('tasks')
         .delete()
         .eq('id', id);
@@ -1381,7 +1393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Task ID is required" });
       }
       
-      const { data: timeEntries, error } = await supabase
+      const { data: timeEntries, error } = await supabaseAdmin
         .from('time_entries')
         .select('*')
         .eq('task_id', taskId);
@@ -1405,7 +1417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Validation error", errors: validation.error });
       }
       
-      const { data: timeEntry, error } = await supabase
+      const { data: timeEntry, error } = await supabaseAdmin
         .from('time_entries')
         .insert(validation.data)
         .select()
@@ -1418,7 +1430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Si incluye horas, actualizar las horas acumuladas de la tarea
       if (validation.data.hours) {
         // Obtener la tarea actual
-        const { data: task } = await supabase
+        const { data: task } = await supabaseAdmin
           .from('tasks')
           .select('actual_hours')
           .eq('id', validation.data.taskId)
@@ -1427,7 +1439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (task) {
           const newHours = parseFloat(task.actual_hours || "0") + parseFloat(validation.data.hours.toString());
           
-          await supabase
+          await supabaseAdmin
             .from('tasks')
             .update({ actual_hours: newHours.toString() })
             .eq('id', validation.data.taskId);
@@ -1446,7 +1458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { clientId, projectId, startDate, endDate } = req.query;
       
-      let query = supabase.from('appointments').select('*');
+      let query = supabaseAdmin.from('appointments').select('*');
       
       if (clientId) {
         query = query.eq('client_id', clientId);
@@ -1489,7 +1501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Validation error", errors: validation.error });
       }
       
-      const { data: appointment, error } = await supabase
+      const { data: appointment, error } = await supabaseAdmin
         .from('appointments')
         .insert(validation.data)
         .select()
@@ -1512,7 +1524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = req.params.id;
       
       // Obtener la cita
-      const { data: appointment, error } = await supabase
+      const { data: appointment, error } = await supabaseAdmin
         .from('appointments')
         .select('*, clients(*)')
         .eq('id', id)
@@ -1526,7 +1538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // En una implementación real, aquí se enviaría el correo de recordatorio
       
       // Marcar la cita como que se ha enviado el recordatorio
-      await supabase
+      await supabaseAdmin
         .from('appointments')
         .update({ reminder_sent: true })
         .eq('id', id);

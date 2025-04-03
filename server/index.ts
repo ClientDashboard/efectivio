@@ -43,7 +43,12 @@ app.use((req, res, next) => {
   syncViteEnvVars();
   
   // Inicializar buckets de almacenamiento de Supabase
-  await initializeStorageBuckets();
+  try {
+    await initializeStorageBuckets();
+    log('✅ Buckets de almacenamiento de Supabase inicializados');
+  } catch (error) {
+    log(`⚠️ No se pudieron inicializar los buckets de Supabase: ${error.message}`);
+  }
   
   const server = await registerRoutes(app);
 

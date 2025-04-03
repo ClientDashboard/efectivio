@@ -10,7 +10,7 @@ import {
 import { db } from './db';
 import { eq, and } from 'drizzle-orm';
 import { meetings, meetingIntegrations } from '@shared/schema';
-import { supabase } from './supabase';
+import { supabaseAdmin as supabase } from './supabase';
 import { transcribeAudio, generateMeetingSummary, extractKeyPointsAndActions } from './ai';
 
 // Constante para el bucket de almacenamiento de grabaciones
@@ -241,7 +241,7 @@ export async function initializeMeetingStorageBucket(): Promise<void> {
     }
     
     // Verificar si el bucket ya existe
-    const bucketExists = buckets?.some(bucket => bucket.name === RECORDINGS_BUCKET);
+    const bucketExists = buckets?.some((bucket: { name: string }) => bucket.name === RECORDINGS_BUCKET);
     
     if (!bucketExists) {
       console.warn(`El bucket '${RECORDINGS_BUCKET}' no existe. 

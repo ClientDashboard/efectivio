@@ -1,206 +1,277 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { 
-  supabase, 
-  signUp as supabaseSignUp, 
-  signIn as supabaseSignIn, 
-  signOut as supabaseSignOut,
-  getCurrentUser,
-  getSession
-} from './supabase';
 import { User, Session } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from './supabase';
 
-// Tipo para las respuestas de autenticación
-type AuthResponse = {
-  user?: User | null;
-  session?: Session | null;
-  error?: Error | null;
-};
-
-// Definir el tipo de contexto
+// Definición del contexto de autenticación
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  loading: boolean;
-  error: Error | null;
-  signUp: (email: string, password: string, metadata?: any) => Promise<AuthResponse>;
-  signIn: (email: string, password: string) => Promise<AuthResponse>;
+  isLoading: boolean;
+  signUp: (email: string, password: string) => Promise<{
+    success: boolean;
+    error: string | null;
+  }>;
+  signIn: (email: string, password: string) => Promise<{
+    success: boolean;
+    error: string | null;
+  }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{
+    success: boolean;
+    error: string | null;
+  }>;
+  updateProfile: (data: { [key: string]: any }) => Promise<boolean>;
 }
 
-// Crear el contexto con un valor por defecto
+// Creación del contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Componente proveedor
+// Proveedor de autenticación
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Inicializar el estado de autenticación al cargar
+  // Efecto para cargar sesión y usuario actual
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        // Verificar sesión actual
-        const { data: { session } } = await getSession();
-        setSession(session);
-
-        // Verificar usuario actual
-        if (session) {
-          const { data: { user } } = await getCurrentUser();
-          setUser(user);
-        }
-      } catch (error) {
-        console.error('Error inicializando autenticación:', error);
-        setError(error instanceof Error ? error : new Error('Error de autenticación desconocido'));
-      } finally {
-        setLoading(false);
+    async function loadUserSession() {
+      setIsLoading(true);
+      
+      // Obtener sesión actual
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Error cargando sesión:', sessionError);
+        setIsLoading(false);
+        return;
       }
-    };
-
-    initializeAuth();
-
-    // Suscribirse a cambios de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        if (session) {
-          const { data: { user } } = await getCurrentUser();
-          setUser(user);
+      
+      setSession(session);
+      
+      if (session) {
+        // Obtener datos del usuario actual
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error('Error cargando usuario:', userError);
         } else {
-          setUser(null);
+          setUser(user);
         }
-        setLoading(false);
+      }
+      
+      setIsLoading(false);
+    }
+    
+    // Cargar sesión y usuario al montar el componente
+    loadUserSession();
+    
+    // Suscribirse a cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user || null);
       }
     );
-
+    
     // Limpiar suscripción al desmontar
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
-  // Función para registrar un usuario
-  const signUp = async (email: string, password: string, metadata?: any): Promise<AuthResponse> => {
+  // Registrar un nuevo usuario
+  const signUp = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      const { data, error } = await supabaseSignUp(email, password, metadata);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
       
       if (error) {
-        setError(error);
         toast({
-          title: 'Error de registro',
+          title: 'Error al registrarse',
           description: error.message,
           variant: 'destructive',
         });
-        return { error };
+        return { success: false, error: error.message };
       }
       
       toast({
         title: 'Registro exitoso',
-        description: 'Se ha enviado un correo de verificación a tu dirección de email.',
+        description: 'Se ha enviado un correo de confirmación a tu dirección de email.',
       });
       
-      return { 
-        user: data.user,
-        session: data.session
-      };
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Error de registro desconocido');
-      setError(error);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error en registro:', error);
       toast({
-        title: 'Error de registro',
+        title: 'Error al registrarse',
         description: error.message,
         variant: 'destructive',
       });
-      return { error };
-    } finally {
-      setLoading(false);
+      return { success: false, error: error.message };
     }
   };
 
-  // Función para iniciar sesión
-  const signIn = async (email: string, password: string): Promise<AuthResponse> => {
+  // Iniciar sesión
+  const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      const { data, error } = await supabaseSignIn(email, password);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
       if (error) {
-        setError(error);
         toast({
-          title: 'Error de inicio de sesión',
+          title: 'Error al iniciar sesión',
           description: error.message,
           variant: 'destructive',
         });
-        return { error };
+        return { success: false, error: error.message };
       }
       
       toast({
-        title: 'Inicio de sesión exitoso',
-        description: `Bienvenido de nuevo, ${data.user?.email}`,
+        title: 'Sesión iniciada',
+        description: '¡Bienvenido de vuelta!',
       });
       
-      return { 
-        user: data.user,
-        session: data.session
-      };
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Error de inicio de sesión desconocido');
-      setError(error);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error en inicio de sesión:', error);
       toast({
-        title: 'Error de inicio de sesión',
+        title: 'Error al iniciar sesión',
         description: error.message,
         variant: 'destructive',
       });
-      return { error };
-    } finally {
-      setLoading(false);
+      return { success: false, error: error.message };
     }
   };
 
-  // Función para cerrar sesión
+  // Cerrar sesión
   const signOut = async () => {
     try {
-      setLoading(true);
-      await supabaseSignOut();
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      
       toast({
         title: 'Sesión cerrada',
-        description: 'Has cerrado sesión correctamente',
+        description: 'Has cerrado sesión exitosamente.',
       });
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Error al cerrar sesión');
-      setError(error);
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
       toast({
-        title: 'Error',
-        description: 'No se pudo cerrar la sesión correctamente',
+        title: 'Error al cerrar sesión',
+        description: error.message,
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Valor del contexto
-  const value = {
-    user,
-    session,
-    loading,
-    error,
-    signUp,
-    signIn,
-    signOut,
+  // Restablecer contraseña
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        toast({
+          title: 'Error al restablecer contraseña',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return { success: false, error: error.message };
+      }
+      
+      toast({
+        title: 'Correo enviado',
+        description: 'Se ha enviado un correo para restablecer tu contraseña.',
+      });
+      
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error al restablecer contraseña:', error);
+      toast({
+        title: 'Error al restablecer contraseña',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return { success: false, error: error.message };
+    }
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // Actualizar perfil de usuario
+  const updateProfile = async (data: { [key: string]: any }) => {
+    if (!user) {
+      toast({
+        title: 'Error al actualizar perfil',
+        description: 'No hay usuario autenticado',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user.id);
+        
+      if (error) {
+        toast({
+          title: 'Error al actualizar perfil',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+      
+      toast({
+        title: 'Perfil actualizado',
+        description: 'Tu perfil ha sido actualizado exitosamente.',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      toast({
+        title: 'Error al actualizar perfil',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  // Proporcionar el contexto
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        isLoading,
+        signUp,
+        signIn,
+        signOut,
+        resetPassword,
+        updateProfile,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-// Hook personalizado para usar el contexto
+// Hook para usar el contexto de autenticación
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  
+  if (!context) {
     throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
+  
   return context;
 }

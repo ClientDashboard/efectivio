@@ -1,145 +1,175 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Utilizamos las variables de entorno VITE que fueron sincronizadas automáticamente
-// desde las variables de backend por el script env-sync.ts
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+// Crear cliente de Supabase para el navegador
+// Usa las variables de entorno VITE_ que están expuestas al cliente
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Credenciales de Supabase no encontradas. Algunas funciones no estarán disponibles.');
+  console.error('Error: Variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY deben estar definidas');
 }
 
-// Crear el cliente de Supabase para el frontend
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Constantes para buckets de almacenamiento (deben coincidir con los del backend)
-export const STORAGE_BUCKETS = {
-  DOCUMENTS: 'documents',
-  INVOICES: 'invoices',
-  RECEIPTS: 'receipts',
-  CONTRACTS: 'contracts',
-  PROFILES: 'profiles',
-  BACKUPS: 'backups',
-};
+/**
+ * Obtiene el token JWT de la sesión actual
+ * @returns El token JWT o null si no hay sesión
+ */
+export async function getSessionToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token || null;
+}
 
-// Función para subir un archivo
-export const uploadFile = async (
-  bucket: string,
-  file: File,
-  path = '',
-  metadata?: Record<string, any>
-) => {
-  try {
-    const filePath = `${path ? path + '/' : ''}${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+/**
+ * Sube un archivo al storage de Supabase
+ * @param bucketName Nombre del bucket
+ * @param filePath Ruta del archivo en el bucket
+ * @param file Archivo a subir (File del navegador)
+ * @returns URL pública del archivo o undefined si hay error
+ */
+export async function uploadFile(
+  bucketName: string,
+  filePath: string,
+  file: File
+): Promise<string | undefined> {
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, file, {
+      upsert: true
+    });
     
-    const { data, error } = await supabase
-      .storage
-      .from(bucket)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-        ...(metadata ? { metadata } : {})
-      });
-      
-    if (error) throw error;
-    
-    // Obtener URL de descarga temporal
-    const { data: urlData } = await supabase
-      .storage
-      .from(bucket)
-      .createSignedUrl(filePath, 60 * 60); // URL válida por 1 hora
-      
-    return {
-      ...data,
-      url: urlData?.signedUrl,
-    };
-  } catch (error) {
-    console.error('Error al subir archivo:', error);
-    throw error;
+  if (error) {
+    console.error(`Error al subir archivo a ${bucketName}/${filePath}:`, error);
+    return undefined;
   }
-};
-
-// Función para obtener lista de archivos
-export const listFiles = async (bucket: string, path = '') => {
-  try {
-    const { data, error } = await supabase
-      .storage
-      .from(bucket)
-      .list(path);
-      
-    if (error) throw error;
-    
-    return data;
-  } catch (error) {
-    console.error('Error al listar archivos:', error);
-    throw error;
+  
+  // Obtener URL pública si el bucket es público, o URL firmada si es privado
+  let url: string;
+  if (bucketName === 'profiles') {
+    const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+    url = data.publicUrl;
+  } else {
+    // URL firmada con expiración de 60 minutos para buckets privados
+    const { data } = await supabase.storage.from(bucketName).createSignedUrl(filePath, 60 * 60);
+    url = data?.signedUrl || '';
   }
-};
+  
+  return url;
+}
 
-// Función para descargar un archivo
-export const downloadFile = async (bucket: string, path: string) => {
-  try {
-    const { data, error } = await supabase
-      .storage
-      .from(bucket)
-      .download(path);
-      
-    if (error) throw error;
+/**
+ * Elimina un archivo del storage de Supabase
+ * @param bucketName Nombre del bucket
+ * @param filePath Ruta del archivo en el bucket
+ * @returns true si se eliminó correctamente, false si hubo error
+ */
+export async function deleteFile(bucketName: string, filePath: string): Promise<boolean> {
+  const { error } = await supabase.storage
+    .from(bucketName)
+    .remove([filePath]);
     
-    return data;
-  } catch (error) {
-    console.error('Error al descargar archivo:', error);
-    throw error;
+  if (error) {
+    console.error(`Error al eliminar archivo de ${bucketName}/${filePath}:`, error);
+    return false;
   }
-};
+  
+  return true;
+}
 
-// Función para eliminar un archivo
-export const deleteFile = async (bucket: string, path: string) => {
-  try {
-    const { error } = await supabase
-      .storage
-      .from(bucket)
-      .remove([path]);
-      
-    if (error) throw error;
+/**
+ * Obtiene una URL firmada para un archivo en Supabase Storage
+ * @param bucketName Nombre del bucket
+ * @param filePath Ruta del archivo
+ * @param expiresIn Tiempo de expiración en segundos (por defecto 1 hora)
+ * @returns URL firmada o undefined si hay error
+ */
+export async function getSignedUrl(
+  bucketName: string,
+  filePath: string,
+  expiresIn = 60 * 60
+): Promise<string | undefined> {
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .createSignedUrl(filePath, expiresIn);
     
-    return true;
-  } catch (error) {
-    console.error('Error al eliminar archivo:', error);
-    throw error;
+  if (error) {
+    console.error(`Error al generar URL firmada para ${bucketName}/${filePath}:`, error);
+    return undefined;
   }
-};
+  
+  return data.signedUrl;
+}
 
-// Auth helpers
-export const signUp = async (email: string, password: string, metadata?: any) => {
-  return await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: metadata
-    }
-  });
-};
+/**
+ * Obtiene una lista de archivos en un bucket para un usuario
+ * @param bucketName Nombre del bucket
+ * @param path Ruta dentro del bucket
+ * @returns Lista de archivos o undefined si hay error
+ */
+export async function listFiles(
+  bucketName: string,
+  path: string = ''
+): Promise<any[] | undefined> {
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .list(path);
+    
+  if (error) {
+    console.error(`Error al listar archivos en ${bucketName}/${path}:`, error);
+    return undefined;
+  }
+  
+  return data;
+}
 
-export const signIn = async (email: string, password: string) => {
-  return await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-};
+/**
+ * Actualiza los datos del perfil de usuario
+ * @param profileData Datos del perfil a actualizar
+ * @returns true si se actualizó correctamente, false si hubo error
+ */
+export async function updateProfile(profileData: { [key: string]: any }): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    console.error('No hay usuario autenticado');
+    return false;
+  }
+  
+  const { error } = await supabase
+    .from('profiles')
+    .update(profileData)
+    .eq('id', user.id);
+    
+  if (error) {
+    console.error('Error al actualizar perfil:', error);
+    return false;
+  }
+  
+  return true;
+}
 
-export const signOut = async () => {
-  return await supabase.auth.signOut();
-};
-
-export const resetPassword = async (email: string) => {
-  return await supabase.auth.resetPasswordForEmail(email);
-};
-
-export const getCurrentUser = async () => {
-  return await supabase.auth.getUser();
-};
-
-export const getSession = async () => {
-  return await supabase.auth.getSession();
-};
+/**
+ * Obtiene los datos del perfil del usuario actual
+ * @returns Datos del perfil o undefined si hay error
+ */
+export async function getProfile(): Promise<any | undefined> {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    console.error('No hay usuario autenticado');
+    return undefined;
+  }
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+    
+  if (error) {
+    console.error('Error al obtener perfil:', error);
+    return undefined;
+  }
+  
+  return data;
+}

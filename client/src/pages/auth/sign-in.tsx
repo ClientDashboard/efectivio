@@ -1,212 +1,144 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation } from "wouter";
-import { useAuth } from "@/lib/auth-provider";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { Link, useLocation } from 'wouter';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/lib/auth-provider';
+
+// Esquema de validación para el formulario de inicio de sesión
+const loginSchema = z.object({
+  email: z.string().email('Email inválido').min(1, 'El email es requerido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres')
+});
 
 export default function SignInPage() {
+  const { signIn } = useAuth();
+  const [isPending, setIsPending] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  
-  // Usar nuestro hook de autenticación de Supabase
-  const { signIn, user, loading } = useAuth();
-  
-  useEffect(() => {
-    // Redirigir si hay sesión activa
-    if (user) {
-      navigate("/dashboard");
-    }
-  }, [user, navigate]);
-  
-  const validateForm = () => {
-    let isValid = true;
-    
-    if (!email.includes('@') || !email.includes('.')) {
-      setEmailError("Por favor ingresa un correo electrónico válido");
-      isValid = false;
-    } else {
-      setEmailError("");
-    }
-    
-    if (password.length < 6) {
-      setPasswordError("La contraseña debe tener al menos 6 caracteres");
-      isValid = false;
-    } else {
-      setPasswordError("");
-    }
-    
-    return isValid;
-  };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
+  // Configuración del formulario con react-hook-form
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: ''
     }
-    
-    // Utilizar la función signIn de nuestro AuthProvider
-    const response = await signIn(email, password);
-    if (response && !response.error) {
-      navigate("/dashboard");
+  });
+
+  // Manejar envío del formulario
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    setIsPending(true);
+
+    try {
+      const { success, error } = await signIn(values.email, values.password);
+
+      if (success) {
+        toast({
+          title: 'Inicio de sesión exitoso',
+          description: 'Bienvenido a Efectivio',
+        });
+        navigate('/dashboard');
+      } else {
+        toast({
+          title: 'Error al iniciar sesión',
+          description: error || 'Credenciales inválidas',
+          variant: 'destructive'
+        });
+      }
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Ha ocurrido un error inesperado',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsPending(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <svg className="h-10 w-auto text-primary-600" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z" />
-          </svg>
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Inicia sesión en tu cuenta
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          ¿No tienes una cuenta?{" "}
-          <Link href="/auth/sign-up">
-            <a className="font-medium text-primary-600 hover:text-primary-500">
-              Registrarse
-            </a>
-          </Link>
-        </p>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card className="px-4 py-8 shadow sm:rounded-lg sm:px-10">
-          <CardContent className="pt-4">
-            <form onSubmit={onSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium">
-                  Correo electrónico
-                </label>
-                <div>
-                  <Input 
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="ejemplo@empresa.com" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                  />
-                  {emailError && (
-                    <p className="text-sm text-red-500 mt-1">{emailError}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Input 
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="Ingresa tu contraseña" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOffIcon className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5 text-gray-400" />
-                    )}
-                  </button>
-                </div>
-                {passwordError && (
-                  <p className="text-sm text-red-500 mt-1">{passwordError}</p>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Iniciar Sesión</CardTitle>
+          <CardDescription className="text-center">
+            Ingresa tus credenciales para acceder a tu cuenta
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="correo@ejemplo.com" 
+                        {...field} 
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember_me"
-                    name="remember_me"
-                    type="checkbox"
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
-                    Recordarme
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
-                    ¿Olvidaste tu contraseña?
-                  </a>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full flex justify-center py-2"
-                disabled={loading}
-              >
-                {loading ? (
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="******" 
+                        {...field} 
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Iniciando sesión...
                   </>
                 ) : (
-                  "Iniciar Sesión"
+                  'Iniciar Sesión'
                 )}
               </Button>
             </form>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4 pt-4 border-t">
-            <div className="relative mt-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">O continuar con</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full" disabled={loading}>
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                    <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
-                    <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
-                    <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
-                    <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
-                  </g>
-                </svg>
-                Google
-              </Button>
-              <Button variant="outline" className="w-full" disabled={loading}>
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path
-                    d="M16.318 13.714v5.484h-9.12v-5.484a2.7 2.7 0 0 1-1.98-2.598 2.7 2.7 0 0 1 1.98-2.598V2.121h9.12v6.397a2.7 2.7 0 0 1 1.98 2.598 2.7 2.7 0 0 1-1.98 2.598zm-7.26-1.62c-.24-.84 0-1.236 1.14-3.54.66-.78 1.74-1.26 2.82-1.26 1.326 0 2.394.72 2.82 1.26 1.14 2.304 1.38 2.7 1.14 3.54l-.12.564h-7.7l-.1-.564zM11.88 1.2H8.94v2.88h2.94V1.2zm0 4.8H8.94v3.84h2.94V6zm2.88 0h-2.94v3.84h2.94V6z"
-                    fill="#141518"
-                  />
-                </svg>
-                Microsoft
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
+          </Form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-2">
+          <div className="text-sm text-center text-muted-foreground">
+            ¿Olvidaste tu contraseña?{' '}
+            <Link to="/auth/reset-password">
+              <a className="underline text-primary hover:text-primary/90">Recuperar</a>
+            </Link>
+          </div>
+          <div className="text-sm text-center text-muted-foreground">
+            ¿No tienes una cuenta?{' '}
+            <Link to="/auth/sign-up">
+              <a className="underline text-primary hover:text-primary/90">Regístrate</a>
+            </Link>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

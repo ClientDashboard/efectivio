@@ -1,65 +1,71 @@
 import { ReactNode } from 'react';
-import { Redirect } from 'wouter';
-import { useAuth } from './auth-provider';
+import { Redirect, Route } from 'wouter';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from './auth-provider';
 
 interface ProtectedRouteProps {
+  path: string;
   children: ReactNode;
-  redirectTo?: string;
 }
 
 /**
- * Componente que protege rutas para que solo sean accesibles por usuarios autenticados
- * Si el usuario no está autenticado, se redirige a la ruta especificada (por defecto '/auth')
+ * Componente de ruta protegida que verifica la autenticación
+ * 
+ * Si el usuario no está autenticado, redirige a la página de login
+ * Si se está cargando, muestra un spinner
+ * Si está autenticado, renderiza los hijos
  */
-export const ProtectedRoute = ({ 
-  children, 
-  redirectTo = '/auth' 
-}: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
+  const { user, isLoading } = useAuth();
 
-  // Mostrar loading mientras se verifica el estado de autenticación
-  if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
+  return (
+    <Route path={path}>
+      {() => {
+        if (isLoading) {
+          return (
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          );
+        }
 
-  // Redirigir si no hay usuario autenticado
-  if (!user) {
-    return <Redirect to={redirectTo} />;
-  }
+        if (!user) {
+          return <Redirect to="/auth/login" />;
+        }
 
-  // Renderizar children si el usuario está autenticado
-  return <>{children}</>;
-};
+        return <>{children}</>;
+      }}
+    </Route>
+  );
+}
 
 /**
- * Componente que protege rutas para que solo sean accesibles por usuarios NO autenticados
- * Si el usuario está autenticado, se redirige a la ruta especificada (por defecto '/')
+ * Componente de ruta pública que redirige a usuarios autenticados
+ * 
+ * Si el usuario está autenticado, redirige al dashboard
+ * Si se está cargando, muestra un spinner
+ * Si no está autenticado, renderiza los hijos
  */
-export const PublicOnlyRoute = ({ 
-  children, 
-  redirectTo = '/' 
-}: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
-  
-  // Mostrar loading mientras se verifica el estado de autenticación
-  if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
+export function PublicRoute({ path, children }: ProtectedRouteProps) {
+  const { user, isLoading } = useAuth();
 
-  // Redirigir si hay un usuario autenticado
-  if (user) {
-    return <Redirect to={redirectTo} />;
-  }
+  return (
+    <Route path={path}>
+      {() => {
+        if (isLoading) {
+          return (
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          );
+        }
 
-  // Renderizar children si el usuario NO está autenticado
-  return <>{children}</>;
-};
+        if (user) {
+          return <Redirect to="/dashboard" />;
+        }
+
+        return <>{children}</>;
+      }}
+    </Route>
+  );
+}
