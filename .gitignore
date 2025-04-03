@@ -51,4 +51,4 @@ Thumbs.db
 # otros
 .vercel
 .replit
-replit_zip_error_log.txt
+replit_zip_error_log.txt.env*
