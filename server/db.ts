@@ -10,8 +10,11 @@ if (!process.env.DATABASE_URL) {
 // Create a new Neon client
 const sql = neon(process.env.DATABASE_URL);
 
-// Using the Neon client for Drizzle ORM
-export const db = drizzle(sql);
+// Importamos el esquema para que Drizzle ORM pueda hacer las consultas correctamente
+import * as schema from "@shared/schema";
+
+// Using the Neon client for Drizzle ORM with schema
+export const db = drizzle(sql, { schema });
 
 // Function to get a standalone Postgres client for operations that need it
 export const getClient = async (): Promise<Client> => {

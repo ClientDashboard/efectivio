@@ -4,13 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
+import { useSignIn } from '@clerk/clerk-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/lib/auth-provider';
 
 // Esquema de validación para el formulario de inicio de sesión
 const loginSchema = z.object({
@@ -19,7 +19,7 @@ const loginSchema = z.object({
 });
 
 export default function SignInPage() {
-  const { signIn } = useAuth();
+  const { isLoaded, signIn } = useSignIn();
   const [isPending, setIsPending] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -35,12 +35,19 @@ export default function SignInPage() {
 
   // Manejar envío del formulario
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    if (!isLoaded) {
+      return;
+    }
+    
     setIsPending(true);
 
     try {
-      const { success, error } = await signIn(values.email, values.password);
+      const result = await signIn.create({
+        identifier: values.email,
+        password: values.password,
+      });
 
-      if (success) {
+      if (result.status === "complete") {
         toast({
           title: 'Inicio de sesión exitoso',
           description: 'Bienvenido a Efectivio',
@@ -49,14 +56,14 @@ export default function SignInPage() {
       } else {
         toast({
           title: 'Error al iniciar sesión',
-          description: error || 'Credenciales inválidas',
+          description: 'El proceso de inicio de sesión no se completó',
           variant: 'destructive'
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       toast({
-        title: 'Error',
-        description: 'Ha ocurrido un error inesperado',
+        title: 'Error al iniciar sesión',
+        description: err.errors?.[0]?.message || 'Credenciales incorrectas',
         variant: 'destructive'
       });
     } finally {

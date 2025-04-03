@@ -2,8 +2,9 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from "./lib/auth-provider";
+import { ClerkProvider } from "./lib/clerk-provider";
 import { ProtectedRoute, PublicRoute } from "./lib/protected-route";
+import { Loader2 } from "lucide-react";
 
 // Pages
 import LandingPage from "@/pages/landing-page";
@@ -28,8 +29,9 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      {/* Rutas públicas */}
+      {/* Rutas públicas (no requieren autenticación) */}
       <Route path="/" component={LandingPage} />
+      <Route path="/auth/reset-password" component={ResetPasswordPage} />
       
       {/* Auth Pages - Solo accesibles si NO está autenticado */}
       <PublicRoute path="/auth/sign-in">
@@ -39,8 +41,6 @@ function Router() {
       <PublicRoute path="/auth/sign-up">
         <SignUpPage />
       </PublicRoute>
-      
-      <Route path="/auth/reset-password" component={ResetPasswordPage} />
       
       {/* Rutas protegidas - Requieren autenticación */}
       <ProtectedRoute path="/dashboard">
@@ -96,7 +96,9 @@ function Router() {
       </ProtectedRoute>
       
       {/* AI Tools */}
-      <Route path="/ai/text-analysis" component={TextAnalysisPage} />
+      <ProtectedRoute path="/ai/text-analysis">
+        <TextAnalysisPage />
+      </ProtectedRoute>
       
       {/* Fallback para cualquier otra ruta */}
       <Route component={NotFound} />
@@ -106,12 +108,12 @@ function Router() {
 
 function App() {
   return (
-    <AuthProvider>
+    <ClerkProvider>
       <QueryClientProvider client={queryClient}>
         <Router />
         <Toaster />
       </QueryClientProvider>
-    </AuthProvider>
+    </ClerkProvider>
   );
 }
 

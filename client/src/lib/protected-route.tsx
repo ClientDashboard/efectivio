@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Redirect, Route } from 'wouter';
 import { Loader2 } from 'lucide-react';
-import { useAuth } from './auth-provider';
+import { useAuth, useUser } from '@clerk/clerk-react';
 
 interface ProtectedRouteProps {
   path: string;
@@ -9,14 +9,17 @@ interface ProtectedRouteProps {
 }
 
 /**
- * Componente de ruta protegida que verifica la autenticación
+ * Componente de ruta protegida que verifica la autenticación con Clerk
  * 
  * Si el usuario no está autenticado, redirige a la página de login
  * Si se está cargando, muestra un spinner
  * Si está autenticado, renderiza los hijos
  */
 export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { isLoaded, userId } = useAuth();
+  const { isLoaded: isUserLoaded } = useUser();
+
+  const isLoading = !isLoaded || !isUserLoaded;
 
   return (
     <Route path={path}>
@@ -29,7 +32,7 @@ export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
           );
         }
 
-        if (!user) {
+        if (!userId) {
           return <Redirect to="/auth/sign-in" />;
         }
 
@@ -47,7 +50,10 @@ export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
  * Si no está autenticado, renderiza los hijos
  */
 export function PublicRoute({ path, children }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { isLoaded, userId } = useAuth();
+  const { isLoaded: isUserLoaded } = useUser();
+
+  const isLoading = !isLoaded || !isUserLoaded;
 
   return (
     <Route path={path}>
@@ -60,7 +66,7 @@ export function PublicRoute({ path, children }: ProtectedRouteProps) {
           );
         }
 
-        if (user) {
+        if (userId) {
           return <Redirect to="/dashboard" />;
         }
 

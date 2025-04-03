@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import express, { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import { randomUUID } from "crypto";
@@ -1775,6 +1775,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(segments);
     } catch (error) {
       res.status(500).json({ message: "Error fetching transcription segments", error });
+    }
+  });
+
+  // Webhook de Clerk para sincronizar usuarios
+  app.post('/api/webhooks/clerk', express.raw({ type: 'application/json' }), async (req: Request, res: Response) => {
+    try {
+      const { handleClerkWebhook } = await import('./webhooks/clerk');
+      return handleClerkWebhook(req, res);
+    } catch (error) {
+      console.error('Error processing Clerk webhook:', error);
+      return res.status(500).json({ error: 'Error processing webhook' });
     }
   });
 
