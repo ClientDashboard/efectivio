@@ -101,4 +101,4 @@ Este proyecto está bajo licencia [MIT](LICENSE).
 
 ## Contacto
 
-Para más información, contacta a [tu@correo.com](mailto:tu@correo.com).
+Para más información, contacta a [tu@correo.com](mailto:tu@correo.com).# efectivio
