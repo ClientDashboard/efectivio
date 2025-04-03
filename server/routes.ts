@@ -98,6 +98,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const client = await storage.createClient(validation.data);
+      
+      // Crear estructura de almacenamiento para este cliente
+      try {
+        const { createClientStorageStructure } = await import('./storage-utils');
+        const storageResult = await createClientStorageStructure(client.id);
+        console.log(`Resultado de creación de almacenamiento para cliente ${client.id}:`, storageResult);
+      } catch (storageError) {
+        console.error(`Error al crear estructura de almacenamiento para cliente ${client.id}:`, storageError);
+        // No fallamos la creación del cliente si hay error en storage
+      }
+      
       res.status(201).json(client);
     } catch (error) {
       res.status(500).json({ message: "Error creating client", error });
@@ -1093,6 +1104,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Error creating user", error });
       }
       
+      // Crear estructura de almacenamiento para este cliente
+      const clientId = invitation.client_id;
+      const { createClientStorageStructure } = await import('./storage-utils');
+      const storageResult = await createClientStorageStructure(clientId);
+      console.log(`Resultado de creación de almacenamiento para cliente ${clientId}:`, storageResult);
+      
       // Eliminar la invitación ya que ha sido utilizada
       await supabaseAdmin
         .from('client_invitations')
@@ -1107,7 +1124,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: 'client',
           fullName,
           clientId: invitation.client_id
-        }
+        },
+        storageCreated: Object.values(storageResult).every(result => result)
       });
     } catch (error) {
       res.status(500).json({ message: "Error registering client", error });
