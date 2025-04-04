@@ -187,7 +187,7 @@ export const FinancialTipWidget = () => {
 export const IncomeExpenseWidget = () => {
   return (
     <div className="h-full w-full flex flex-col items-center justify-center">
-      <div className="w-full h-full">
+      <div className="w-full h-full min-h-[400px]">
         <IncomeExpenseChart 
           incomeColor="#0062ff"
           expenseColor="#F48E21"

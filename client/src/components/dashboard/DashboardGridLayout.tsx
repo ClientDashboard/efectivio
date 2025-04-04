@@ -29,21 +29,21 @@ const defaultLayouts = {
     { i: 'tasks', x: 1, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'appointments', x: 2, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'financial-tip', x: 0, y: 3, w: 2, h: 3, minW: 2, minH: 3 },
-    { i: 'income-expense', x: 0, y: 6, w: 3, h: 6, minW: 3, minH: 6 },
+    { i: 'income-expense', x: 0, y: 6, w: 3, h: 10, minW: 3, minH: 8 },
   ],
   md: [
     { i: 'calculator', x: 0, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'tasks', x: 1, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'appointments', x: 0, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'financial-tip', x: 1, y: 3, w: 1, h: 3, minW: 1, minH: 3 },
-    { i: 'income-expense', x: 0, y: 6, w: 2, h: 6, minW: 2, minH: 6 },
+    { i: 'income-expense', x: 0, y: 6, w: 2, h: 10, minW: 2, minH: 8 },
   ],
   sm: [
     { i: 'calculator', x: 0, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'tasks', x: 0, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'appointments', x: 0, y: 6, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'financial-tip', x: 0, y: 9, w: 1, h: 3, minW: 1, minH: 3 },
-    { i: 'income-expense', x: 0, y: 12, w: 1, h: 6, minW: 1, minH: 6 },
+    { i: 'income-expense', x: 0, y: 12, w: 1, h: 10, minW: 1, minH: 8 },
   ],
 };
 
