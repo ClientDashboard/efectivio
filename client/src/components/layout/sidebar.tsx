@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/lib/protected-route';
+import { useAppStore } from '@/lib/store';
 import {
   LayoutDashboard,
   Users,

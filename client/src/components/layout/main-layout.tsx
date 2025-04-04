@@ -20,7 +20,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
       {/* Sidebar */}
-      <Sidebar />
+      {!location.startsWith('/auth') && <Sidebar />}
       
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
