@@ -68,7 +68,7 @@ export default function Sidebar() {
   };
 
   const mainNavigation = [
-    { name: 'PRUEBA', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Panel', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Clientes', path: '/clients', icon: Users },
     { name: 'Facturas', path: '/invoices', icon: FileText },
     { name: 'Gastos', path: '/expenses', icon: Receipt },
