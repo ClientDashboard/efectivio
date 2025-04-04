@@ -42,6 +42,12 @@ export default function Sidebar() {
   const { userId, signOut } = useAuth();
   const { isSidebarOpen } = useAppStore();
   
+  // Estado para menús desplegables
+  const [activeMenus, setActiveMenus] = useState<Record<string, boolean>>({
+    clientPortal: false,
+    inventory: false
+  });
+  
   // Datos de usuario para la interfaz (en un sistema real, estos datos vendrían de la base de datos)
   const user = {
     name: 'Administrador',
@@ -53,11 +59,6 @@ export default function Sidebar() {
   if (!isSidebarOpen) {
     return null;
   }
-  
-  const [activeMenus, setActiveMenus] = useState<Record<string, boolean>>({
-    clientPortal: false,
-    inventory: false
-  });
 
   const toggleSubMenu = (menuName: string) => {
     setActiveMenus({

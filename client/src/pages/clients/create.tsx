@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import MainLayout from "@/components/layout/main-layout";
 import { ClientForm } from "@/components/clients/client-form";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
@@ -43,7 +42,7 @@ export default function ClientCreatePage() {
   };
 
   return (
-    <MainLayout>
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Crear Nuevo Cliente</h1>
@@ -66,6 +65,6 @@ export default function ClientCreatePage() {
           />
         </CardContent>
       </Card>
-    </MainLayout>
+    </>
   );
 }

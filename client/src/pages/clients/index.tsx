@@ -26,13 +26,9 @@ export default function ClientsPage() {
 
   const { data: clients, isLoading, error } = useQuery<Client[]>({
     queryKey: ['/api/clients'],
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Error al cargar clientes",
-        description: "No se pudieron cargar los datos de clientes. Intente de nuevo más tarde.",
-      });
-    }
+    retry: 1,
+    gcTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
   });
 
   const columns: Column<Client>[] = [
