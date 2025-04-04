@@ -186,11 +186,13 @@ export const FinancialTipWidget = () => {
 // Componente de Ingresos vs Gastos
 export const IncomeExpenseWidget = () => {
   return (
-    <div className="h-full w-full">
-      <IncomeExpenseChart 
-        incomeColor="#0062ff"
-        expenseColor="#F48E21"
-      />
+    <div className="h-full w-full flex flex-col items-center justify-center">
+      <div className="w-full" style={{ height: '300px' }}>
+        <IncomeExpenseChart 
+          incomeColor="#0062ff"
+          expenseColor="#F48E21"
+        />
+      </div>
     </div>
   );
 };
@@ -242,7 +244,7 @@ export const dashboardWidgets: Widget[] = [
     icon: <BarChart3 className="mr-2 h-5 w-5 text-orange-500" />,
     content: <IncomeExpenseWidget />,
     description: 'Comparativa de ingresos y gastos por periodo',
-    minH: 4,
+    minH: 6,
     minW: 3
   },
 ];

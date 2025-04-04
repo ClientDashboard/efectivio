@@ -29,21 +29,21 @@ const defaultLayouts = {
     { i: 'tasks', x: 1, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'appointments', x: 2, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'financial-tip', x: 0, y: 3, w: 2, h: 3, minW: 2, minH: 3 },
-    { i: 'links', x: 2, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'income-expense', x: 0, y: 6, w: 3, h: 6, minW: 3, minH: 6 },
   ],
   md: [
     { i: 'calculator', x: 0, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'tasks', x: 1, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'appointments', x: 0, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'financial-tip', x: 1, y: 3, w: 1, h: 3, minW: 1, minH: 3 },
-    { i: 'links', x: 0, y: 6, w: 2, h: 2, minW: 1, minH: 2 },
+    { i: 'income-expense', x: 0, y: 6, w: 2, h: 6, minW: 2, minH: 6 },
   ],
   sm: [
     { i: 'calculator', x: 0, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'tasks', x: 0, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'appointments', x: 0, y: 6, w: 1, h: 3, minW: 1, minH: 2 },
     { i: 'financial-tip', x: 0, y: 9, w: 1, h: 3, minW: 1, minH: 3 },
-    { i: 'links', x: 0, y: 12, w: 1, h: 2, minW: 1, minH: 2 },
+    { i: 'income-expense', x: 0, y: 12, w: 1, h: 6, minW: 1, minH: 6 },
   ],
 };
 
@@ -141,8 +141,8 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
         >
           {widgets.map((widget) => (
             <div key={widget.id} className="widget-container">
-              <Card className="h-full shadow-sm hover:shadow-md transition-shadow overflow-hidden border-0">
-                <CardHeader className="pb-2 px-5 pt-4 border-b border-gray-50">
+              <Card className="h-full shadow-sm hover:shadow-md transition-shadow overflow-hidden border-0 flex flex-col">
+                <CardHeader className="pb-2 px-5 pt-4 border-b border-gray-50 flex-shrink-0">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-base font-medium flex items-center gap-2">
                       {widget.icon}
@@ -158,11 +158,11 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
                     <CardDescription className="text-xs mt-1 text-gray-500">{widget.description}</CardDescription>
                   )}
                 </CardHeader>
-                <CardContent className="px-5 py-3 overflow-auto h-[calc(100%-70px)]" style={{maxHeight: widget.minH ? `calc(${widget.minH * 140}px - 70px)` : 'none'}}>
+                <CardContent className="px-5 py-3 overflow-auto flex-grow">
                   {widget.content}
                 </CardContent>
                 {widget.footer && (
-                  <CardFooter className="pt-0 pb-3 px-5 mt-auto border-t border-gray-50">
+                  <CardFooter className="pt-0 pb-3 px-5 flex-shrink-0 border-t border-gray-50">
                     {widget.footer}
                   </CardFooter>
                 )}
