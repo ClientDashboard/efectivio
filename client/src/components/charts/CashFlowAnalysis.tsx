@@ -42,7 +42,7 @@ export default function CashFlowAnalysis({
   const lastRealMonth = lastRealIndex >= 0 ? data[lastRealIndex] : null;
   const previousMonth = lastRealIndex > 0 ? data[lastRealIndex - 1] : null;
   
-  const trend = lastRealMonth && previousMonth 
+  const trend = (lastRealMonth && previousMonth && lastRealMonth.real !== null && previousMonth.real !== null)
     ? ((lastRealMonth.real - previousMonth.real) / previousMonth.real) * 100 
     : 0;
     
@@ -62,7 +62,7 @@ export default function CashFlowAnalysis({
     return () => clearTimeout(timer);
   }, []);
 
-  const renderChart = () => {
+  const renderChart = (): React.ReactElement => {
     switch (viewMode) {
       case 'line':
         return (
@@ -360,7 +360,20 @@ export default function CashFlowAnalysis({
           </ComposedChart>
         );
       default:
-        return null;
+        // Fallback para asegurar que siempre retorne un elemento React
+        return (
+          <LineChart
+            data={data}
+            margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="real" name="Real" stroke={realColor} />
+          </LineChart>
+        );
     }
   };
 
@@ -421,36 +434,36 @@ export default function CashFlowAnalysis({
         </div>
         
         {!isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-            <div className="bg-gradient-to-tr from-blue-50 to-blue-100 rounded-lg p-3 flex items-center">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-600 mr-3">
-                <CreditCard className="h-5 w-5" />
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <div className="bg-gradient-to-tr from-blue-50 to-blue-100 rounded-lg p-2 flex items-center">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-600 mr-2">
+                <CreditCard className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-sm text-gray-500">Total Ingresos</div>
-                <div className="text-lg font-semibold">B/. {totalIngresos?.toLocaleString()}</div>
+                <div className="text-xs text-gray-500">Ingresos</div>
+                <div className="text-sm font-semibold">B/. {totalIngresos?.toLocaleString()}</div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-tr from-red-50 to-red-100 rounded-lg p-3 flex items-center">
-              <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center text-red-600 mr-3">
-                <WalletCards className="h-5 w-5" />
+            <div className="bg-gradient-to-tr from-red-50 to-red-100 rounded-lg p-2 flex items-center">
+              <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center text-red-600 mr-2">
+                <WalletCards className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-sm text-gray-500">Total Gastos</div>
-                <div className="text-lg font-semibold">B/. {totalGastos?.toLocaleString()}</div>
+                <div className="text-xs text-gray-500">Gastos</div>
+                <div className="text-sm font-semibold">B/. {totalGastos?.toLocaleString()}</div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-tr from-green-50 to-green-100 rounded-lg p-3 flex items-center">
-              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center text-green-600 mr-3">
-                {trend >= 0 ? <ArrowUp className="h-5 w-5" /> : <ArrowDown className="h-5 w-5" />}
+            <div className="bg-gradient-to-tr from-green-50 to-green-100 rounded-lg p-2 flex items-center">
+              <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-600 mr-2">
+                {trend >= 0 ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
               </div>
               <div>
-                <div className="text-sm text-gray-500">Tendencia</div>
-                <div className="text-lg font-semibold flex items-center">
+                <div className="text-xs text-gray-500">Tendencia</div>
+                <div className="text-sm font-semibold flex items-center">
                   {trend.toFixed(1)}%
-                  <Badge className={`ml-2 ${trend >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  <Badge className={`ml-1 text-[10px] px-1 py-0 ${trend >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {trend >= 0 ? 'Alza' : 'Baja'}
                   </Badge>
                 </div>
