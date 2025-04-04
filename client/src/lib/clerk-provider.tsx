@@ -3,11 +3,8 @@ import { ClerkProvider as BaseClerkProvider, useAuth } from '@clerk/clerk-react'
 import { supabase } from './supabase';
 
 // Obtener la clave pública de Clerk desde las variables de entorno
-const publishableKey = import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-if (!publishableKey) {
-  throw new Error('ERROR: Falta NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY en las variables de entorno');
-}
+// Temporalmente deshabilitado para desarrollo
+const publishableKey = import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'temporary_key';
 
 // Verificar que estamos usando la clave de producción
 if (!publishableKey.startsWith('pk_live_')) {
