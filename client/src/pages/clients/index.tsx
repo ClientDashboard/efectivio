@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import MainLayout from "@/components/layout/main-layout";
 import DataTable, { Column } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -87,7 +86,7 @@ export default function ClientsPage() {
   };
 
   return (
-    <MainLayout>
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Clientes</h1>
@@ -146,6 +145,6 @@ export default function ClientsPage() {
           )}
         </CardContent>
       </Card>
-    </MainLayout>
+    </>
   );
 }
