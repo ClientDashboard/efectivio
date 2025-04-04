@@ -5,9 +5,10 @@ import { useUser } from '@clerk/clerk-react';
 import { useDevAuth } from './clerk-provider';
 
 // Variable para determinar si estamos en modo desarrollo
-const isDevelopmentMode = !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-                         (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY?.startsWith('pk_live_') && 
-                          window.location.hostname !== 'efectivio.com');
+const isDevelopmentMode = typeof window !== 'undefined' && 
+                        (typeof (window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY === 'undefined' || 
+                        !(window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY ||
+                        window.location.hostname !== 'efectivio.com');
 
 // En desarrollo, siempre usamos el DevAuth para evitar problemas con Clerk
 export function useAuth() {
