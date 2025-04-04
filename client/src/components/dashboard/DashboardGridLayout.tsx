@@ -141,28 +141,28 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
         >
           {widgets.map((widget) => (
             <div key={widget.id} className="widget-container">
-              <Card className="h-full shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2 px-4 pt-3">
+              <Card className="h-full shadow-sm hover:shadow-md transition-shadow overflow-hidden border-0">
+                <CardHeader className="pb-2 px-5 pt-4 border-b border-gray-50">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-base font-medium flex items-center">
+                    <CardTitle className="text-base font-medium flex items-center gap-2">
                       {widget.icon}
-                      {widget.title}
+                      <span>{widget.title}</span>
                     </CardTitle>
                     {editing && (
-                      <div className="cursor-move text-gray-400">
+                      <div className="cursor-move text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100 transition-colors">
                         <GripVertical className="h-4 w-4" />
                       </div>
                     )}
                   </div>
                   {widget.description && (
-                    <CardDescription className="text-xs">{widget.description}</CardDescription>
+                    <CardDescription className="text-xs mt-1 text-gray-500">{widget.description}</CardDescription>
                   )}
                 </CardHeader>
-                <CardContent className="px-4 py-2">
+                <CardContent className="px-5 py-3 overflow-auto h-[calc(100%-70px)]" style={{maxHeight: widget.minH ? `calc(${widget.minH * 140}px - 70px)` : 'none'}}>
                   {widget.content}
                 </CardContent>
                 {widget.footer && (
-                  <CardFooter className="pt-0 pb-2 px-4">
+                  <CardFooter className="pt-0 pb-3 px-5 mt-auto border-t border-gray-50">
                     {widget.footer}
                   </CardFooter>
                 )}

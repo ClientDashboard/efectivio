@@ -1,4 +1,4 @@
-import { Calculator, Calendar, FileText, Link2, ExternalLink, Clock, CheckCircle2, CalendarClock, Lightbulb, BarChart3 } from "lucide-react";
+import { Calculator, Calendar, FileText, Link2, ExternalLink, Clock, CheckCircle2, CalendarClock, Lightbulb, BarChart3, Plus, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -54,26 +54,42 @@ export const CalculatorWidget = () => {
 
   return (
     <>
-      <div className="bg-gray-50 p-3 rounded-lg mb-3">
-        <div className="text-right text-sm text-gray-500 h-5">
+      <div className="bg-gray-50 p-4 rounded-xl mb-4 border border-gray-100 shadow-sm">
+        <div className="text-right text-sm text-gray-500 h-5 font-mono">
           {calculation}
         </div>
-        <div className="text-right text-2xl font-medium h-8">
+        <div className="text-right text-2xl font-semibold h-8 text-gray-900 font-mono">
           {calculatedValue || '0'}
         </div>
       </div>
-      <div className="grid grid-cols-5 gap-1.5">
-        {calculatorButtons.map((btn, index) => (
-          <Button
-            key={index}
-            variant={btn === '=' ? "default" : btn === 'C' ? "destructive" : "outline"}
-            className={`h-10 ${btn === ' ' ? 'opacity-0 cursor-default' : ''}`}
-            onClick={() => handleCalculatorInput(btn)}
-            disabled={btn === ' '}
-          >
-            {btn}
-          </Button>
-        ))}
+      <div className="grid grid-cols-5 gap-2">
+        {calculatorButtons.map((btn, index) => {
+          let buttonStyle = "";
+          
+          if (btn === '=') {
+            buttonStyle = "bg-blue-500 hover:bg-blue-600 text-white";
+          } else if (btn === 'C') {
+            buttonStyle = "bg-red-500 hover:bg-red-600 text-white";
+          } else if (btn === '←') {
+            buttonStyle = "bg-amber-500 hover:bg-amber-600 text-white";
+          } else if (['+', '-', '*', '/'].includes(btn)) {
+            buttonStyle = "bg-purple-100 hover:bg-purple-200 text-purple-700";
+          } else {
+            buttonStyle = "bg-gray-100 hover:bg-gray-200 text-gray-900";
+          }
+          
+          return (
+            <Button
+              key={index}
+              variant="ghost"
+              className={`h-11 font-medium transition-all ${buttonStyle} ${btn === ' ' ? 'opacity-0 cursor-default' : ''}`}
+              onClick={() => handleCalculatorInput(btn)}
+              disabled={btn === ' '}
+            >
+              {btn}
+            </Button>
+          );
+        })}
       </div>
     </>
   );
@@ -82,19 +98,24 @@ export const CalculatorWidget = () => {
 // Componente de Tareas Pendientes
 export const TasksWidget = () => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {pendingTasks.map(task => (
-        <div key={task.id} className="flex items-start gap-3 border-b border-gray-100 pb-3">
-          <div className="h-6 w-6 mt-1 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
+        <div key={task.id} className="flex items-start gap-3 border-b border-gray-100 pb-4 last:border-0">
+          <div className={`flex-shrink-0 w-5 h-5 mt-0.5 rounded-full border-2 ${
+            task.priority === 'alta' ? 'border-red-500' : 
+            task.priority === 'media' ? 'border-blue-500' : 'border-gray-300'
+          }`}></div>
           <div className="flex-1">
-            <p className="text-sm font-medium">{task.title}</p>
+            <p className="text-sm font-medium text-gray-900">{task.title}</p>
             <div className="flex items-center gap-2 mt-1">
-              <Clock className="h-3.5 w-3.5 text-gray-400" />
-              <span className="text-xs text-gray-500">{task.dueDate}</span>
+              <div className="flex items-center text-xs text-gray-500">
+                <Clock className="h-3 w-3 mr-1 text-gray-400" />
+                {task.dueDate}
+              </div>
               <Badge variant={
                 task.priority === 'alta' ? "destructive" : 
                 task.priority === 'media' ? "default" : "outline"
-              } className="text-[10px] px-1 py-0">
+              } className="text-[10px] px-1.5 py-0.5 font-medium">
                 {task.priority.toUpperCase()}
               </Badge>
             </div>
@@ -108,7 +129,8 @@ export const TasksWidget = () => {
 // Footer para el widget de tareas
 export const TasksFooter = () => {
   return (
-    <Button variant="ghost" size="sm" className="w-full text-blue-500 hover:text-blue-600">
+    <Button variant="ghost" size="sm" className="w-full text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium">
+      <Plus className="h-4 w-4 mr-2" />
       Ver todas las tareas
     </Button>
   );
@@ -117,21 +139,24 @@ export const TasksFooter = () => {
 // Componente de Citas
 export const AppointmentsWidget = () => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {upcomingAppointments.map(appointment => (
-        <div key={appointment.id} className="flex items-start gap-3 border-b border-gray-100 pb-3 last:border-0">
-          <div className="flex-shrink-0 bg-violet-100 text-violet-800 rounded-md p-2.5">
+        <div key={appointment.id} className="flex items-start gap-4 border-b border-gray-100 pb-4 last:border-0">
+          <div className="flex-shrink-0 bg-violet-50 text-violet-700 rounded-xl border border-violet-100 p-2.5">
             <Calendar className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium">{appointment.title}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-gray-500">{appointment.date}</span>
-              <span className="text-xs text-gray-400">•</span>
-              <span className="text-xs text-gray-500">{appointment.time}</span>
+            <p className="text-sm font-medium text-gray-900">{appointment.title}</p>
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex items-center text-xs font-medium px-2 py-1 rounded-full bg-violet-50 text-violet-700">
+                <span>{appointment.date}</span>
+              </div>
+              <div className="flex items-center text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                <span>{appointment.time}</span>
+              </div>
             </div>
           </div>
-          <Button variant="outline" size="sm" className="flex-shrink-0">
+          <Button variant="outline" size="sm" className="flex-shrink-0 bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 mt-1">
             <Calendar className="h-3.5 w-3.5 mr-1" />
             <span className="text-xs">Unirse</span>
           </Button>
@@ -144,7 +169,8 @@ export const AppointmentsWidget = () => {
 // Footer para el widget de citas
 export const AppointmentsFooter = () => {
   return (
-    <Button variant="ghost" size="sm" className="w-full text-violet-500 hover:text-violet-600">
+    <Button variant="ghost" size="sm" className="w-full text-violet-600 hover:text-violet-700 hover:bg-violet-50 font-medium">
+      <PlusCircle className="h-4 w-4 mr-2" />
       Programar nueva cita
     </Button>
   );
@@ -154,19 +180,31 @@ export const AppointmentsFooter = () => {
 export const LinksWidget = () => {
   return (
     <div className="grid grid-cols-1 gap-3">
-      <Button variant="outline" className="justify-start">
+      <Button 
+        variant="outline" 
+        className="justify-start h-11 border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
+      >
         <FileText className="mr-2 h-4 w-4" />
         <span>DGI - Portal tributario</span>
       </Button>
-      <Button variant="outline" className="justify-start">
+      <Button 
+        variant="outline" 
+        className="justify-start h-11 border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+      >
         <FileText className="mr-2 h-4 w-4" />
         <span>CSS - Portal empresarial</span>
       </Button>
-      <Button variant="outline" className="justify-start">
+      <Button 
+        variant="outline" 
+        className="justify-start h-11 border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+      >
         <FileText className="mr-2 h-4 w-4" />
         <span>Legislación fiscal</span>
       </Button>
-      <Button variant="outline" className="justify-start">
+      <Button 
+        variant="outline" 
+        className="justify-start h-11 border-purple-100 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
+      >
         <FileText className="mr-2 h-4 w-4" />
         <span>Calculadora de impuestos</span>
       </Button>
@@ -177,8 +215,8 @@ export const LinksWidget = () => {
 // Footer para el widget de enlaces
 export const LinksFooter = () => {
   return (
-    <Button variant="ghost" size="sm" className="w-full text-blue-500 hover:text-blue-600">
-      <ExternalLink className="mr-2 h-4 w-4" />
+    <Button variant="ghost" size="sm" className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium">
+      <Plus className="h-4 w-4 mr-2" />
       Añadir enlace personalizado
     </Button>
   );
