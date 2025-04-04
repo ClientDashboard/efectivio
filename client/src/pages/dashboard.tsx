@@ -82,23 +82,24 @@ export default function Dashboard() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="container mx-auto px-4 py-8"
+      className="container mx-auto px-3 py-5"
     >
       {/* Cabecera con saludo y fecha */}
-      <motion.div variants={itemVariants} className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{greeting}, Usuario</h1>
-        <p className="text-gray-600 mt-1">{formatDate(currentTime)}</p>
+      <motion.div variants={itemVariants} className="mb-5">
+        <h1 className="text-2xl font-bold text-gray-900">{greeting}, Usuario</h1>
+        <p className="text-gray-600 mt-1 text-sm">{formatDate(currentTime)}</p>
       </motion.div>
 
       {/* Acciones rápidas */}
-      <motion.div variants={itemVariants} className="mb-8">
-        <div className="flex flex-wrap gap-4">
+      <motion.div variants={itemVariants} className="mb-5">
+        <div className="flex flex-wrap gap-3">
           {quickActions.map((action, index) => (
             <Button
               key={index}
               variant="outline"
               onClick={action.action}
               className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border-gray-200 shadow-sm transition-all"
+              size="sm"
             >
               {action.icon}
               <span>{action.label}</span>
@@ -113,13 +114,13 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Contenido principal y widgets */}
-      <motion.div variants={itemVariants} className="mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="mt-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-3">
             <DashboardGridLayout widgets={dashboardWidgets} />
           </div>
         </div>
-        <div className="mt-8">
+        <div className="mt-5">
           <RecentActivity />
         </div>
       </motion.div>

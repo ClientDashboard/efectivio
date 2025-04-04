@@ -154,8 +154,8 @@ export default function DashboardOverview() {
   ];
 
   return (
-    <section className="mb-8 animate-fadeIn">
-      <div className="flex items-center justify-between mb-4">
+    <section className="mb-5 animate-fadeIn">
+      <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-semibold text-gray-900">Vista General</h2>
         <div className="flex space-x-2">
           <Button 
@@ -170,32 +170,32 @@ export default function DashboardOverview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {stats.map((stat) => (
           <div
             key={stat.id}
-            className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 
-              transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg
-              ${hoveredCard === stat.id ? "ring-2 ring-blue-500 ring-opacity-50" : ""}`}
+            className={`bg-white rounded-lg shadow-sm border border-gray-100 p-4 
+              transition-all duration-300 hover:shadow-md
+              ${hoveredCard === stat.id ? "ring-1 ring-blue-500 ring-opacity-50" : ""}`}
             onMouseEnter={() => setHoveredCard(stat.id)}
             onMouseLeave={() => setHoveredCard(null)}
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2">
               <div>
                 <h3 className="text-sm font-medium text-gray-600">
                   {stat.title}
                 </h3>
-                <p className="text-xs text-gray-400 mt-1">{stat.description}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{stat.description}</p>
               </div>
               <div
-                className={`w-12 h-12 rounded-xl ${stat.iconBgClass} flex items-center justify-center 
+                className={`w-10 h-10 rounded-lg ${stat.iconBgClass} flex items-center justify-center 
                 transition-transform duration-300 ${hoveredCard === stat.id ? "scale-110" : ""}`}
               >
                 {stat.icon}
               </div>
             </div>
             <div className="flex items-baseline">
-              <span className="text-2xl font-semibold text-gray-900">
+              <span className="text-xl font-semibold text-gray-900">
                 {stat.amount}
               </span>
               {stat.change !== null && (
@@ -214,18 +214,18 @@ export default function DashboardOverview() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-base font-medium text-gray-900 flex items-center">
               <i className="ri-line-chart-line mr-2 text-blue-500"></i>
               Ingresos vs Gastos
             </h3>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <Palette className="h-4 w-4" />
-                  <span className="hidden sm:inline">Colores</span>
+                <Button variant="outline" size="sm" className="flex items-center gap-1 h-7 px-2">
+                  <Palette className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline text-xs">Colores</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80">
@@ -329,24 +329,26 @@ export default function DashboardOverview() {
               </PopoverContent>
             </Popover>
           </div>
-          <IncomeExpenseChart 
-            key={`income-expense-${chartRefresh}`}
-            incomeColor={chartColors.incomeColor}
-            expenseColor={chartColors.expenseColor}
-          />
+          <div className="h-60">
+            <IncomeExpenseChart 
+              key={`income-expense-${chartRefresh}`}
+              incomeColor={chartColors.incomeColor}
+              expenseColor={chartColors.expenseColor}
+            />
+          </div>
         </div>
         
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-base font-medium text-gray-900 flex items-center">
               <i className="ri-funds-line mr-2 text-blue-500"></i>
               Flujo de Efectivo
             </h3>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <Palette className="h-4 w-4" />
-                  <span className="hidden sm:inline">Colores</span>
+                <Button variant="outline" size="sm" className="flex items-center gap-1 h-7 px-2">
+                  <Palette className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline text-xs">Colores</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80">
