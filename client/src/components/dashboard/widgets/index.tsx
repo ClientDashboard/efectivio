@@ -1,8 +1,9 @@
-import { Calculator, Calendar, FileText, Link2, ExternalLink, Clock, CheckCircle2, CalendarClock, Lightbulb } from "lucide-react";
+import { Calculator, Calendar, FileText, Link2, ExternalLink, Clock, CheckCircle2, CalendarClock, Lightbulb, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import FinancialTipGenerator from '../../financial-tip/FinancialTipGenerator';
+import IncomeExpenseChart from "../../charts/IncomeExpenseChart";
 import { Widget } from "../DashboardGridLayout";
 
 // Lista de tareas pendientes
@@ -188,6 +189,18 @@ export const FinancialTipWidget = () => {
   return <FinancialTipGenerator />;
 };
 
+// Componente de Ingresos vs Gastos
+export const IncomeExpenseWidget = () => {
+  return (
+    <div className="h-full">
+      <IncomeExpenseChart 
+        incomeColor="#0062ff"
+        expenseColor="#F48E21"
+      />
+    </div>
+  );
+};
+
 // Widget definitions
 export const dashboardWidgets: Widget[] = [
   {
@@ -237,5 +250,14 @@ export const dashboardWidgets: Widget[] = [
     description: 'Recursos y herramientas importantes',
     minH: 2,
     minW: 1
+  },
+  {
+    id: 'income-expense',
+    title: 'Ingresos vs Gastos',
+    icon: <BarChart3 className="mr-2 h-5 w-5 text-orange-500" />,
+    content: <IncomeExpenseWidget />,
+    description: 'Comparativa de ingresos y gastos por periodo',
+    minH: 3,
+    minW: 2
   },
 ];
