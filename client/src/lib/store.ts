@@ -41,11 +41,15 @@ interface AppState {
   setSidebarOpen: (isOpen: boolean) => void;
 }
 
-export const useAppStore = create<AppState>()((set) => ({
-  isSidebarOpen: true,
-  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
-  setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
-}));
+export const useAppStore = create<AppState>()(
+  persist((set) => ({
+    isSidebarOpen: true,
+    toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+    setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+  }), {
+    name: 'efectivio-sidebar-storage'
+  })
+);
 
 interface AccountingState {
   fiscalYearStart: Date;
