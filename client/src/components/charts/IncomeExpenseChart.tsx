@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 
 type ChartPeriod = 'month' | 'quarter' | 'year';
 
@@ -15,6 +16,11 @@ export default function IncomeExpenseChart({
 }: IncomeExpenseChartProps) {
   const [period, setPeriod] = useState<ChartPeriod>('month');
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
+  
+  // Totales calculados
+  const totalIngresos = 125500;
+  const totalGastos = 53650;
+  const diferencia = totalIngresos - totalGastos;
   
   // Sample data
   const monthlyData = [
@@ -34,11 +40,11 @@ export default function IncomeExpenseChart({
   ];
 
   const yearlyData = [
-    { name: '2019', ingresos: 210000, gastos: 95000 },
-    { name: '2020', ingresos: 220000, gastos: 98500 },
     { name: '2021', ingresos: 245000, gastos: 105000 },
     { name: '2022', ingresos: 255000, gastos: 108000 },
-    { name: '2023', ingresos: 268000, gastos: 114150 }
+    { name: '2023', ingresos: 268000, gastos: 114150 },
+    { name: '2024', ingresos: 280000, gastos: 120000 },
+    { name: '2025', ingresos: 290000, gastos: 125000 }
   ];
 
   const chartData = 
@@ -46,42 +52,45 @@ export default function IncomeExpenseChart({
     period === 'quarter' ? quarterlyData : yearlyData;
   
   return (
-    <div className="bg-white rounded-lg p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex bg-gray-100 rounded-lg p-1">
-          {['month', 'quarter', 'year'].map((p) => (
-            <button
-              key={p}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                period === p 
-                  ? 'bg-white text-gray-900 shadow-sm' 
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-              onClick={() => setPeriod(p as ChartPeriod)}
-            >
-              {p === 'month' ? 'Mes' : p === 'quarter' ? 'Trimestre' : 'Año'}
-            </button>
-          ))}
-        </div>
+    <div className="w-full h-full px-1">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Ingresos vs Gastos</h2>
         
-        <div className="ml-auto flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: incomeColor }}></span>
-            <span>Ingresos</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: expenseColor }}></span>
-            <span>Gastos</span>
+        <div className="flex items-center">
+          <div className="relative">
+            <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 rounded-md px-3 py-1.5">
+              {period === 'month' ? 'Este semestre' : period === 'quarter' ? 'Este año (trimestres)' : 'Últimos 5 años'}
+              <ChevronDown className="h-4 w-4 ml-1" />
+            </button>
           </div>
         </div>
       </div>
       
-      <div className="h-80 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+          <p className="text-blue-600 text-sm mb-1">Ingresos totales</p>
+          <p className="text-2xl font-semibold">${totalIngresos.toLocaleString()}</p>
+          <p className="text-blue-600 text-xs mt-1">+8.2% vs periodo anterior</p>
+        </div>
+        
+        <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+          <p className="text-orange-600 text-sm mb-1">Gastos totales</p>
+          <p className="text-2xl font-semibold">${totalGastos.toLocaleString()}</p>
+          <p className="text-orange-600 text-xs mt-1">+4.5% vs periodo anterior</p>
+        </div>
+        
+        <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+          <p className="text-emerald-600 text-sm mb-1">Diferencia</p>
+          <p className="text-2xl font-semibold">${diferencia.toLocaleString()}</p>
+          <p className="text-emerald-600 text-xs mt-1">+12.3% vs periodo anterior</p>
+        </div>
+      </div>
+      
+      <div className="h-72 w-full mt-4">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+          <AreaChart
             data={chartData}
             margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
-            barGap={8}
             onMouseMove={(data) => {
               if (data.activeTooltipIndex !== undefined) {
                 setHoveredBar(data.activeTooltipIndex.toString());
@@ -89,6 +98,17 @@ export default function IncomeExpenseChart({
             }}
             onMouseLeave={() => setHoveredBar(null)}
           >
+            <defs>
+              <linearGradient id="ingresos" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={incomeColor} stopOpacity={0.1}/>
+                <stop offset="95%" stopColor={incomeColor} stopOpacity={0}/>
+              </linearGradient>
+              <linearGradient id="gastos" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={expenseColor} stopOpacity={0.1}/>
+                <stop offset="95%" stopColor={expenseColor} stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
             <XAxis 
               dataKey="name" 
@@ -101,10 +121,10 @@ export default function IncomeExpenseChart({
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#666', fontSize: 12 }}
-              tickFormatter={(value) => `B/.${value / 1000}k`}
+              tickFormatter={(value) => `$${value / 1000}k`}
             />
             <Tooltip 
-              formatter={(value) => [`B/. ${value.toLocaleString()}`, null]}
+              formatter={(value) => [`$${value.toLocaleString()}`, null]}
               labelFormatter={(name) => `${period === 'month' ? 'Mes' : period === 'quarter' ? 'Trimestre' : 'Año'}: ${name}`}
               contentStyle={{ 
                 borderRadius: '8px', 
@@ -113,25 +133,42 @@ export default function IncomeExpenseChart({
                 padding: '10px 14px'
               }}
             />
-            <Legend />
-            <Bar 
-              dataKey="ingresos" 
-              name="Ingresos" 
-              fill={incomeColor} 
-              radius={[4, 4, 0, 0]}
+            
+            <Area
+              type="monotone"
+              dataKey="ingresos"
+              stroke={incomeColor}
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#ingresos)"
+              name="Ingresos"
               animationDuration={1000}
               animationEasing="ease-out"
             />
-            <Bar 
-              dataKey="gastos" 
-              name="Gastos" 
-              fill={expenseColor} 
-              radius={[4, 4, 0, 0]}
+            <Area
+              type="monotone"
+              dataKey="gastos"
+              stroke={expenseColor}
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#gastos)"
+              name="Gastos"
               animationDuration={1000}
               animationEasing="ease-out"
             />
-          </BarChart>
+          </AreaChart>
         </ResponsiveContainer>
+      </div>
+      
+      <div className="flex items-center justify-center gap-8 mt-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: incomeColor }}></span>
+          <span>Ingresos</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: expenseColor }}></span>
+          <span>Gastos</span>
+        </div>
       </div>
     </div>
   );
