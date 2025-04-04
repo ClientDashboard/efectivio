@@ -97,7 +97,7 @@ export default function Dashboard() {
               key={index}
               variant="outline"
               onClick={action.action}
-              className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border-gray-200 shadow-sm transition-all"
+              className="flex items-center gap-2 bg-white/80 hover:bg-white text-gray-800 border-gray-200/50 shadow-sm transition-all backdrop-blur-sm"
               size="sm"
             >
               {action.icon}

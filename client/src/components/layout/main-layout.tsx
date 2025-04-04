@@ -32,9 +32,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <Sidebar />
         </div>
         
-        <div className="flex flex-col flex-1 overflow-hidden bg-white">
+        <div className="flex flex-col flex-1 overflow-hidden">
           <Header />
-          <main className="flex-1 relative overflow-y-auto focus:outline-none bg-white">
+          <main className="flex-1 relative overflow-y-auto focus:outline-none">
             <div className="py-4">
               <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
                 {children}

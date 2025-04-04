@@ -141,15 +141,15 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
         >
           {widgets.map((widget) => (
             <div key={widget.id} className="widget-container">
-              <Card className="h-full shadow-sm hover:shadow-md transition-shadow overflow-hidden border-0 flex flex-col">
-                <CardHeader className="pb-2 px-5 pt-4 border-b border-gray-50 flex-shrink-0">
+              <Card className="h-full shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100/60 flex flex-col bg-white/90 backdrop-blur-sm">
+                <CardHeader className="pb-2 px-5 pt-4 border-b border-gray-50/70 flex-shrink-0 bg-gradient-to-r from-white to-gray-50/10">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-base font-medium flex items-center gap-2">
                       {widget.icon}
                       <span>{widget.title}</span>
                     </CardTitle>
                     {editing && (
-                      <div className="cursor-move text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100 transition-colors">
+                      <div className="cursor-move text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-50/50 transition-colors">
                         <GripVertical className="h-4 w-4" />
                       </div>
                     )}
@@ -162,7 +162,7 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
                   {widget.content}
                 </CardContent>
                 {widget.footer && (
-                  <CardFooter className="pt-0 pb-3 px-5 flex-shrink-0 border-t border-gray-50">
+                  <CardFooter className="pt-0 pb-3 px-5 flex-shrink-0 border-t border-gray-50/70">
                     {widget.footer}
                   </CardFooter>
                 )}
