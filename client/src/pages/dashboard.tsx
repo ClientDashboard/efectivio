@@ -1,6 +1,5 @@
 
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
-import RecentActivity from '@/components/dashboard/RecentActivity';
 import { DashboardGridLayout } from '@/components/dashboard/DashboardGridLayout';
 import { dashboardWidgets } from '@/components/dashboard/widgets';
 import { useLocation } from "wouter";
@@ -119,9 +118,6 @@ export default function Dashboard() {
           <div className="lg:col-span-3">
             <DashboardGridLayout widgets={dashboardWidgets} />
           </div>
-        </div>
-        <div className="mt-5">
-          <RecentActivity />
         </div>
       </motion.div>
     </motion.div>

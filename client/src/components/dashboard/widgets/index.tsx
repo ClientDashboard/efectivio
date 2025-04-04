@@ -1,4 +1,4 @@
-import { Calculator, Calendar, FileText, Link2, ExternalLink, Clock, CheckCircle2, CalendarClock, Lightbulb, BarChart3, Plus, PlusCircle } from "lucide-react";
+import { Calculator, Calendar, Clock, CheckCircle2, CalendarClock, Lightbulb, BarChart3, Plus, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -176,51 +176,7 @@ export const AppointmentsFooter = () => {
   );
 };
 
-// Componente de enlaces útiles
-export const LinksWidget = () => {
-  return (
-    <div className="grid grid-cols-1 gap-3">
-      <Button 
-        variant="outline" 
-        className="justify-start h-11 border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
-      >
-        <FileText className="mr-2 h-4 w-4" />
-        <span>DGI - Portal tributario</span>
-      </Button>
-      <Button 
-        variant="outline" 
-        className="justify-start h-11 border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
-      >
-        <FileText className="mr-2 h-4 w-4" />
-        <span>CSS - Portal empresarial</span>
-      </Button>
-      <Button 
-        variant="outline" 
-        className="justify-start h-11 border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
-      >
-        <FileText className="mr-2 h-4 w-4" />
-        <span>Legislación fiscal</span>
-      </Button>
-      <Button 
-        variant="outline" 
-        className="justify-start h-11 border-purple-100 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
-      >
-        <FileText className="mr-2 h-4 w-4" />
-        <span>Calculadora de impuestos</span>
-      </Button>
-    </div>
-  );
-};
 
-// Footer para el widget de enlaces
-export const LinksFooter = () => {
-  return (
-    <Button variant="ghost" size="sm" className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium">
-      <Plus className="h-4 w-4 mr-2" />
-      Añadir enlace personalizado
-    </Button>
-  );
-};
 
 // Componente de consejo financiero
 export const FinancialTipWidget = () => {
@@ -279,16 +235,7 @@ export const dashboardWidgets: Widget[] = [
     minH: 3,
     minW: 2
   },
-  {
-    id: 'links',
-    title: 'Enlaces útiles',
-    icon: <Link2 className="mr-2 h-5 w-5 text-blue-500" />,
-    content: <LinksWidget />,
-    footer: <LinksFooter />,
-    description: 'Recursos y herramientas importantes',
-    minH: 2,
-    minW: 1
-  },
+
   {
     id: 'income-expense',
     title: 'Ingresos vs Gastos',
