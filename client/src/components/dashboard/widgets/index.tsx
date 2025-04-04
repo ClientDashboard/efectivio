@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import FinancialTipGenerator from '../../financial-tip/FinancialTipGenerator';
-import IncomeExpenseChart from "../../charts/IncomeExpenseChart";
 import { Widget } from "../DashboardGridLayout";
+import BasicIncomeExpenseWidget from "./BasicIncomeExpenseWidget";
 
 // Lista de tareas pendientes
 const pendingTasks = [
@@ -183,16 +183,13 @@ export const FinancialTipWidget = () => {
   return <FinancialTipGenerator />;
 };
 
+// Componente de Ingresos vs Gastos integrado directamente
+
 // Componente de Ingresos vs Gastos
 export const IncomeExpenseWidget = () => {
   return (
     <div className="h-full w-full flex flex-col items-center justify-center">
-      <div className="w-full h-full min-h-[400px]">
-        <IncomeExpenseChart 
-          incomeColor="#0062ff"
-          expenseColor="#F48E21"
-        />
-      </div>
+      <BasicIncomeExpenseWidget />
     </div>
   );
 };
