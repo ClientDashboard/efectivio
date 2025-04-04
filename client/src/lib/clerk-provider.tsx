@@ -9,9 +9,9 @@ if (!publishableKey) {
   throw new Error('ERROR: Falta VITE_CLERK_PUBLISHABLE_KEY en las variables de entorno');
 }
 
-// En desarrollo, permitimos claves de prueba
-if (!publishableKey.startsWith('pk_test_')) {
-  console.warn('Usando clave de desarrollo de Clerk');
+// Verificar que estamos usando la clave de producción
+if (publishableKey.startsWith('pk_test_')) {
+  console.warn('⚠️ Usando clave de prueba de Clerk. Cambiar a clave de producción.');
 }
 
 type ClerkProviderProps = {
