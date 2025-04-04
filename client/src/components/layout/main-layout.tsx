@@ -12,8 +12,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
   const { isSidebarOpen } = useAppStore();
   
-  // Don't show layout on landing page or auth pages
-  if (location === "/" || location.startsWith("/auth")) {
+  const showSidebar = !location.startsWith("/auth") && location !== "/";
+  
+  if (!showSidebar) {
     return <>{children}</>;
   }
   
