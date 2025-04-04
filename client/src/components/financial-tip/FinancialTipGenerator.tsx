@@ -1,140 +1,190 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lightbulb, RefreshCw } from "lucide-react";
+import { Lightbulb, RefreshCw, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 // Lista de consejos financieros predefinidos
 const FINANCIAL_TIPS = [
-  "Asegúrate de separar al menos el 20% de tus ingresos para ahorros e inversiones.",
-  "Revisa tus gastos fijos mensualmente y busca oportunidades para reducirlos.",
-  "Considera automatizar tus pagos recurrentes para evitar cargos por pagos tardíos.",
-  "Mantén un fondo de emergencia equivalente a 3-6 meses de gastos.",
-  "Diversifica tus inversiones para minimizar riesgos.",
-  "Revisa tu informe de crédito al menos una vez al año.",
-  "Antes de hacer una compra importante, espera 24 horas para evitar decisiones impulsivas.",
-  "Establece metas financieras específicas y medibles, tanto a corto como a largo plazo.",
-  "Programa un 'día de no gastar' cada semana para mejorar tus hábitos de ahorro.",
-  "Utiliza la regla 50/30/20: 50% para necesidades, 30% para deseos y 20% para ahorro.",
-  "Considera abrir una cuenta de ahorro separada para objetivos específicos.",
-  "Revisa tus suscripciones y cancela aquellas que no utilizas con regularidad.",
-  "Mantén un seguimiento detallado de tus gastos para identificar patrones de consumo.",
-  "Aprende sobre inversiones y finanzas personales a través de libros, podcasts y cursos en línea.",
-  "Establece recordatorios para pagar tus facturas a tiempo y evitar recargos.",
-  "Antes de contratar un servicio o hacer una compra, compara precios y opciones.",
-  "Considera la posibilidad de refinanciar tus deudas para obtener tasas de interés más bajas.",
-  "Aprende a distinguir entre necesidades y deseos para tomar mejores decisiones financieras.",
-  "Planifica tus comidas para reducir gastos en restaurantes y comida para llevar.",
-  "Reserva tiempo mensualmente para revisar tu situación financiera y ajustar tu presupuesto."
+  {
+    text: "Asegúrate de separar al menos el 20% de tus ingresos para ahorros e inversiones.",
+    category: "ahorro"
+  },
+  {
+    text: "Revisa tus gastos fijos mensualmente y busca oportunidades para reducirlos.",
+    category: "gastos"
+  },
+  {
+    text: "Considera automatizar tus pagos recurrentes para evitar cargos por pagos tardíos.",
+    category: "organización"
+  },
+  {
+    text: "Mantén un fondo de emergencia equivalente a 3-6 meses de gastos.",
+    category: "planificación"
+  },
+  {
+    text: "Diversifica tus inversiones para minimizar riesgos.",
+    category: "inversión"
+  },
+  {
+    text: "Revisa tu informe de crédito al menos una vez al año.",
+    category: "crédito"
+  },
+  {
+    text: "Antes de hacer una compra importante, espera 24 horas para evitar decisiones impulsivas.",
+    category: "compras"
+  },
+  {
+    text: "Establece metas financieras específicas y medibles, tanto a corto como a largo plazo.",
+    category: "planificación"
+  },
+  {
+    text: "Programa un 'día de no gastar' cada semana para mejorar tus hábitos de ahorro.",
+    category: "ahorro"
+  },
+  {
+    text: "Utiliza la regla 50/30/20: 50% para necesidades, 30% para deseos y 20% para ahorro.",
+    category: "presupuesto"
+  },
+  {
+    text: "Considera abrir una cuenta de ahorro separada para objetivos específicos.",
+    category: "ahorro"
+  },
+  {
+    text: "Revisa tus suscripciones y cancela aquellas que no utilizas con regularidad.",
+    category: "gastos"
+  },
+  {
+    text: "Mantén un seguimiento detallado de tus gastos para identificar patrones de consumo.",
+    category: "organización"
+  },
+  {
+    text: "Aprende sobre inversiones y finanzas personales a través de libros, podcasts y cursos en línea.",
+    category: "educación"
+  },
+  {
+    text: "Establece recordatorios para pagar tus facturas a tiempo y evitar recargos.",
+    category: "organización"
+  },
+  {
+    text: "Antes de contratar un servicio o hacer una compra, compara precios y opciones.",
+    category: "compras"
+  },
+  {
+    text: "Considera la posibilidad de refinanciar tus deudas para obtener tasas de interés más bajas.",
+    category: "deudas"
+  },
+  {
+    text: "Aprende a distinguir entre necesidades y deseos para tomar mejores decisiones financieras.",
+    category: "presupuesto"
+  },
+  {
+    text: "Planifica tus comidas para reducir gastos en restaurantes y comida para llevar.",
+    category: "gastos"
+  },
+  {
+    text: "Reserva tiempo mensualmente para revisar tu situación financiera y ajustar tu presupuesto.",
+    category: "organización"
+  }
 ];
 
-// Estilos para las animaciones de la mascota
-const mascotStyles = {
-  container: {
-    position: 'relative',
-    width: '120px',
-    height: '120px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  } as React.CSSProperties,
-  body: {
-    width: '100px',
-    height: '100px',
-    backgroundColor: '#39FFBD',
-    borderRadius: '50%',
-    position: 'absolute',
-    bottom: '0',
-    left: '10px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    animation: 'bodyBounce 2s infinite ease-in-out',
-  } as React.CSSProperties,
-  eye: {
-    width: '20px',
-    height: '20px',
-    backgroundColor: '#062644',
-    borderRadius: '50%',
-    position: 'absolute',
-    top: '30px',
-  } as React.CSSProperties,
-  leftEye: {
-    left: '25px',
-  } as React.CSSProperties,
-  rightEye: {
-    right: '25px',
-  } as React.CSSProperties,
-  mouth: {
-    width: '40px',
-    height: '20px',
-    borderRadius: '0 0 20px 20px',
-    border: '4px solid #062644',
-    borderTop: 'none',
-    position: 'absolute',
-    bottom: '25px',
-    left: '30px',
-  } as React.CSSProperties,
+// Colores para las categorías
+const CATEGORY_COLORS: Record<string, { bg: string, text: string }> = {
+  ahorro: { bg: 'bg-blue-50', text: 'text-blue-600' },
+  gastos: { bg: 'bg-red-50', text: 'text-red-600' },
+  organización: { bg: 'bg-purple-50', text: 'text-purple-600' },
+  planificación: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
+  inversión: { bg: 'bg-amber-50', text: 'text-amber-600' },
+  crédito: { bg: 'bg-teal-50', text: 'text-teal-600' },
+  compras: { bg: 'bg-orange-50', text: 'text-orange-600' },
+  presupuesto: { bg: 'bg-indigo-50', text: 'text-indigo-600' },
+  deudas: { bg: 'bg-rose-50', text: 'text-rose-600' },
+  educación: { bg: 'bg-cyan-50', text: 'text-cyan-600' }
 };
 
-// Animaciones CSS para la mascota
-const mascotAnimations = `
-@keyframes bodyBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
+// Componente para la mascota animada
+const AnimatedMascot = ({ state }: { state: string }) => {
+  // Variantes para las animaciones con Framer Motion
+  const bodyVariants = {
+    normal: { 
+      y: [0, -10, 0], 
+      transition: { 
+        repeat: Infinity, 
+        duration: 2 
+      } 
+    },
+    thinking: { 
+      rotate: [-5, 5, -5],
+      transition: { 
+        repeat: Infinity, 
+        duration: 1.5 
+      } 
+    },
+    excited: { 
+      scale: [1, 1.1, 1],
+      transition: { 
+        repeat: Infinity, 
+        duration: 0.5 
+      } 
+    }
+  };
 
-@keyframes blink {
-  0%, 10%, 25%, 75%, 100% { transform: scaleY(1); }
-  20%, 70% { transform: scaleY(0.1); }
-}
+  const eyeVariants = {
+    normal: { 
+      scaleY: [1, 0.1, 1, 1, 1, 1, 1, 1],
+      transition: { 
+        repeat: Infinity, 
+        duration: 4, 
+        times: [0, 0.1, 0.2, 0.3, 0.7, 0.75, 0.8, 1] 
+      } 
+    },
+    thinking: { 
+      scaleY: [1, 0.1, 1],
+      transition: { 
+        repeat: Infinity, 
+        duration: 2
+      } 
+    },
+    excited: { 
+      scaleY: [1, 0.1, 1, 1, 0.1, 1],
+      transition: { 
+        repeat: Infinity, 
+        duration: 2 
+      } 
+    }
+  };
 
-@keyframes thinking {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  75% { transform: rotate(5deg); }
-}
-
-@keyframes excited {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-`;
+  return (
+    <div className="relative w-28 h-28 mx-auto">
+      <motion.div 
+        className="absolute bottom-0 left-2.5 w-24 h-24 bg-[#39FFBD] rounded-full flex justify-center items-center overflow-hidden shadow-lg"
+        variants={bodyVariants}
+        animate={state}
+      >
+        <motion.div 
+          className="absolute top-7 left-6 w-5 h-5 bg-[#062644] rounded-full"
+          variants={eyeVariants}
+          animate={state}
+        />
+        <motion.div 
+          className="absolute top-7 right-6 w-5 h-5 bg-[#062644] rounded-full"
+          variants={eyeVariants}
+          animate={state}
+        />
+        <div className="absolute bottom-6 left-7 w-10 h-5 rounded-b-xl border-4 border-t-0 border-[#062644]" />
+      </motion.div>
+    </div>
+  );
+};
 
 export interface FinancialTipProps {
   className?: string;
 }
 
-const FinancialTipGenerator: React.FC<FinancialTipProps> = ({ className }) => {
-  const [currentTip, setCurrentTip] = useState<string>("");
+const FinancialTipGenerator = ({ className }: FinancialTipProps) => {
+  const [currentTip, setCurrentTip] = useState<typeof FINANCIAL_TIPS[number] | null>(null);
   const [animationState, setAnimationState] = useState<string>("normal");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-
-  // Estilo para los ojos según el estado de animación
-  const getEyeStyle = () => {
-    let style = { ...mascotStyles.eye };
-    
-    if (animationState === "thinking") {
-      style.animation = 'thinking 1s infinite ease-in-out';
-    } else if (animationState === "excited") {
-      style.animation = 'blink 3s infinite';
-    } else {
-      style.animation = 'blink 4s infinite';
-    }
-    
-    return style;
-  };
-
-  // Estilo para el cuerpo según el estado de animación
-  const getBodyStyle = () => {
-    let style = { ...mascotStyles.body };
-    
-    if (animationState === "excited") {
-      style.animation = 'excited 0.5s infinite ease-in-out';
-    }
-    
-    return style;
-  };
 
   // Generar un nuevo consejo financiero
   const generateNewTip = () => {
@@ -160,37 +210,53 @@ const FinancialTipGenerator: React.FC<FinancialTipProps> = ({ className }) => {
     generateNewTip();
   }, []);
 
+  // Obtener el estilo de color según la categoría
+  const getCategoryStyle = (category: string) => {
+    return CATEGORY_COLORS[category] || { bg: 'bg-gray-100', text: 'text-gray-600' };
+  };
+
   return (
     <Card className={`w-full ${className}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium flex items-center">
-          <Lightbulb className="mr-2 h-5 w-5 text-[#39FFBD]" />
-          Consejo Financiero del Día
-        </CardTitle>
+      <CardHeader className="pb-0">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-medium flex items-center">
+            <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
+            Consejo Financiero
+          </CardTitle>
+          <div className="px-2 py-1 bg-amber-50 rounded-full flex items-center text-xs text-amber-600">
+            <Sparkles className="h-3 w-3 mr-1" />
+            <span>Efectivio IA</span>
+          </div>
+        </div>
         <CardDescription>
           Consejos personalizados para mejorar tus finanzas
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <style>
-          {mascotAnimations}
-        </style>
-        <div style={mascotStyles.container}>
-          <div style={getBodyStyle()}>
-            <div style={{ ...getEyeStyle(), ...mascotStyles.leftEye }} />
-            <div style={{ ...getEyeStyle(), ...mascotStyles.rightEye }} />
-            <div style={mascotStyles.mouth} />
-          </div>
-        </div>
-        <div className="mt-4 min-h-[80px] flex items-center justify-center">
-          <p className="text-center">{currentTip}</p>
-        </div>
+      <CardContent className="pt-4">
+        <AnimatedMascot state={animationState} />
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          key={currentTip?.text}
+          className="mt-4 min-h-[90px] flex flex-col items-center justify-center space-y-2"
+        >
+          {currentTip && (
+            <>
+              <div className={`px-2 py-1 rounded-full text-xs ${getCategoryStyle(currentTip.category).bg} ${getCategoryStyle(currentTip.category).text}`}>
+                {currentTip.category.charAt(0).toUpperCase() + currentTip.category.slice(1)}
+              </div>
+              <p className="text-center text-sm">{currentTip.text}</p>
+            </>
+          )}
+        </motion.div>
       </CardContent>
-      <CardFooter className="pt-3">
+      <CardFooter className="pt-2">
         <Button 
           onClick={generateNewTip} 
           disabled={isGenerating}
-          className="w-full bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644]"
+          className="w-full"
+          variant="outline"
         >
           {isGenerating ? (
             <>
@@ -198,7 +264,10 @@ const FinancialTipGenerator: React.FC<FinancialTipProps> = ({ className }) => {
               Generando consejo...
             </>
           ) : (
-            "Nuevo consejo"
+            <>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Nuevo consejo
+            </>
           )}
         </Button>
       </CardFooter>

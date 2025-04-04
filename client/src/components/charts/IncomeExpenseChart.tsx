@@ -1,10 +1,20 @@
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { motion } from 'framer-motion';
 
 type ChartPeriod = 'month' | 'quarter' | 'year';
 
-export default function IncomeExpenseChart() {
+interface IncomeExpenseChartProps {
+  incomeColor?: string;
+  expenseColor?: string;
+}
+
+export default function IncomeExpenseChart({ 
+  incomeColor = "#0062ff", 
+  expenseColor = "#F48E21" 
+}: IncomeExpenseChartProps) {
   const [period, setPeriod] = useState<ChartPeriod>('month');
+  const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   
   // Sample data
   const monthlyData = [
@@ -36,46 +46,90 @@ export default function IncomeExpenseChart() {
     period === 'quarter' ? quarterlyData : yearlyData;
   
   return (
-    <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="font-medium text-gray-900">Ingresos vs Gastos</h3>
-        <div className="flex text-sm space-x-2">
-          <button 
-            className={`px-3 py-1 rounded font-medium ${period === 'month' ? 'bg-primary-50 text-primary-500' : 'text-gray-500 hover:bg-gray-100'}`}
-            onClick={() => setPeriod('month')}
-          >
-            Mes
-          </button>
-          <button 
-            className={`px-3 py-1 rounded font-medium ${period === 'quarter' ? 'bg-primary-50 text-primary-500' : 'text-gray-500 hover:bg-gray-100'}`}
-            onClick={() => setPeriod('quarter')}
-          >
-            Trimestre
-          </button>
-          <button 
-            className={`px-3 py-1 rounded font-medium ${period === 'year' ? 'bg-primary-50 text-primary-500' : 'text-gray-500 hover:bg-gray-100'}`}
-            onClick={() => setPeriod('year')}
-          >
-            Año
-          </button>
+    <div className="bg-white rounded-lg p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          {['month', 'quarter', 'year'].map((p) => (
+            <button
+              key={p}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
+                period === p 
+                  ? 'bg-white text-gray-900 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+              onClick={() => setPeriod(p as ChartPeriod)}
+            >
+              {p === 'month' ? 'Mes' : p === 'quarter' ? 'Trimestre' : 'Año'}
+            </button>
+          ))}
+        </div>
+        
+        <div className="ml-auto flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: incomeColor }}></span>
+            <span>Ingresos</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: expenseColor }}></span>
+            <span>Gastos</span>
+          </div>
         </div>
       </div>
-      <div className="h-64 w-full">
+      
+      <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+            barGap={8}
+            onMouseMove={(data) => {
+              if (data.activeTooltipIndex !== undefined) {
+                setHoveredBar(data.activeTooltipIndex.toString());
+              }
+            }}
+            onMouseLeave={() => setHoveredBar(null)}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+            <XAxis 
+              dataKey="name" 
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#666', fontSize: 12 }}
+              dy={10}
+            />
+            <YAxis 
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#666', fontSize: 12 }}
+              tickFormatter={(value) => `B/.${value / 1000}k`}
+            />
             <Tooltip 
-              formatter={(value) => `B/. ${value.toLocaleString()}`}
-              labelFormatter={(name) => `Período: ${name}`}
+              formatter={(value) => [`B/. ${value.toLocaleString()}`, null]}
+              labelFormatter={(name) => `${period === 'month' ? 'Mes' : period === 'quarter' ? 'Trimestre' : 'Año'}: ${name}`}
+              contentStyle={{ 
+                borderRadius: '8px', 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
+                border: 'none', 
+                padding: '10px 14px'
+              }}
             />
             <Legend />
-            <Bar dataKey="ingresos" name="Ingresos" fill="#0062ff" />
-            <Bar dataKey="gastos" name="Gastos" fill="#F48E21" />
+            <Bar 
+              dataKey="ingresos" 
+              name="Ingresos" 
+              fill={incomeColor} 
+              radius={[4, 4, 0, 0]}
+              animationDuration={1000}
+              animationEasing="ease-out"
+            />
+            <Bar 
+              dataKey="gastos" 
+              name="Gastos" 
+              fill={expenseColor} 
+              radius={[4, 4, 0, 0]}
+              animationDuration={1000}
+              animationEasing="ease-out"
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
