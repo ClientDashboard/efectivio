@@ -107,21 +107,21 @@ const AnimatedMascot = ({ state }: { state: string }) => {
   // Variantes para las animaciones con Framer Motion
   const bodyVariants = {
     normal: { 
-      y: [0, -10, 0], 
+      y: [0, -5, 0], 
       transition: { 
         repeat: Infinity, 
         duration: 2 
       } 
     },
     thinking: { 
-      rotate: [-5, 5, -5],
+      rotate: [-3, 3, -3],
       transition: { 
         repeat: Infinity, 
         duration: 1.5 
       } 
     },
     excited: { 
-      scale: [1, 1.1, 1],
+      scale: [1, 1.05, 1],
       transition: { 
         repeat: Infinity, 
         duration: 0.5 
@@ -155,23 +155,23 @@ const AnimatedMascot = ({ state }: { state: string }) => {
   };
 
   return (
-    <div className="relative w-28 h-28 mx-auto">
+    <div className="relative w-20 h-20 mx-auto">
       <motion.div 
-        className="absolute bottom-0 left-2.5 w-24 h-24 bg-[#39FFBD] rounded-full flex justify-center items-center overflow-hidden shadow-lg"
+        className="absolute bottom-0 left-1.5 w-16 h-16 bg-[#39FFBD] rounded-full flex justify-center items-center overflow-hidden shadow-lg"
         variants={bodyVariants}
         animate={state}
       >
         <motion.div 
-          className="absolute top-7 left-6 w-5 h-5 bg-[#062644] rounded-full"
+          className="absolute top-5 left-4 w-3 h-3 bg-[#062644] rounded-full"
           variants={eyeVariants}
           animate={state}
         />
         <motion.div 
-          className="absolute top-7 right-6 w-5 h-5 bg-[#062644] rounded-full"
+          className="absolute top-5 right-4 w-3 h-3 bg-[#062644] rounded-full"
           variants={eyeVariants}
           animate={state}
         />
-        <div className="absolute bottom-6 left-7 w-10 h-5 rounded-b-xl border-4 border-t-0 border-[#062644]" />
+        <div className="absolute bottom-4 left-5 w-6 h-3 rounded-b-xl border-2 border-t-0 border-[#062644]" />
       </motion.div>
     </div>
   );
@@ -216,63 +216,67 @@ const FinancialTipGenerator = ({ className }: FinancialTipProps) => {
   };
 
   return (
-    <Card className={`w-full ${className}`}>
-      <CardHeader className="pb-0">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-medium flex items-center">
-            <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
-            Consejo Financiero
-          </CardTitle>
-          <div className="px-2 py-1 bg-amber-50 rounded-full flex items-center text-xs text-amber-600">
-            <Sparkles className="h-3 w-3 mr-1" />
-            <span>Efectivio IA</span>
+    <Card className={`w-full h-full overflow-hidden ${className}`}>
+      <div className="flex flex-col h-full">
+        <CardHeader className="pb-0 flex-shrink-0">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg font-medium flex items-center">
+              <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
+              Consejo Financiero
+            </CardTitle>
+            <div className="px-2 py-1 bg-amber-50 rounded-full flex items-center text-xs text-amber-600">
+              <Sparkles className="h-3 w-3 mr-1" />
+              <span>Efectivio IA</span>
+            </div>
           </div>
-        </div>
-        <CardDescription>
-          Consejos personalizados para mejorar tus finanzas
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-4 flex flex-col items-center">
-        <div className="w-full flex justify-center">
-          <AnimatedMascot state={animationState} />
-        </div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          key={currentTip?.text}
-          className="mt-4 min-h-[100px] w-full flex flex-col items-center justify-center space-y-3"
-        >
-          {currentTip && (
-            <>
-              <div className={`px-2 py-1 rounded-full text-xs ${getCategoryStyle(currentTip.category).bg} ${getCategoryStyle(currentTip.category).text}`}>
-                {currentTip.category.charAt(0).toUpperCase() + currentTip.category.slice(1)}
-              </div>
-              <p className="text-center text-sm px-2">{currentTip.text}</p>
-            </>
-          )}
-        </motion.div>
-      </CardContent>
-      <CardFooter className="pt-2">
-        <Button 
-          onClick={generateNewTip} 
-          disabled={isGenerating}
-          className="w-full"
-          variant="outline"
-        >
-          {isGenerating ? (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-              Generando consejo...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Nuevo consejo
-            </>
-          )}
-        </Button>
-      </CardFooter>
+          <CardDescription>
+            Consejos personalizados para mejorar tus finanzas
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4 flex-grow flex flex-col items-center justify-center overflow-hidden">
+          <div className="w-full flex justify-center" style={{ maxHeight: '120px' }}>
+            <AnimatedMascot state={animationState} />
+          </div>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            key={currentTip?.text}
+            className="w-full flex flex-col items-center justify-center space-y-3 overflow-hidden"
+            style={{ minHeight: '80px', maxHeight: '120px' }}
+          >
+            {currentTip && (
+              <>
+                <div className={`px-2 py-1 rounded-full text-xs ${getCategoryStyle(currentTip.category).bg} ${getCategoryStyle(currentTip.category).text}`}>
+                  {currentTip.category.charAt(0).toUpperCase() + currentTip.category.slice(1)}
+                </div>
+                <p className="text-center text-sm px-2 line-clamp-3">{currentTip.text}</p>
+              </>
+            )}
+          </motion.div>
+        </CardContent>
+        <CardFooter className="pt-0 mt-auto flex-shrink-0">
+          <Button 
+            onClick={generateNewTip} 
+            disabled={isGenerating}
+            className="w-full"
+            variant="outline"
+            size="sm"
+          >
+            {isGenerating ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Generando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Nuevo consejo
+              </>
+            )}
+          </Button>
+        </CardFooter>
+      </div>
     </Card>
   );
 };
