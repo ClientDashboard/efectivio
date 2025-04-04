@@ -1,5 +1,4 @@
 import { useState } from "react";
-import MainLayout from "@/components/layout/main-layout";
 import { useQuery } from "@tanstack/react-query";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -78,7 +77,7 @@ export default function IncomeStatementPage() {
   const netIncome = totalRevenue - totalExpenses;
 
   return (
-    <MainLayout>
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Estado de Resultados</h1>
@@ -233,6 +232,6 @@ export default function IncomeStatementPage() {
           </p>
         </CardFooter>
       </Card>
-    </MainLayout>
+    </>
   );
 }
