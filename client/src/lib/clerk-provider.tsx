@@ -3,15 +3,15 @@ import { ClerkProvider as BaseClerkProvider, useAuth } from '@clerk/clerk-react'
 import { supabase } from './supabase';
 
 // Obtener la clave pública de Clerk desde las variables de entorno
-const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const publishableKey = import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 if (!publishableKey) {
-  throw new Error('ERROR: Falta VITE_CLERK_PUBLISHABLE_KEY en las variables de entorno');
+  throw new Error('ERROR: Falta NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY en las variables de entorno');
 }
 
 // Verificar que estamos usando la clave de producción
-if (publishableKey.startsWith('pk_test_')) {
-  console.warn('⚠️ Usando clave de prueba de Clerk. Cambiar a clave de producción.');
+if (!publishableKey.startsWith('pk_live_')) {
+  console.warn('⚠️ Usando clave que no es de producción');
 }
 
 type ClerkProviderProps = {
