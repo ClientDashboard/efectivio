@@ -14,7 +14,7 @@ export default function DashboardOverview() {
   const stats = [
     {
       id: 1,
-      title: "Ingresos Mensuales",
+      title: "Ingresos Mesuales",
       amount: dashboardData?.ingresos || "B/. 0.00",
       change: dashboardData?.ingresosChange || 0,
       isPositive: true,
