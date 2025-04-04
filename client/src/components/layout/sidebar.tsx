@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/lib/protected-route';
@@ -41,12 +40,20 @@ import {
 export default function Sidebar() {
   const [location] = useLocation();
   const { userId, signOut } = useAuth();
+  const { isSidebarOpen } = useAppStore();
+  
   // Datos de usuario para la interfaz (en un sistema real, estos datos vendrían de la base de datos)
   const user = {
     name: 'Administrador',
     initials: 'A',
     role: 'Administrador'
   };
+  
+  // Si el sidebar no está abierto (aunque debería estarlo siempre), no renderizar nada
+  if (!isSidebarOpen) {
+    return null;
+  }
+  
   const [activeMenus, setActiveMenus] = useState<Record<string, boolean>>({
     clientPortal: false,
     inventory: false

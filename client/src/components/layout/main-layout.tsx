@@ -1,5 +1,5 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { useLocation } from "wouter";
 import Sidebar from "./sidebar";
 import Header from "./header";
@@ -11,7 +11,13 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
-  const { isSidebarOpen } = useAppStore();
+  const { isSidebarOpen, setSidebarOpen } = useAppStore();
+  
+  // Forzar sidebar abierto al montar el componente
+  useEffect(() => {
+    // Asegurarnos de que el sidebar siempre esté abierto en el dashboard
+    setSidebarOpen(true);
+  }, [setSidebarOpen]);
   
   // No mostrar layout en la página de inicio o páginas de autenticación
   if (location === "/" || location.startsWith("/auth")) {
@@ -21,8 +27,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="flex h-screen overflow-hidden">
-        {/* Sidebar - siempre visible */}
-        <div className="flex-shrink-0">
+        {/* Sidebar - forzado a ser siempre visible */}
+        <div className="flex-shrink-0" style={{ display: 'block' }}>
           <Sidebar />
         </div>
         
