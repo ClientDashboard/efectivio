@@ -1,118 +1,64 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useLocation } from "wouter";
+import React, { createContext, useContext } from 'react';
+import { useAuth as useClerkAuth } from '@clerk/clerk-react';
+import { useDevAuth } from './dev-auth';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  initials: string;
+// Variable para determinar si estamos en modo desarrollo
+const isDevelopmentMode = !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+// Interfaz unificada para la autenticación
+export interface AuthContextType {
+  userId: string | null;
+  isSignedIn: boolean;
+  isLoaded: boolean;
+  signOut: () => Promise<void>;
+  getToken: (options?: { template?: string }) => Promise<string | null>;
 }
 
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-}
+// Contexto de autenticación unificado
+const AuthContext = createContext<AuthContextType | null>(null);
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Proveedor de autenticación unificado
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  // Si estamos en modo desarrollo, usar el proveedor de desarrollo
+  // De lo contrario, usar Clerk
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [_, setLocation] = useLocation();
+  let authValue: AuthContextType;
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const storedUser = localStorage.getItem("efectivio_user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch (error) {
-        console.error("Authentication error:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  if (isDevelopmentMode) {
+    const devAuth = useDevAuth();
+    authValue = {
+      userId: devAuth.userId,
+      isSignedIn: devAuth.isSignedIn,
+      isLoaded: devAuth.isLoaded,
+      signOut: devAuth.signOut,
+      getToken: devAuth.getToken,
     };
+  } else {
+    const clerkAuth = useClerkAuth();
+    // Asegurarnos que userId sea string | null, nunca undefined
+    const userId: string | null = typeof clerkAuth.userId === 'string' ? clerkAuth.userId : null;
     
-    checkAuth();
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      
-      // MODO DESARROLLO: Usuario demo
-      // TODO: Para producción, reemplazar esto con la autenticación real de Clerk
-      if (process.env.NODE_ENV === 'development' && email === "demo@efectivio.com" && password === "demo123") {
-        const newUser: User = {
-          id: "1",
-          name: "Juan Sánchez",
-          email,
-          role: "Administrador",
-          initials: "JS"
-        };
-        
-        localStorage.setItem("efectivio_user", JSON.stringify(newUser));
-        setUser(newUser);
-        setLocation("/");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (name: string, email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const nameParts = name.split(" ");
-      const initials = nameParts.length > 1 
-        ? nameParts[0][0] + nameParts[1][0]
-        : nameParts[0][0] + (nameParts[0][1] || "");
-      
-      // Mock user for demonstration
-      const newUser: User = {
-        id: "1",
-        name,
-        email,
-        role: "Administrador",
-        initials: initials.toUpperCase()
-      };
-      
-      localStorage.setItem("efectivio_user", JSON.stringify(newUser));
-      setUser(newUser);
-      setLocation("/");
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem("efectivio_user");
-    setUser(null);
-    setLocation("/login");
-  };
+    authValue = {
+      userId,
+      isSignedIn: !!clerkAuth.isSignedIn,
+      isLoaded: clerkAuth.isLoaded,
+      signOut: clerkAuth.signOut,
+      getToken: clerkAuth.getToken,
+    };
+  }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   );
 }
 
+// Hook para usar la autenticación unificada
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  if (!context) {
+    throw new Error('useAuth debe ser utilizado dentro de un AuthProvider');
   }
   return context;
 }

@@ -1,9 +1,58 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, createContext, useContext } from 'react';
 import { ClerkProvider as BaseClerkProvider, useAuth } from '@clerk/clerk-react';
 import { supabase } from './supabase';
 
 // Usar una clave de desarrollo si no hay variable de entorno
-const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_Y29vbC1saWdlci05Mi5jbGVyay5hY2NvdW50cy5kZXYk';
+const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
+
+// Variable para indicar si estamos en modo desarrollo sin Clerk
+const isDevelopmentMode = !publishableKey;
+
+// Interfaz para el contexto de autenticación en desarrollo
+interface DevAuthContextType {
+  userId: string | null;
+  sessionId: string | null;
+  getToken: (options?: { template?: string }) => Promise<string | null>;
+  isSignedIn: boolean;
+  isLoaded: boolean;
+  signOut: () => Promise<void>;
+}
+
+// Contexto de autenticación para desarrollo
+const DevAuthContext = createContext<DevAuthContextType>({
+  userId: 'dev-user-123',
+  sessionId: 'dev-session-123',
+  getToken: async () => 'mock-token-for-development',
+  isSignedIn: true,
+  isLoaded: true,
+  signOut: async () => {},
+});
+
+// Hook para usar en modo desarrollo
+export function useDevAuth() {
+  return useContext(DevAuthContext);
+}
+
+// Proveedor para modo desarrollo
+function DevAuthProvider({ children }: { children: React.ReactNode }) {
+  // Implementación simulada para desarrollo
+  const mockAuthValue: DevAuthContextType = {
+    userId: 'dev-user-123',
+    sessionId: 'dev-session-123',
+    getToken: async (options?: { template?: string }) => 'mock-token-for-development',
+    isSignedIn: true,
+    isLoaded: true,
+    signOut: async () => {
+      console.log('Simulando cierre de sesión en modo desarrollo');
+    },
+  };
+
+  return (
+    <DevAuthContext.Provider value={mockAuthValue}>
+      {children}
+    </DevAuthContext.Provider>
+  );
+}
 
 // Componente de sincronización de sesión con Supabase
 function SupabaseSessionSyncProvider({ children }: { children: React.ReactNode }) {
@@ -52,6 +101,14 @@ export function ClerkProvider({ children }: { children: React.ReactNode }) {
 
   if (!mounted) return null;
 
+  // Si estamos en modo desarrollo y no hay clave de Clerk, usar el proveedor de desarrollo
+  if (isDevelopmentMode) {
+    console.log('Usando proveedor de autenticación para desarrollo');
+    return <DevAuthProvider>{children}</DevAuthProvider>;
+  }
+
+  // Si tenemos una clave de Clerk, usar el proveedor normal
+  console.log('Usando proveedor de autenticación Clerk');
   return (
     <BaseClerkProvider
       publishableKey={publishableKey}

@@ -22,11 +22,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/protected-route";
 
 export default function Header() {
   const { isSidebarOpen, toggleSidebar } = useAppStore();
-  const { user, signOut } = useAuth();
+  const { userId, signOut } = useAuth();
   const [customLogo, setCustomLogo] = useState<string | null>(null);
   
   const handleLogout = () => {
@@ -167,7 +167,7 @@ export default function Header() {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center space-x-2 hover:opacity-80">
                 <div className="h-9 w-9 rounded-full bg-primary text-white flex items-center justify-center font-medium">
-                  {user ? (user.fullName?.charAt(0) || user.username?.charAt(0) || 'U').toUpperCase() : 'G'}
+                  {userId ? 'A' : 'G'}
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-400 hidden md:block" />
               </button>

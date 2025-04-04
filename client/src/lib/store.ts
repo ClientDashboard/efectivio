@@ -1,11 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AuthUser } from "@/lib/auth";
+
+// Define a generic user type
+interface User {
+  id: string;
+  fullName?: string;
+  email?: string;
+  imageUrl?: string;
+}
 
 interface UserState {
-  user: AuthUser | null;
+  user: User | null;
   isAuthenticated: boolean;
-  setUser: (user: AuthUser | null) => void;
+  setUser: (user: User | null) => void;
   clearUser: () => void;
 }
 

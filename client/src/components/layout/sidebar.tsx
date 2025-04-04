@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/protected-route';
 import {
   LayoutDashboard,
   Users,
@@ -39,7 +39,13 @@ import {
 
 export default function Sidebar() {
   const [location] = useLocation();
-  const { user, signOut } = useAuth();
+  const { userId, signOut } = useAuth();
+  // Datos de usuario para la interfaz (en un sistema real, estos datos vendrían de la base de datos)
+  const user = {
+    name: 'Administrador',
+    initials: 'A',
+    role: 'Administrador'
+  };
   const [activeMenus, setActiveMenus] = useState<Record<string, boolean>>({
     clientPortal: false,
     inventory: false
