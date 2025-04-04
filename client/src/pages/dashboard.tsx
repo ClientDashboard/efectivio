@@ -1,7 +1,8 @@
 
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import RecentActivity from '@/components/dashboard/RecentActivity';
-import DashboardWidgets from '@/components/dashboard/DashboardWidgets';
+import { DashboardGridLayout } from '@/components/dashboard/DashboardGridLayout';
+import { dashboardWidgets } from '@/components/dashboard/widgets';
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -112,12 +113,14 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Contenido principal y widgets */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <div className="lg:col-span-2">
-          <RecentActivity />
+      <motion.div variants={itemVariants} className="mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-3">
+            <DashboardGridLayout widgets={dashboardWidgets} />
+          </div>
         </div>
-        <div className="lg:col-span-1">
-          <DashboardWidgets />
+        <div className="mt-8">
+          <RecentActivity />
         </div>
       </motion.div>
     </motion.div>
