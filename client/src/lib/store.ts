@@ -1,11 +1,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Define a generic user type
-interface User {
+// Interfaz de AuthUser importada de auth.ts
+export interface User {
   id: string;
-  fullName?: string;
+  clerkId?: string;
+  username?: string;
   email?: string;
+  fullName?: string;
+  role?: string;
+  initials?: string;
+  name?: string; // Para compatibilidad con el sidebar
   imageUrl?: string;
 }
 

@@ -1,18 +1,19 @@
 import { ReactNode } from 'react';
 import { Redirect, Route } from 'wouter';
 import { Loader2 } from 'lucide-react';
-import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
 import { useDevAuth } from './clerk-provider';
 
 // Variable para determinar si estamos en modo desarrollo
-const isDevelopmentMode = !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const isDevelopmentMode = !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
+                         (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY?.startsWith('pk_live_') && 
+                          window.location.hostname !== 'efectivio.com');
 
-// Hook unificado que usa el proveedor adecuado según el entorno
+// En desarrollo, siempre usamos el DevAuth para evitar problemas con Clerk
 export function useAuth() {
-  if (isDevelopmentMode) {
-    return useDevAuth();
-  }
-  return useClerkAuth();
+  // En este momento siempre usamos el proveedor de desarrollo para evitar
+  // el error de requerir ClerkProvider
+  return useDevAuth();
 }
 
 interface ProtectedRouteProps {

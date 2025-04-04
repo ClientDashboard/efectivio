@@ -1,20 +1,14 @@
+// Nota: Este archivo está en desuso - usamos protected-route.tsx para Auth
+
 import { useAuth as useClerkAuth, useUser, useSignIn, useSignUp } from '@clerk/clerk-react';
 import { useEffect } from 'react';
-import { useUserStore } from './store';
+import { useUserStore, User } from './store';
 
-export interface AuthUser {
-  id: number;
-  clerkId: string;
-  username: string;
-  email: string;
-  fullName?: string;
-  role: string;
-  initials: string;
-  name?: string; // Para compatibilidad con el sidebar
-}
+// Usamos la interfaz User del store para mantener consistencia
+export type AuthUser = User;
 
 export interface AuthContextType {
-  user: AuthUser | null;
+  user: User | null;
   isLoaded: boolean;
   isSignedIn: boolean;
   signIn: any;
@@ -22,6 +16,8 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
+// Esta función no debe usarse - en su lugar usa useAuth desde protected-route.tsx
+// Mantiene para compatibilidad con código existente
 export function useAuth(): AuthContextType {
   const clerkAuth = useClerkAuth();
   const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
@@ -41,11 +37,20 @@ export function useAuth(): AuthContextType {
 
       // Formatear usuario para el store
       const fullName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ');
-      const authUser: AuthUser = {
-        id: 0, // Se actualizará cuando obtengamos los datos de nuestra BD
+      const username = clerkUser.username || 
+                      (clerkUser.emailAddresses && clerkUser.emailAddresses.length > 0 
+                       ? clerkUser.emailAddresses[0].emailAddress.split('@')[0] 
+                       : 'usuario');
+      const email = clerkUser.emailAddresses && clerkUser.emailAddresses.length > 0 
+                   ? clerkUser.emailAddresses[0].emailAddress 
+                   : 'email@ejemplo.com';
+      
+      // Todos los campos son opcionales ahora excepto id
+      const authUser: User = {
+        id: clerkUser.id, // Usamos el ID de Clerk como ID principal
         clerkId: clerkUser.id,
-        username: clerkUser.username || clerkUser.emailAddresses[0].emailAddress.split('@')[0] || 'usuario',
-        email: clerkUser.emailAddresses[0].emailAddress || 'email@ejemplo.com',
+        username: username,
+        email: email,
         fullName: fullName,
         name: fullName, // Para compatibilidad con el sidebar
         role: 'admin', // Por defecto, se actualizará con datos de nuestra BD
@@ -72,11 +77,10 @@ export function useAuth(): AuthContextType {
         
         if (user) {
           // Actualizar user store con datos adicionales como el rol y el ID en nuestra BD
-          const updatedUser: AuthUser = {
+          const updatedUser: User = {
             ...user,
-            id: userData.id || 0,
-            username: user.username,
-            email: user.email,
+            // Mantenemos el id como string para compatibilidad con Clerk
+            id: userData.id?.toString() || clerkId,
             role: userData.role || 'user',
           };
           setUser(updatedUser);

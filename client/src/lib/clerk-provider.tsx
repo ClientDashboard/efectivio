@@ -5,8 +5,13 @@ import { supabase } from './supabase';
 // Usar una clave de desarrollo si no hay variable de entorno
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 
-// Variable para indicar si estamos en modo desarrollo sin Clerk
-const isDevelopmentMode = !publishableKey;
+// Para fines de depuración - remover en producción
+console.log('CLERK KEY disponible:', !!publishableKey);
+
+// Variable para indicar si estamos en modo desarrollo sin Clerk o si la clave es de producción y no estamos en efectivio.com
+const isDevelopmentMode = !publishableKey || 
+                         (publishableKey.startsWith('pk_live_') && 
+                          window.location.hostname !== 'efectivio.com');
 
 // Interfaz para el contexto de autenticación en desarrollo
 interface DevAuthContextType {
