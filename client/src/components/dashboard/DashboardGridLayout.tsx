@@ -25,25 +25,25 @@ export interface Widget {
 // Configuración de layouts predeterminados
 const defaultLayouts = {
   lg: [
-    { i: 'calculator', x: 0, y: 0, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'tasks', x: 1, y: 0, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'appointments', x: 2, y: 0, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'financial-tip', x: 0, y: 2, w: 2, h: 2, minW: 1, minH: 2 },
-    { i: 'links', x: 2, y: 2, w: 1, h: 2, minW: 1, minH: 1 },
+    { i: 'calculator', x: 0, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'tasks', x: 1, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'appointments', x: 2, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'financial-tip', x: 0, y: 3, w: 2, h: 3, minW: 2, minH: 3 },
+    { i: 'links', x: 2, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
   ],
   md: [
-    { i: 'calculator', x: 0, y: 0, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'tasks', x: 1, y: 0, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'appointments', x: 0, y: 2, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'financial-tip', x: 0, y: 4, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'links', x: 1, y: 2, w: 1, h: 2, minW: 1, minH: 1 },
+    { i: 'calculator', x: 0, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'tasks', x: 1, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'appointments', x: 0, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'financial-tip', x: 1, y: 3, w: 1, h: 3, minW: 1, minH: 3 },
+    { i: 'links', x: 0, y: 6, w: 2, h: 2, minW: 1, minH: 2 },
   ],
   sm: [
-    { i: 'calculator', x: 0, y: 0, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'tasks', x: 0, y: 2, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'appointments', x: 0, y: 4, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'financial-tip', x: 0, y: 6, w: 1, h: 2, minW: 1, minH: 2 },
-    { i: 'links', x: 0, y: 8, w: 1, h: 2, minW: 1, minH: 1 },
+    { i: 'calculator', x: 0, y: 0, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'tasks', x: 0, y: 3, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'appointments', x: 0, y: 6, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: 'financial-tip', x: 0, y: 9, w: 1, h: 3, minW: 1, minH: 3 },
+    { i: 'links', x: 0, y: 12, w: 1, h: 2, minW: 1, minH: 2 },
   ],
 };
 

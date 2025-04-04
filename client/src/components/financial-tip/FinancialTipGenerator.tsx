@@ -232,21 +232,23 @@ const FinancialTipGenerator = ({ className }: FinancialTipProps) => {
           Consejos personalizados para mejorar tus finanzas
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-4">
-        <AnimatedMascot state={animationState} />
+      <CardContent className="pt-4 flex flex-col items-center">
+        <div className="w-full flex justify-center">
+          <AnimatedMascot state={animationState} />
+        </div>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           key={currentTip?.text}
-          className="mt-4 min-h-[90px] flex flex-col items-center justify-center space-y-2"
+          className="mt-4 min-h-[100px] w-full flex flex-col items-center justify-center space-y-3"
         >
           {currentTip && (
             <>
               <div className={`px-2 py-1 rounded-full text-xs ${getCategoryStyle(currentTip.category).bg} ${getCategoryStyle(currentTip.category).text}`}>
                 {currentTip.category.charAt(0).toUpperCase() + currentTip.category.slice(1)}
               </div>
-              <p className="text-center text-sm">{currentTip.text}</p>
+              <p className="text-center text-sm px-2">{currentTip.text}</p>
             </>
           )}
         </motion.div>

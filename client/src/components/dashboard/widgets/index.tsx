@@ -1,4 +1,4 @@
-import { Calculator, Calendar, FileText, Link2, ExternalLink, Clock, CheckCircle2, CalendarClock } from "lucide-react";
+import { Calculator, Calendar, FileText, Link2, ExternalLink, Clock, CheckCircle2, CalendarClock, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -196,7 +196,7 @@ export const dashboardWidgets: Widget[] = [
     icon: <Calculator className="mr-2 h-5 w-5 text-blue-500" />,
     content: <CalculatorWidget />,
     description: 'Realiza cálculos financieros simples',
-    minH: 2,
+    minH: 3,
     minW: 1
   },
   {
@@ -206,7 +206,7 @@ export const dashboardWidgets: Widget[] = [
     content: <TasksWidget />,
     footer: <TasksFooter />,
     description: 'Tus próximas tareas por completar',
-    minH: 2,
+    minH: 3,
     minW: 1
   },
   {
@@ -216,16 +216,17 @@ export const dashboardWidgets: Widget[] = [
     content: <AppointmentsWidget />,
     footer: <AppointmentsFooter />,
     description: 'Reuniones programadas',
-    minH: 2,
+    minH: 3,
     minW: 1
   },
   {
     id: 'financial-tip',
     title: 'Consejo Financiero',
-    icon: null,
+    icon: <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />,
     content: <FinancialTipWidget />,
-    minH: 2,
-    minW: 1
+    description: 'Consejos personalizados para mejorar tus finanzas',
+    minH: 3,
+    minW: 2
   },
   {
     id: 'links',
@@ -234,7 +235,7 @@ export const dashboardWidgets: Widget[] = [
     content: <LinksWidget />,
     footer: <LinksFooter />,
     description: 'Recursos y herramientas importantes',
-    minH: 1,
+    minH: 2,
     minW: 1
   },
 ];
