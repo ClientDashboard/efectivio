@@ -37,9 +37,9 @@ export default function Header() {
     <header className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
       <button
         type="button"
-        className="px-4 border-r border-gray-200 text-gray-500 md:hidden"
+        className="px-4 border-r border-gray-200 text-gray-500 flex items-center justify-center"
         onClick={toggleSidebar}
-        aria-label="Abrir menú lateral"
+        aria-label={isSidebarOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
       >
         <Menu className="h-6 w-6" />
       </button>

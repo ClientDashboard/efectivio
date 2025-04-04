@@ -43,11 +43,13 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist((set) => ({
-    isSidebarOpen: true,
+    isSidebarOpen: true, // Por defecto, la barra lateral está abierta
     toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
     setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
   }), {
-    name: 'efectivio-sidebar-storage'
+    name: 'efectivio-sidebar-storage',
+    // Para solucionar problemas de estado en localStorage, configuramos skipHydration
+    skipHydration: true
   })
 );
 

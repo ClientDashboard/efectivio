@@ -3,7 +3,9 @@ import { useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { useDevAuth } from './dev-auth';
 
 // Variable para determinar si estamos en modo desarrollo
-const isDevelopmentMode = !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const isDevelopmentMode = typeof window !== 'undefined' && 
+                        (typeof (window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY === 'undefined' || 
+                         !(window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY);
 
 // Interfaz unificada para la autenticación
 export interface AuthContextType {

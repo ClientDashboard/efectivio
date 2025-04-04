@@ -21,7 +21,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="flex h-screen overflow-hidden">
-        <div className="hidden md:flex md:flex-shrink-0">
+        {/* Sidebar - visible en todas las pantallas cuando está abierto */}
+        <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block flex-shrink-0 transition-all duration-300`}>
           <Sidebar />
         </div>
         
