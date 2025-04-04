@@ -25,7 +25,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }
   
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-white">
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar - forzado a ser siempre visible */}
         <div className="flex-shrink-0" style={{ display: 'block' }}>

@@ -170,25 +170,23 @@ export default function JournalPage() {
           ) : (
             <div className="space-y-6">
               {filteredEntries.map((entry) => (
-                <Card key={entry.id} className="shadow-sm">
-                  <CardHeader className="py-3 px-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">
-                          {formatDate(entry.date)} | Ref: {entry.reference || "N/A"}
-                        </p>
-                        <h3 className="text-base font-medium">{entry.description}</h3>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => navigate(`/accounting/entries/${entry.id}`)}
-                      >
-                        Ver Detalle
-                      </Button>
+                <div key={entry.id} className="mb-6 bg-white rounded-xl p-4 shadow-md">
+                  <div className="flex justify-between items-center mb-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">
+                        {formatDate(entry.date)} | Ref: {entry.reference || "N/A"}
+                      </p>
+                      <h3 className="text-base font-medium">{entry.description}</h3>
                     </div>
-                  </CardHeader>
-                  <CardContent className="py-2 px-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate(`/accounting/entries/${entry.id}`)}
+                    >
+                      Ver Detalle
+                    </Button>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -213,8 +211,8 @@ export default function JournalPage() {
                         ))}
                       </TableBody>
                     </Table>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           )}
