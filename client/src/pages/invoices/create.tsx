@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import MainLayout from "@/components/layout/main-layout";
 import { InvoiceForm } from "@/components/invoices/invoice-form";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -78,7 +77,7 @@ export default function InvoiceCreatePage() {
   };
 
   return (
-    <MainLayout>
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Crear Nueva Factura</h1>
@@ -106,6 +105,6 @@ export default function InvoiceCreatePage() {
           )}
         </CardContent>
       </Card>
-    </MainLayout>
+    </>
   );
 }
