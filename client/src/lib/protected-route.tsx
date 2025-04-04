@@ -9,29 +9,8 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
-  const { isLoaded, userId } = useAuth();
-  const { isLoaded: isUserLoaded } = useUser();
-  const isLoading = !isLoaded || !isUserLoaded;
-
-  return (
-    <Route path={path}>
-      {() => {
-        if (isLoading) {
-          return (
-            <div className="flex items-center justify-center min-h-screen">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          );
-        }
-
-        if (!userId) {
-          return <Redirect to="/auth/sign-in" />;
-        }
-
-        return <>{children}</>;
-      }}
-    </Route>
-  );
+  // Temporalmente permitimos acceso directo
+  return <Route path={path}>{children}</Route>;
 }
 
 export function PublicRoute({ path, children }: ProtectedRouteProps) {
