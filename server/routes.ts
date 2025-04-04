@@ -6,6 +6,8 @@ import { storage } from "./storage";
 import { HfInference } from '@huggingface/inference';
 import { 
   insertClientSchema, 
+  insertQuoteSchema,
+  insertQuoteItemSchema,
   insertInvoiceSchema, 
   insertInvoiceItemSchema,
   insertExpenseSchema,
@@ -148,6 +150,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Error deleting client", error });
+    }
+  });
+
+  // Quotes API
+  app.get("/api/quotes", async (req: Request, res: Response) => {
+    try {
+      const quotes = await storage.getQuotes();
+      res.json(quotes);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching quotes", error });
+    }
+  });
+
+  app.get("/api/quotes/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const quoteData = await storage.getQuoteWithItems(id);
+      
+      if (!quoteData) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json(quoteData);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching quote", error });
+    }
+  });
+
+  app.post("/api/quotes", async (req: Request, res: Response) => {
+    try {
+      const { quote, items } = req.body;
+      
+      const quoteValidation = validateRequest(insertQuoteSchema, quote);
+      if (!quoteValidation.success) {
+        return res.status(400).json({ message: "Quote validation error", errors: quoteValidation.error });
+      }
+      
+      // Validate each item
+      const itemsValidation = items.map((item: any) => validateRequest(insertQuoteItemSchema, item));
+      const hasItemErrors = itemsValidation.some((v: any) => !v.success);
+      
+      if (hasItemErrors) {
+        const errors = itemsValidation
+          .filter((v: any) => !v.success)
+          .map((v: any, index: number) => ({ index, errors: v.error }));
+          
+        return res.status(400).json({ message: "Item validation error", errors });
+      }
+      
+      const validatedItems = itemsValidation.map((v: any) => v.data);
+      
+      // Create quote with items
+      const createdQuote = await storage.createQuote(quoteValidation.data, validatedItems);
+      
+      res.status(201).json(createdQuote);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating quote", error });
+    }
+  });
+
+  app.put("/api/quotes/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = validateRequest(insertQuoteSchema.partial(), req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      const updatedQuote = await storage.updateQuote(id, validation.data);
+      
+      if (!updatedQuote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json(updatedQuote);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating quote", error });
+    }
+  });
+
+  app.delete("/api/quotes/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteQuote(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting quote", error });
+    }
+  });
+
+  // Endpoint para convertir una cotización en factura
+  app.post("/api/quotes/:id/convert", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.convertQuoteToInvoice(id);
+      
+      if (!result) {
+        return res.status(404).json({ message: "Quote not found or already converted" });
+      }
+      
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Error converting quote to invoice", error });
     }
   });
 

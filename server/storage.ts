@@ -1,7 +1,8 @@
 import {
-  users, clients, invoices, invoiceItems, expenses, accounts, journalEntries, journalLines,
-  type User, type InsertUser, type Client, type InsertClient,
-  type Invoice, type InsertInvoice, type InvoiceItem, type InsertInvoiceItem,
+  users, clients, quotes, quoteItems, invoices, invoiceItems, expenses, accounts, journalEntries, journalLines,
+  type User, type InsertUser, type Client, type InsertClient, type ClientType,
+  type Quote, type InsertQuote, type QuoteItem, type InsertQuoteItem, type QuoteStatus,
+  type Invoice, type InsertInvoice, type InvoiceItem, type InsertInvoiceItem, type InvoiceStatus,
   type Expense, type InsertExpense, type Account, type InsertAccount,
   type JournalEntry, type InsertJournalEntry, type JournalLine, type InsertJournalLine
 } from "@shared/schema";
@@ -25,12 +26,25 @@ export interface IStorage {
   deleteClient(id: number): Promise<boolean>;
   searchClients(query: string): Promise<Client[]>;
   
+  // Quotes/Presupuestos
+  getQuotes(): Promise<Quote[]>;
+  getQuotesByClient(clientId: number): Promise<Quote[]>;
+  getQuote(id: number): Promise<Quote | undefined>;
+  getQuoteWithItems(id: number): Promise<{quote: Quote, items: QuoteItem[]} | undefined>;
+  createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote>;
+  updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined>;
+  updateQuoteStatus(id: number, status: QuoteStatus): Promise<Quote | undefined>;
+  deleteQuote(id: number): Promise<boolean>;
+  convertQuoteToInvoice(quoteId: number): Promise<Invoice | undefined>;
+  
   // Invoices
   getInvoices(): Promise<Invoice[]>;
+  getInvoicesByClient(clientId: number): Promise<Invoice[]>;
   getInvoice(id: number): Promise<Invoice | undefined>;
   getInvoiceWithItems(id: number): Promise<{invoice: Invoice, items: InvoiceItem[]} | undefined>;
   createInvoice(invoice: InsertInvoice, items: InsertInvoiceItem[]): Promise<Invoice>;
   updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
+  updateInvoiceStatus(id: number, status: InvoiceStatus): Promise<Invoice | undefined>;
   deleteInvoice(id: number): Promise<boolean>;
   
   // Expenses
@@ -60,6 +74,8 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private usersData: Map<number, User>;
   private clientsData: Map<number, Client>;
+  private quotesData: Map<number, Quote>;
+  private quoteItemsData: Map<number, QuoteItem[]>;
   private invoicesData: Map<number, Invoice>;
   private invoiceItemsData: Map<number, InvoiceItem[]>;
   private expensesData: Map<number, Expense>;
@@ -69,6 +85,8 @@ export class MemStorage implements IStorage {
   
   private currentUserId: number;
   private currentClientId: number;
+  private currentQuoteId: number;
+  private currentQuoteItemId: number;
   private currentInvoiceId: number;
   private currentInvoiceItemId: number;
   private currentExpenseId: number;
@@ -79,6 +97,8 @@ export class MemStorage implements IStorage {
   constructor() {
     this.usersData = new Map();
     this.clientsData = new Map();
+    this.quotesData = new Map();
+    this.quoteItemsData = new Map();
     this.invoicesData = new Map();
     this.invoiceItemsData = new Map();
     this.expensesData = new Map();
@@ -88,6 +108,8 @@ export class MemStorage implements IStorage {
     
     this.currentUserId = 1;
     this.currentClientId = 1;
+    this.currentQuoteId = 1;
+    this.currentQuoteItemId = 1;
     this.currentInvoiceId = 1;
     this.currentInvoiceItemId = 1;
     this.currentExpenseId = 1;
@@ -171,12 +193,17 @@ export class MemStorage implements IStorage {
       id,
       createdAt: now,
       updatedAt: now,
+      clientType: insertClient.clientType || "company",
+      companyName: insertClient.companyName ?? null,
+      firstName: insertClient.firstName ?? null,
+      lastName: insertClient.lastName ?? null,
       email: insertClient.email ?? null,
       contactName: insertClient.contactName ?? null,
       phone: insertClient.phone ?? null,
       address: insertClient.address ?? null,
       taxId: insertClient.taxId ?? null,
-      notes: insertClient.notes ?? null
+      notes: insertClient.notes ?? null,
+      isActive: insertClient.isActive ?? true
     };
     this.clientsData.set(id, client);
     return client;
@@ -204,10 +231,151 @@ export class MemStorage implements IStorage {
     const lowercaseQuery = query.toLowerCase();
     return Array.from(this.clientsData.values()).filter(
       client => 
-        client.companyName.toLowerCase().includes(lowercaseQuery) ||
+        (client.companyName && client.companyName.toLowerCase().includes(lowercaseQuery)) ||
         (client.contactName && client.contactName.toLowerCase().includes(lowercaseQuery)) ||
         (client.email && client.email.toLowerCase().includes(lowercaseQuery))
     );
+  }
+  
+  // Quote methods
+  async getQuotes(): Promise<Quote[]> {
+    return Array.from(this.quotesData.values());
+  }
+  
+  async getQuotesByClient(clientId: number): Promise<Quote[]> {
+    return Array.from(this.quotesData.values()).filter(
+      quote => quote.clientId === clientId
+    );
+  }
+  
+  async getQuote(id: number): Promise<Quote | undefined> {
+    return this.quotesData.get(id);
+  }
+  
+  async getQuoteWithItems(id: number): Promise<{quote: Quote, items: QuoteItem[]} | undefined> {
+    const quote = this.quotesData.get(id);
+    if (!quote) return undefined;
+    
+    const items = this.quoteItemsData.get(id) || [];
+    return { quote, items };
+  }
+  
+  async createQuote(insertQuote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote> {
+    const id = this.currentQuoteId++;
+    const now = new Date();
+    
+    // Asegurarse de que las fechas sean objetos Date
+    const issueDate = insertQuote.issueDate instanceof Date ? 
+      insertQuote.issueDate : 
+      (typeof insertQuote.issueDate === 'string' ? new Date(insertQuote.issueDate) : now);
+      
+    const expiryDate = insertQuote.expiryDate instanceof Date ? 
+      insertQuote.expiryDate : 
+      (typeof insertQuote.expiryDate === 'string' ? new Date(insertQuote.expiryDate) : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000));
+    
+    const quote: Quote = {
+      id,
+      quoteNumber: insertQuote.quoteNumber,
+      clientId: insertQuote.clientId,
+      issueDate,
+      expiryDate,
+      status: insertQuote.status || "draft",
+      subtotal: insertQuote.subtotal,
+      taxAmount: insertQuote.taxAmount || null,
+      total: insertQuote.total,
+      convertedToInvoiceId: insertQuote.convertedToInvoiceId || null,
+      notes: insertQuote.notes || null,
+      termsAndConditions: insertQuote.termsAndConditions || null,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.quotesData.set(id, quote);
+    
+    // Create quote items
+    const quoteItems: QuoteItem[] = items.map(item => ({
+      ...item,
+      id: this.currentQuoteItemId++,
+      quoteId: id,
+      taxRate: item.taxRate || null
+    }));
+    
+    this.quoteItemsData.set(id, quoteItems);
+    
+    return quote;
+  }
+  
+  async updateQuote(id: number, quoteData: Partial<InsertQuote>): Promise<Quote | undefined> {
+    const existingQuote = this.quotesData.get(id);
+    if (!existingQuote) return undefined;
+    
+    const updatedQuote: Quote = {
+      ...existingQuote,
+      ...quoteData,
+      updatedAt: new Date()
+    };
+    
+    this.quotesData.set(id, updatedQuote);
+    return updatedQuote;
+  }
+  
+  async updateQuoteStatus(id: number, status: QuoteStatus): Promise<Quote | undefined> {
+    const existingQuote = this.quotesData.get(id);
+    if (!existingQuote) return undefined;
+    
+    const updatedQuote: Quote = {
+      ...existingQuote,
+      status,
+      updatedAt: new Date()
+    };
+    
+    this.quotesData.set(id, updatedQuote);
+    return updatedQuote;
+  }
+  
+  async deleteQuote(id: number): Promise<boolean> {
+    this.quoteItemsData.delete(id);
+    return this.quotesData.delete(id);
+  }
+  
+  async convertQuoteToInvoice(quoteId: number): Promise<Invoice | undefined> {
+    const quoteWithItems = await this.getQuoteWithItems(quoteId);
+    if (!quoteWithItems) return undefined;
+    
+    const { quote, items } = quoteWithItems;
+    
+    // Actualizamos el estado de la cotización
+    await this.updateQuoteStatus(quoteId, "converted");
+    
+    // Creamos la factura
+    const invoiceData: InsertInvoice = {
+      clientId: quote.clientId,
+      invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
+      issueDate: new Date(),
+      dueDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000), // 30 días de plazo por defecto
+      subtotal: quote.subtotal,
+      taxAmount: quote.taxAmount,
+      total: quote.total,
+      notes: `Generado desde cotización #${quote.quoteNumber}`,
+      status: "draft"
+    };
+    
+    // Creamos la factura con sus items
+    const newInvoice = await this.createInvoice(invoiceData, items.map(item => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      amount: item.amount,
+      taxRate: item.taxRate,
+      invoiceId: 0 // Este valor será reemplazado por el ID real en createInvoice
+    })));
+    
+    // Actualizamos la cotización para incluir el ID de la factura asociada
+    await this.updateQuote(quoteId, {
+      convertedToInvoiceId: newInvoice.id
+    });
+    
+    return newInvoice;
   }
   
   // Invoice methods
@@ -215,8 +383,28 @@ export class MemStorage implements IStorage {
     return Array.from(this.invoicesData.values());
   }
   
+  async getInvoicesByClient(clientId: number): Promise<Invoice[]> {
+    return Array.from(this.invoicesData.values()).filter(
+      invoice => invoice.clientId === clientId
+    );
+  }
+  
   async getInvoice(id: number): Promise<Invoice | undefined> {
     return this.invoicesData.get(id);
+  }
+  
+  async updateInvoiceStatus(id: number, status: InvoiceStatus): Promise<Invoice | undefined> {
+    const existingInvoice = this.invoicesData.get(id);
+    if (!existingInvoice) return undefined;
+    
+    const updatedInvoice: Invoice = {
+      ...existingInvoice,
+      status,
+      updatedAt: new Date()
+    };
+    
+    this.invoicesData.set(id, updatedInvoice);
+    return updatedInvoice;
   }
   
   async getInvoiceWithItems(id: number): Promise<{invoice: Invoice, items: InvoiceItem[]} | undefined> {
@@ -234,7 +422,12 @@ export class MemStorage implements IStorage {
       ...insertInvoice,
       id,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      status: insertInvoice.status || "draft",
+      issueDate: insertInvoice.issueDate || now,
+      dueDate: insertInvoice.dueDate || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+      notes: insertInvoice.notes || null,
+      taxAmount: insertInvoice.taxAmount || null
     };
     
     this.invoicesData.set(id, invoice);
@@ -286,7 +479,11 @@ export class MemStorage implements IStorage {
       ...insertExpense,
       id,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      date: insertExpense.date || now,
+      notes: insertExpense.notes || null,
+      category: insertExpense.category || "other",
+      receipt: insertExpense.receipt || null
     };
     
     this.expensesData.set(id, expense);
@@ -327,7 +524,10 @@ export class MemStorage implements IStorage {
       ...insertAccount,
       id,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      isActive: insertAccount.isActive ?? true,
+      description: insertAccount.description ?? null,
+      parentId: insertAccount.parentId ?? null
     };
     
     this.accountsData.set(id, account);
@@ -376,7 +576,11 @@ export class MemStorage implements IStorage {
       ...insertEntry,
       id,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      date: insertEntry.date || now,
+      reference: insertEntry.reference || null,
+      sourceType: insertEntry.sourceType || null,
+      sourceId: insertEntry.sourceId || null
     };
     
     this.journalEntriesData.set(id, entry);
@@ -385,7 +589,10 @@ export class MemStorage implements IStorage {
     const lines: JournalLine[] = insertLines.map(line => ({
       ...line,
       id: this.currentJournalLineId++,
-      journalEntryId: id
+      journalEntryId: id,
+      description: line.description || null,
+      debit: line.debit || '0',
+      credit: line.credit || '0'
     }));
     
     this.journalLinesData.set(id, lines);
@@ -499,14 +706,166 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(clients.createdAt));
   }
   
+  // QUOTES/PRESUPUESTOS
+  async getQuotes(): Promise<Quote[]> {
+    return await db.select().from(quotes).orderBy(desc(quotes.createdAt));
+  }
+  
+  async getQuotesByClient(clientId: number): Promise<Quote[]> {
+    return await db.select().from(quotes).where(eq(quotes.clientId, clientId)).orderBy(desc(quotes.createdAt));
+  }
+  
+  async getQuote(id: number): Promise<Quote | undefined> {
+    const [quote] = await db.select().from(quotes).where(eq(quotes.id, id));
+    return quote;
+  }
+  
+  async getQuoteWithItems(id: number): Promise<{quote: Quote, items: QuoteItem[]} | undefined> {
+    const [quote] = await db.select().from(quotes).where(eq(quotes.id, id));
+    if (!quote) return undefined;
+    
+    const items = await db.select().from(quoteItems).where(eq(quoteItems.quoteId, id));
+    return { quote, items };
+  }
+  
+  async createQuote(insertQuote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote> {
+    // Usamos el objeto de transacción de Drizzle
+    return await db.transaction(async (tx) => {
+      // Aseguramos que todos los campos requeridos estén presentes
+      const completeQuote = {
+        ...insertQuote,
+        status: insertQuote.status || "draft",
+        taxAmount: insertQuote.taxAmount || null,
+        notes: insertQuote.notes || null,
+        termsAndConditions: insertQuote.termsAndConditions || null,
+        expiryDate: insertQuote.expiryDate || new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000), // 30 días por defecto
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // Insertamos la cotización y obtenemos el ID
+      const [quote] = await tx
+        .insert(quotes)
+        .values(completeQuote)
+        .returning();
+      
+      // Insertamos los items de la cotización
+      for (const item of items) {
+        const completeItem = {
+          ...item,
+          quoteId: quote.id,
+          taxRate: item.taxRate || null
+        };
+        
+        await tx
+          .insert(quoteItems)
+          .values(completeItem);
+      }
+      
+      return quote;
+    });
+  }
+  
+  async updateQuote(id: number, quoteData: Partial<InsertQuote>): Promise<Quote | undefined> {
+    const [updatedQuote] = await db
+      .update(quotes)
+      .set({ ...quoteData, updatedAt: new Date() })
+      .where(eq(quotes.id, id))
+      .returning();
+    return updatedQuote;
+  }
+  
+  async updateQuoteStatus(id: number, status: QuoteStatus): Promise<Quote | undefined> {
+    const [updatedQuote] = await db
+      .update(quotes)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(quotes.id, id))
+      .returning();
+    return updatedQuote;
+  }
+  
+  async deleteQuote(id: number): Promise<boolean> {
+    // Primero eliminamos los items relacionados a la cotización
+    await db.delete(quoteItems).where(eq(quoteItems.quoteId, id));
+    // Luego eliminamos la cotización
+    const result = await db.delete(quotes).where(eq(quotes.id, id));
+    return !!result;
+  }
+  
+  async convertQuoteToInvoice(quoteId: number): Promise<Invoice | undefined> {
+    // Obtenemos la cotización con sus items
+    const quoteWithItems = await this.getQuoteWithItems(quoteId);
+    if (!quoteWithItems) return undefined;
+    
+    const { quote, items } = quoteWithItems;
+    
+    return await db.transaction(async (tx) => {
+      // Actualizamos el estado de la cotización a "converted"
+      await tx
+        .update(quotes)
+        .set({ status: "converted", updatedAt: new Date() })
+        .where(eq(quotes.id, quoteId));
+      
+      // Creamos la factura
+      const insertInvoice: InsertInvoice = {
+        clientId: quote.clientId,
+        invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
+        issueDate: new Date(),
+        dueDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000), // 30 días por defecto
+        subtotal: quote.subtotal,
+        taxAmount: quote.taxAmount,
+        total: quote.total,
+        notes: `Generado desde cotización #${quote.quoteNumber}`,
+        status: "draft"
+      };
+      
+      // Insertamos la factura
+      const [invoice] = await tx
+        .insert(invoices)
+        .values({
+          ...insertInvoice,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+      
+      // Convertimos los items de la cotización a items de factura
+      for (const item of items) {
+        await tx.insert(invoiceItems).values({
+          invoiceId: invoice.id,
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          amount: item.amount,
+          taxRate: item.taxRate
+        });
+      }
+      
+      return invoice;
+    });
+  }
+  
   // INVOICES
   async getInvoices(): Promise<Invoice[]> {
     return await db.select().from(invoices).orderBy(desc(invoices.createdAt));
   }
   
+  async getInvoicesByClient(clientId: number): Promise<Invoice[]> {
+    return await db.select().from(invoices).where(eq(invoices.clientId, clientId)).orderBy(desc(invoices.createdAt));
+  }
+  
   async getInvoice(id: number): Promise<Invoice | undefined> {
     const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
     return invoice;
+  }
+  
+  async updateInvoiceStatus(id: number, status: InvoiceStatus): Promise<Invoice | undefined> {
+    const [updatedInvoice] = await db
+      .update(invoices)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(invoices.id, id))
+      .returning();
+    return updatedInvoice;
   }
   
   async getInvoiceWithItems(id: number): Promise<{invoice: Invoice, items: InvoiceItem[]} | undefined> {

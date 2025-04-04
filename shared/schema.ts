@@ -15,19 +15,33 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Client Type enum
+export const clientTypeEnum = pgEnum("client_type", [
+  "company", "individual"
+]);
+
 // Client/Customer model
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
-  companyName: text("company_name").notNull(),
+  clientType: clientTypeEnum("client_type").default("company").notNull(),
+  companyName: text("company_name"),
   contactName: text("contact_name"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
   email: text("email"),
   phone: text("phone"),
   address: text("address"),
   taxId: text("tax_id"),
   notes: text("notes"),
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Quote/Estimación status enum
+export const quoteStatusEnum = pgEnum("quote_status", [
+  "draft", "sent", "accepted", "rejected", "expired", "converted"
+]);
 
 // Invoice status enum
 export const invoiceStatusEnum = pgEnum("invoice_status", [
@@ -48,6 +62,35 @@ export const invoices = pgTable("invoices", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Quote/Presupuesto model
+export const quotes = pgTable("quotes", {
+  id: serial("id").primaryKey(),
+  quoteNumber: text("quote_number").notNull().unique(),
+  clientId: integer("client_id").notNull(),
+  issueDate: timestamp("issue_date").defaultNow().notNull(),
+  expiryDate: timestamp("expiry_date").notNull(),
+  status: quoteStatusEnum("status").default("draft").notNull(),
+  subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0"),
+  total: numeric("total", { precision: 10, scale: 2 }).notNull(),
+  convertedToInvoiceId: integer("converted_to_invoice_id"),
+  notes: text("notes"),
+  termsAndConditions: text("terms_and_conditions"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Quote items model
+export const quoteItems = pgTable("quote_items", {
+  id: serial("id").primaryKey(),
+  quoteId: integer("quote_id").notNull(),
+  description: text("description").notNull(),
+  quantity: numeric("quantity", { precision: 10, scale: 2 }).notNull(),
+  unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0"),
 });
 
 // Invoice items model
@@ -316,6 +359,12 @@ export const insertUserSchema = createInsertSchema(users)
 export const insertClientSchema = createInsertSchema(clients)
   .omit({ id: true, createdAt: true, updatedAt: true });
 
+export const insertQuoteSchema = createInsertSchema(quotes)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertQuoteItemSchema = createInsertSchema(quoteItems)
+  .omit({ id: true });
+
 export const insertInvoiceSchema = createInsertSchema(invoices)
   .omit({ id: true, createdAt: true, updatedAt: true });
 
@@ -370,6 +419,14 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
+export type ClientType = "company" | "individual";
+
+export type Quote = typeof quotes.$inferSelect;
+export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+export type QuoteStatus = "draft" | "sent" | "accepted" | "rejected" | "expired" | "converted";
+
+export type QuoteItem = typeof quoteItems.$inferSelect;
+export type InsertQuoteItem = z.infer<typeof insertQuoteItemSchema>;
 
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;

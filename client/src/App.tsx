@@ -17,6 +17,8 @@ import LandingPage from "@/pages/landing-page";
 import DashboardPage from "@/pages/dashboard";
 import ClientsPage from "@/pages/clients";
 import ClientCreatePage from "@/pages/clients/create";
+import QuotesPage from "@/pages/quotes";
+import QuoteCreatePage from "@/pages/quotes/create";
 import InvoicesPage from "@/pages/invoices";
 import InvoiceCreatePage from "@/pages/invoices/create";
 import ExpensesPage from "@/pages/expenses";
@@ -100,6 +102,15 @@ function Router() {
         
         <ProtectedRoute path="/clients/create">
           <ClientCreatePage />
+        </ProtectedRoute>
+        
+        {/* Quotes */}
+        <ProtectedRoute path="/quotes">
+          <QuotesPage />
+        </ProtectedRoute>
+        
+        <ProtectedRoute path="/quotes/create">
+          <QuoteCreatePage />
         </ProtectedRoute>
         
         {/* Invoices */}

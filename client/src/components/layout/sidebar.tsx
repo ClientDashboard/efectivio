@@ -70,6 +70,7 @@ export default function Sidebar() {
   const mainNavigation = [
     { name: 'Panel', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Clientes', path: '/clients', icon: Users },
+    { name: 'Cotizaciones', path: '/quotes', icon: FileSpreadsheet },
     { name: 'Facturas', path: '/invoices', icon: FileText },
     { name: 'Gastos', path: '/expenses', icon: Receipt },
     { name: 'Productos', path: '/products', icon: ShoppingCart },
