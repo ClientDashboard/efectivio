@@ -20,8 +20,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="fixed inset-y-0 left-0 z-30">
+        <Sidebar />
+      </div>
+      <div className="flex flex-col flex-1 ml-64 overflow-hidden">
         <Header />
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
           <div className="py-6">

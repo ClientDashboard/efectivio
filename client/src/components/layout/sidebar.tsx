@@ -60,7 +60,7 @@ export default function Sidebar() {
   };
 
   const mainNavigation = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'PRUEBA', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Clientes', path: '/clients', icon: Users },
     { name: 'Facturas', path: '/invoices', icon: FileText },
     { name: 'Gastos', path: '/expenses', icon: Receipt },
