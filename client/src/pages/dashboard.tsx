@@ -1,3 +1,4 @@
+
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import DashboardWidgets from '@/components/dashboard/DashboardWidgets';
@@ -5,6 +6,8 @@ import { useLocation } from "wouter";
 import React from 'react';
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
@@ -19,15 +22,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-}
-
-export default function LegacyDashboard() {
-  const [, setLocation] = useLocation();
-
-  // Redireccionar al dashboard
-  React.useEffect(() => {
-    setLocation("/dashboard");
-  }, [setLocation]);
-
-  return null;
 }
