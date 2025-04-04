@@ -1,16 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { AuthUser } from "@/lib/auth";
 
 interface UserState {
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    fullName?: string;
-    role: string;
-  } | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
-  setUser: (user: UserState["user"]) => void;
+  setUser: (user: AuthUser | null) => void;
   clearUser: () => void;
 }
 

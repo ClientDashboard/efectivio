@@ -39,7 +39,7 @@ import {
 
 export default function Sidebar() {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [activeMenus, setActiveMenus] = useState<Record<string, boolean>>({
     clientPortal: false,
     inventory: false
@@ -255,7 +255,7 @@ export default function Sidebar() {
 
       <div className="p-4 border-t border-gray-200">
         <button
-          onClick={logout}
+          onClick={() => signOut && signOut()}
           className="flex items-center w-full px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50"
         >
           <LogOut className="w-5 h-5 mr-3" />
