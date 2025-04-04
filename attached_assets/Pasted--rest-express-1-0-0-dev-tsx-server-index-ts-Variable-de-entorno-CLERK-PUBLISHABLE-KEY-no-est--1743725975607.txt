@@ -1,0 +1,100 @@
+> rest-express@1.0.0 dev
+> tsx server/index.ts
+
+⚠️ Variable de entorno CLERK_PUBLISHABLE_KEY no está definida, VITE_CLERK_PUBLISHABLE_KEY no estará disponible
+⚠️ Algunas variables de entorno no están definidas. Es posible que ciertas funcionalidades no trabajen correctamente.
+⚠️ Variable de entorno CLERK_PUBLISHABLE_KEY no está definida, VITE_CLERK_PUBLISHABLE_KEY no estará disponible
+⚠️ Algunas variables de entorno no están definidas. Es posible que ciertas funcionalidades no trabajen correctamente.
+ℹ️ Bucket documents ya existe
+ℹ️ Bucket invoices ya existe
+ℹ️ Bucket receipts ya existe
+ℹ️ Bucket contracts ya existe
+ℹ️ Bucket profiles ya existe
+ℹ️ Bucket meeting_recordings ya existe
+12:19:09 AM [express] ✅ Buckets de almacenamiento de Supabase inicializados
+12:19:09 AM [express] serving on port 5000
+El bucket 'meeting_recordings' ya existe
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+17 |  }
+18 |  
+19 |  @import '@fontsource/inter/400.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+20 |  @import '@fontsource/inter/500.css';
+21 |  @import '@fontsource/inter/600.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+18 |  
+19 |  @import '@fontsource/inter/400.css';
+20 |  @import '@fontsource/inter/500.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+21 |  @import '@fontsource/inter/600.css';
+22 |  @import '@fontsource/inter/700.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+19 |  @import '@fontsource/inter/400.css';
+20 |  @import '@fontsource/inter/500.css';
+21 |  @import '@fontsource/inter/600.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+22 |  @import '@fontsource/inter/700.css';
+23 |  @import '@fontsource/montserrat/300.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+20 |  @import '@fontsource/inter/500.css';
+21 |  @import '@fontsource/inter/600.css';
+22 |  @import '@fontsource/inter/700.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23 |  @import '@fontsource/montserrat/300.css';
+24 |  @import '@fontsource/montserrat/400.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+21 |  @import '@fontsource/inter/600.css';
+22 |  @import '@fontsource/inter/700.css';
+23 |  @import '@fontsource/montserrat/300.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+24 |  @import '@fontsource/montserrat/400.css';
+25 |  @import '@fontsource/montserrat/500.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+22 |  @import '@fontsource/inter/700.css';
+23 |  @import '@fontsource/montserrat/300.css';
+24 |  @import '@fontsource/montserrat/400.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+25 |  @import '@fontsource/montserrat/500.css';
+26 |  @import '@fontsource/montserrat/600.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+23 |  @import '@fontsource/montserrat/300.css';
+24 |  @import '@fontsource/montserrat/400.css';
+25 |  @import '@fontsource/montserrat/500.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+26 |  @import '@fontsource/montserrat/600.css';
+27 |  @import '@fontsource/montserrat/700.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+24 |  @import '@fontsource/montserrat/400.css';
+25 |  @import '@fontsource/montserrat/500.css';
+26 |  @import '@fontsource/montserrat/600.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+27 |  @import '@fontsource/montserrat/700.css';
+28 |  @import '@fontsource/montserrat/800.css';
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+25 |  @import '@fontsource/montserrat/500.css';
+26 |  @import '@fontsource/montserrat/600.css';
+27 |  @import '@fontsource/montserrat/700.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+28 |  @import '@fontsource/montserrat/800.css';
+29 |  
+[vite:css] @import must precede all other statements (besides @charset or empty @layer)
+26 |  @import '@fontsource/montserrat/600.css';
+27 |  @import '@fontsource/montserrat/700.css';
+28 |  @import '@fontsource/montserrat/800.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+29 |  
+30 |  @tailwind base;
+
+Could not open clerk-provider.tsx in the editor.
+The editor process exited with an error: spawn vi ENOENT ('vi' command does not exist in 'PATH').
+
+
+Could not open clerk-provider.tsx in the editor.
+The editor process exited with an error: spawn vi ENOENT ('vi' command does not exist in 'PATH').
+
+
+Could not open clerk-provider.tsx in the editor.
+The editor process exited with an error: spawn vi ENOENT ('vi' command does not exist in 'PATH').
