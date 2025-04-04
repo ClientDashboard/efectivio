@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/lib/auth';
@@ -16,7 +17,10 @@ import {
   Building2,
   Calendar,
   MessageSquare,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Brain,
+  CreditCard,
+  Box
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -39,6 +43,10 @@ export default function Sidebar() {
     { name: 'Balance', path: '/accounting/balance-sheet', icon: BarChart2 },
     { name: 'Estado de Resultados', path: '/accounting/income-statement', icon: FileBarChart },
     { name: 'Diario', path: '/accounting/journal', icon: FileText },
+  ];
+
+  const aiNavigation = [
+    { name: 'Análisis de Texto', path: '/ai/text-analysis', icon: Brain },
   ];
 
   const configNavigation = [
@@ -84,6 +92,22 @@ export default function Sidebar() {
 
         <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Contabilidad</div>
         {contabilidadNavigation.map((item) => (
+          <Link
+            key={item.path}
+            href={item.path}
+            className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
+              location === item.path
+                ? 'bg-primary-50 text-primary-600'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <item.icon className="w-5 h-5 mr-3" />
+            {item.name}
+          </Link>
+        ))}
+
+        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">IA y Análisis</div>
+        {aiNavigation.map((item) => (
           <Link
             key={item.path}
             href={item.path}
