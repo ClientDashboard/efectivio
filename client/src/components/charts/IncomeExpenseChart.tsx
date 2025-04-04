@@ -52,8 +52,8 @@ export default function IncomeExpenseChart({
     period === 'quarter' ? quarterlyData : yearlyData;
   
   return (
-    <div className="w-full h-full px-1">
-      <div className="flex justify-between items-center mb-4">
+    <div className="w-full h-full px-1 flex flex-col">
+      <div className="flex justify-between items-center mb-2">
         <h2 className="text-lg font-semibold text-gray-900">Ingresos vs Gastos</h2>
         
         <div className="flex items-center">
@@ -66,27 +66,27 @@ export default function IncomeExpenseChart({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-3">
+        <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
           <p className="text-blue-600 text-sm mb-1">Ingresos totales</p>
-          <p className="text-2xl font-semibold">${totalIngresos.toLocaleString()}</p>
+          <p className="text-xl font-semibold">${totalIngresos.toLocaleString()}</p>
           <p className="text-blue-600 text-xs mt-1">+8.2% vs periodo anterior</p>
         </div>
         
-        <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+        <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
           <p className="text-orange-600 text-sm mb-1">Gastos totales</p>
-          <p className="text-2xl font-semibold">${totalGastos.toLocaleString()}</p>
+          <p className="text-xl font-semibold">${totalGastos.toLocaleString()}</p>
           <p className="text-orange-600 text-xs mt-1">+4.5% vs periodo anterior</p>
         </div>
         
-        <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+        <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
           <p className="text-emerald-600 text-sm mb-1">Diferencia</p>
-          <p className="text-2xl font-semibold">${diferencia.toLocaleString()}</p>
+          <p className="text-xl font-semibold">${diferencia.toLocaleString()}</p>
           <p className="text-emerald-600 text-xs mt-1">+12.3% vs periodo anterior</p>
         </div>
       </div>
       
-      <div className="h-72 w-full mt-4">
+      <div className="flex-grow w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
@@ -160,7 +160,7 @@ export default function IncomeExpenseChart({
         </ResponsiveContainer>
       </div>
       
-      <div className="flex items-center justify-center gap-8 mt-2 text-sm text-gray-600">
+      <div className="flex items-center justify-center gap-8 mt-1 mb-1 text-sm text-gray-600 flex-shrink-0">
         <div className="flex items-center gap-2">
           <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: incomeColor }}></span>
           <span>Ingresos</span>

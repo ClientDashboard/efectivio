@@ -187,7 +187,7 @@ export const FinancialTipWidget = () => {
 export const IncomeExpenseWidget = () => {
   return (
     <div className="h-full w-full flex flex-col items-center justify-center">
-      <div className="w-full" style={{ height: '300px' }}>
+      <div className="w-full h-full">
         <IncomeExpenseChart 
           incomeColor="#0062ff"
           expenseColor="#F48E21"
@@ -244,7 +244,7 @@ export const dashboardWidgets: Widget[] = [
     icon: <BarChart3 className="mr-2 h-5 w-5 text-orange-500" />,
     content: <IncomeExpenseWidget />,
     description: 'Comparativa de ingresos y gastos por periodo',
-    minH: 6,
+    minH: 10,
     minW: 3
   },
 ];

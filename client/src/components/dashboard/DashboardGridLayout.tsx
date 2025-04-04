@@ -158,7 +158,7 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
                     <CardDescription className="text-xs mt-1 text-gray-500">{widget.description}</CardDescription>
                   )}
                 </CardHeader>
-                <CardContent className="px-5 py-3 overflow-auto flex-grow">
+                <CardContent className={`px-5 py-3 flex-grow ${widget.id === 'income-expense' ? '' : 'overflow-auto'}`}>
                   {widget.content}
                 </CardContent>
                 {widget.footer && (
