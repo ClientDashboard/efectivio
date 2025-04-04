@@ -9,6 +9,13 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
+  // Modo desarrollo - permitir acceso directo
+  const isDevelopment = true;
+  
+  if (isDevelopment) {
+    return <Route path={path}>{children}</Route>;
+  }
+
   const { isLoaded, userId } = useAuth();
   const { isLoaded: isUserLoaded } = useUser();
   const isLoading = !isLoaded || !isUserLoaded;
