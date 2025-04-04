@@ -19,20 +19,22 @@ import {
   MessageSquare,
   FileSpreadsheet,
   Brain,
+  ChevronDown,
   CreditCard,
-  Box
+  Box,
+  Settings2
 } from 'lucide-react';
 
 export default function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
 
-  const navigation = [
+  const mainNavigation = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Clientes', path: '/clients', icon: Users },
     { name: 'Facturas', path: '/invoices', icon: FileText },
     { name: 'Gastos', path: '/expenses', icon: Receipt },
-    { name: 'Productos', path: '/productos', icon: ShoppingCart },
+    { name: 'Productos', path: '/products', icon: ShoppingCart },
     { name: 'Calendario', path: '/calendar', icon: Calendar },
     { name: 'Mensajes', path: '/messages', icon: MessageSquare },
   ];
@@ -47,6 +49,7 @@ export default function Sidebar() {
 
   const aiNavigation = [
     { name: 'Análisis de Texto', path: '/ai/text-analysis', icon: Brain },
+    { name: 'Asistente Virtual', path: '/ai/assistant', icon: MessageSquare },
   ];
 
   const configNavigation = [
@@ -75,7 +78,7 @@ export default function Sidebar() {
 
       <nav className="flex-1 overflow-y-auto py-4">
         <div className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase">Principal</div>
-        {navigation.map((item) => (
+        {mainNavigation.map((item) => (
           <Link
             key={item.path}
             href={item.path}
