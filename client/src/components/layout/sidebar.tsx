@@ -22,12 +22,35 @@ import {
   ChevronDown,
   CreditCard,
   Box,
-  Settings2
+  Settings2,
+  ListTodo,
+  Clock,
+  FolderArchive,
+  Video,
+  FileDigit,
+  Briefcase,
+  CircleDollarSign,
+  Database,
+  HardDrive,
+  Shield,
+  Store,
+  ChevronRight
 } from 'lucide-react';
 
 export default function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const [activeMenus, setActiveMenus] = useState<Record<string, boolean>>({
+    clientPortal: false,
+    inventory: false
+  });
+
+  const toggleSubMenu = (menuName: string) => {
+    setActiveMenus({
+      ...activeMenus,
+      [menuName]: !activeMenus[menuName]
+    });
+  };
 
   const mainNavigation = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -45,33 +68,53 @@ export default function Sidebar() {
     { name: 'Balance', path: '/accounting/balance-sheet', icon: BarChart2 },
     { name: 'Estado de Resultados', path: '/accounting/income-statement', icon: FileBarChart },
     { name: 'Diario', path: '/accounting/journal', icon: FileText },
+    { name: 'Impuestos', path: '/accounting/taxes', icon: CircleDollarSign },
+  ];
+
+  const clientPortalNavigation = [
+    { name: 'Proyectos', path: '/client-portal/projects', icon: Briefcase },
+    { name: 'Tareas', path: '/client-portal/tasks', icon: ListTodo },
+    { name: 'Registro de Horas', path: '/client-portal/time-tracking', icon: Clock },
+    { name: 'Documentos', path: '/client-portal/documents', icon: FolderArchive },
+    { name: 'Reuniones', path: '/client-portal/meetings', icon: Video },
+  ];
+
+  const inventoryNavigation = [
+    { name: 'Productos', path: '/inventory/products', icon: Box },
+    { name: 'Categorías', path: '/inventory/categories', icon: FileDigit },
+    { name: 'Almacenes', path: '/inventory/warehouses', icon: Store },
+    { name: 'Movimientos', path: '/inventory/movements', icon: ShoppingCart },
   ];
 
   const aiNavigation = [
     { name: 'Análisis de Texto', path: '/ai/text-analysis', icon: Brain },
+    { name: 'Transcripciones', path: '/ai/transcriptions', icon: FileText },
     { name: 'Asistente Virtual', path: '/ai/assistant', icon: MessageSquare },
   ];
 
   const configNavigation = [
-    { name: 'Empresa', path: '/company', icon: Building2 },
-    { name: 'Ajustes', path: '/settings', icon: Settings },
-    { name: 'Usuarios', path: '/users', icon: UserCog },
+    { name: 'Empresa', path: '/settings/company', icon: Building2 },
+    { name: 'Seguridad', path: '/settings/security', icon: Shield },
+    { name: 'Respaldo', path: '/settings/backup', icon: Database },
+    { name: 'Almacenamiento', path: '/settings/storage', icon: HardDrive },
+    { name: 'Usuarios', path: '/settings/users', icon: UserCog },
+    { name: 'General', path: '/settings/general', icon: Settings },
   ];
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
-      <div className="p-4 flex items-center border-b border-gray-200">
-        <img src="/images/primary-logo.png" alt="Efectivio" className="h-8" />
+      <div className="p-4 flex items-center justify-center border-b border-gray-200">
+        <img src="/images/primary-logo.png" alt="Efectivio" className="h-10" />
       </div>
 
       <div className="border-b border-gray-200 py-4 px-4">
         <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full bg-primary-500 text-white flex items-center justify-center font-medium">
+          <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-medium">
             {user?.initials || 'U'}
           </div>
           <div className="ml-3">
             <div className="font-medium text-gray-900">{user?.name || 'Usuario'}</div>
-            <div className="text-sm text-gray-500">{user?.role || 'Invitado'}</div>
+            <div className="text-sm text-gray-500">{user?.role || 'Administrador'}</div>
           </div>
         </div>
       </div>
@@ -84,7 +127,7 @@ export default function Sidebar() {
             href={item.path}
             className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
               location === item.path
-                ? 'bg-primary-50 text-primary-600'
+                ? 'bg-primary/10 text-primary'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -100,7 +143,7 @@ export default function Sidebar() {
             href={item.path}
             className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
               location === item.path
-                ? 'bg-primary-50 text-primary-600'
+                ? 'bg-primary/10 text-primary'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -109,6 +152,74 @@ export default function Sidebar() {
           </Link>
         ))}
 
+        {/* Portal del Cliente - Menú desplegable */}
+        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Portal del Cliente</div>
+        <button
+          onClick={() => toggleSubMenu('clientPortal')}
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+        >
+          <div className="flex items-center">
+            <Briefcase className="w-5 h-5 mr-3" />
+            <span>Portal del Cliente</span>
+          </div>
+          <ChevronDown 
+            className={`w-4 h-4 transition-transform ${activeMenus.clientPortal ? 'rotate-180' : ''}`} 
+          />
+        </button>
+        
+        {activeMenus.clientPortal && (
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+            {clientPortalNavigation.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center px-3 py-2 rounded-lg text-sm ${
+                  location === item.path
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <item.icon className="w-4 h-4 mr-3" />
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Inventario - Menú desplegable */}
+        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Inventario</div>
+        <button
+          onClick={() => toggleSubMenu('inventory')}
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+        >
+          <div className="flex items-center">
+            <Box className="w-5 h-5 mr-3" />
+            <span>Inventario</span>
+          </div>
+          <ChevronDown 
+            className={`w-4 h-4 transition-transform ${activeMenus.inventory ? 'rotate-180' : ''}`} 
+          />
+        </button>
+        
+        {activeMenus.inventory && (
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+            {inventoryNavigation.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center px-3 py-2 rounded-lg text-sm ${
+                  location === item.path
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <item.icon className="w-4 h-4 mr-3" />
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        )}
+
         <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">IA y Análisis</div>
         {aiNavigation.map((item) => (
           <Link
@@ -116,7 +227,7 @@ export default function Sidebar() {
             href={item.path}
             className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
               location === item.path
-                ? 'bg-primary-50 text-primary-600'
+                ? 'bg-primary/10 text-primary'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -132,7 +243,7 @@ export default function Sidebar() {
             href={item.path}
             className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
               location === item.path
-                ? 'bg-primary-50 text-primary-600'
+                ? 'bg-primary/10 text-primary'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
