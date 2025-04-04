@@ -617,6 +617,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error generating income statement", error });
     }
   });
+  
+  // API para obtener datos del dashboard
+  app.get("/api/dashboard", async (req: Request, res: Response) => {
+    try {
+      // En un entorno real, estos datos vendrían de la base de datos
+      // Los formateamos según la interfaz DashboardData definida en el cliente
+      const dashboardData = {
+        ingresos: "B/. 42,500.00",
+        ingresosChange: 8.5,
+        gastos: "B/. 27,320.00",
+        gastosChange: 2.3,
+        facturasPendientes: "B/. 13,750.00",
+        facturasPendientesChange: -5.2,
+        itbms: "B/. 2,975.00"
+      };
+      
+      return res.status(200).json(dashboardData);
+    } catch (error) {
+      console.error("Error al obtener datos del dashboard:", error);
+      return res.status(500).json({ error: "Error al cargar los datos del dashboard" });
+    }
+  });
 
   // Authentication API endpoints
   app.post("/api/auth/register", async (req: Request, res: Response) => {

@@ -77,9 +77,9 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
   };
 
   return (
-    <div className="w-full mb-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">
+    <div className="w-full mb-5">
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-lg font-semibold">
           {editing ? "Personalizar dashboard" : "Dashboard"}
         </h2>
         {editing ? (
@@ -88,27 +88,27 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
               variant="outline" 
               size="sm" 
               onClick={resetLayouts}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 h-7 px-2"
             >
-              <Maximize className="h-4 w-4" />
-              <span>Restablecer</span>
+              <Maximize className="h-3.5 w-3.5" />
+              <span className="text-xs">Restablecer</span>
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => setEditing(false)}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 h-7 px-2"
             >
-              <X className="h-4 w-4" />
-              <span>Cancelar</span>
+              <X className="h-3.5 w-3.5" />
+              <span className="text-xs">Cancelar</span>
             </Button>
             <Button 
               size="sm" 
               onClick={() => setEditing(false)}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 h-7 px-2"
             >
-              <Save className="h-4 w-4" />
-              <span>Guardar</span>
+              <Save className="h-3.5 w-3.5" />
+              <span className="text-xs">Guardar</span>
             </Button>
           </div>
         ) : (
@@ -116,10 +116,10 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
             variant="outline" 
             size="sm" 
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 h-7 px-2"
           >
-            <Settings className="h-4 w-4" />
-            <span>Personalizar dashboard</span>
+            <Settings className="h-3.5 w-3.5" />
+            <span className="text-xs">Personalizar dashboard</span>
           </Button>
         )}
       </div>
@@ -131,20 +131,20 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
           layouts={layouts}
           breakpoints={{ lg: 1200, md: 768, sm: 480 }}
           cols={{ lg: 3, md: 2, sm: 1 }}
-          rowHeight={150}
+          rowHeight={140}
           onLayoutChange={handleLayoutChange}
           onBreakpointChange={handleBreakpointChange}
           isDraggable={editing}
           isResizable={editing}
-          margin={[16, 16]}
+          margin={[12, 12]}
           containerPadding={[0, 0]}
         >
           {widgets.map((widget) => (
             <div key={widget.id} className="widget-container">
-              <Card className="h-full">
-                <CardHeader className="pb-3">
+              <Card className="h-full shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2 px-4 pt-3">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg font-medium flex items-center">
+                    <CardTitle className="text-base font-medium flex items-center">
                       {widget.icon}
                       {widget.title}
                     </CardTitle>
@@ -155,14 +155,14 @@ export function DashboardGridLayout({ widgets }: { widgets: Widget[] }) {
                     )}
                   </div>
                   {widget.description && (
-                    <CardDescription>{widget.description}</CardDescription>
+                    <CardDescription className="text-xs">{widget.description}</CardDescription>
                   )}
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 py-2">
                   {widget.content}
                 </CardContent>
                 {widget.footer && (
-                  <CardFooter className="pt-1">
+                  <CardFooter className="pt-0 pb-2 px-4">
                     {widget.footer}
                   </CardFooter>
                 )}

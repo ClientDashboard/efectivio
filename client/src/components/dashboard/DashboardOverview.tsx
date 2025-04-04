@@ -10,6 +10,18 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { HexColorPicker } from "react-colorful";
 
+// Definición del tipo para los datos del dashboard
+interface DashboardData {
+  ingresos: string;
+  ingresosChange: number;
+  gastos: string;
+  gastosChange: number;
+  facturasPendientes: string;
+  facturasPendientesChange: number;
+  itbms: string;
+  // Más campos según sea necesario
+}
+
 // Tipos para las opciones de color
 interface ChartColorScheme {
   incomeColor: string;
@@ -21,7 +33,7 @@ interface ChartColorScheme {
 }
 
 export default function DashboardOverview() {
-  const { data: dashboardData, isLoading, refetch } = useQuery({
+  const { data: dashboardData, isLoading, refetch } = useQuery<DashboardData>({
     queryKey: ["/api/dashboard"],
     enabled: true,
   });
