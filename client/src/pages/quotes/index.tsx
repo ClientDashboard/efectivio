@@ -12,13 +12,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -113,27 +106,34 @@ export default function QuotesPage() {
     : quotes;
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container mx-auto">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cotizaciones</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-semibold text-gray-900">Cotizaciones</h1>
+          <p className="text-gray-500 mt-1">
             Gestiona las cotizaciones y propuestas para tus clientes
           </p>
         </div>
-        <Button asChild>
-          <Link href="/quotes/create">
-            <Plus className="mr-2 h-4 w-4" /> Nueva cotización
-          </Link>
-        </Button>
+        <Link href="/quotes/create">
+          <Button>
+            <Plus className="h-4 w-4 mr-2" /> Nueva cotización
+          </Button>
+        </Link>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="px-6 py-5 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <CardTitle>Listado de cotizaciones</CardTitle>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Listado de cotizaciones</h2>
+              <p className="text-gray-500 mt-1 text-sm">
+                {quotes && quotes.length > 0
+                  ? `${filteredQuotes?.length || 0} cotizaciones encontradas`
+                  : "No hay cotizaciones registradas"}
+              </p>
+            </div>
             <div className="relative w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 type="text"
                 placeholder="Buscar cotización..."
@@ -143,20 +143,15 @@ export default function QuotesPage() {
               />
             </div>
           </div>
-          <CardDescription>
-            {quotes && quotes.length > 0
-              ? `${filteredQuotes?.length || 0} cotizaciones encontradas`
-              : "No hay cotizaciones registradas"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div className="p-6">
           {isLoadingQuotes || isLoadingClients ? (
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-white">
                 <TableRow>
                   <TableHead>Número</TableHead>
                   <TableHead>Cliente</TableHead>
@@ -172,7 +167,7 @@ export default function QuotesPage() {
                   filteredQuotes.map((quote: Quote) => (
                     <TableRow 
                       key={quote.id}
-                      className="cursor-pointer hover:bg-muted/50"
+                      className="cursor-pointer hover:bg-gray-50/30"
                       onClick={() => handleRowClick(quote)}
                     >
                       <TableCell className="font-medium">{quote.quoteNumber}</TableCell>
@@ -229,8 +224,8 @@ export default function QuotesPage() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
