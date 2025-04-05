@@ -4,6 +4,7 @@ import multer from "multer";
 import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { HfInference } from '@huggingface/inference';
+import filesRoutes from './routes/files';
 import { 
   insertClientSchema, 
   insertQuoteSchema,
@@ -1922,6 +1923,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Registrar rutas de archivos
+  import('./routes/files').then(module => {
+    module.registerFileRoutes(app);
+  });
+  
   const httpServer = createServer(app);
   return httpServer;
 }

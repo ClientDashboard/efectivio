@@ -967,13 +967,21 @@ export class MemStorage implements IStorage {
     
     this.journalEntriesData.set(id, entry);
     
-    // Create journal lines
-    const journalLines: JournalLine[] = lines.map(line => ({
-      ...line,
-      id: this.currentJournalLineId++,
-      journalEntryId: id,
-      description: line.description || null,
-    }));
+    // Create journal lines with proper type enforcement
+    const journalLines: JournalLine[] = lines.map(line => {
+      // Ensure debit and credit are never undefined
+      const debitValue: string = line.debit || "0";
+      const creditValue: string = line.credit || "0";
+      
+      return {
+        id: this.currentJournalLineId++,
+        journalEntryId: id,
+        accountId: line.accountId,
+        description: line.description || null,
+        debit: debitValue,
+        credit: creditValue,
+      };
+    });
     
     this.journalLinesData.set(id, journalLines);
     

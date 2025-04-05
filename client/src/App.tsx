@@ -23,6 +23,7 @@ import InvoicesPage from "@/pages/invoices";
 import InvoiceCreatePage from "@/pages/invoices/create";
 import ExpensesPage from "@/pages/expenses";
 import ExpenseCreatePage from "@/pages/expenses/create";
+import FilesPage from "@/pages/files-page";
 import EntriesPage from "@/pages/accounting/entries";
 import ChartOfAccountsPage from "@/pages/accounting/chart-of-accounts";
 import JournalPage from "@/pages/accounting/journal";
@@ -129,6 +130,11 @@ function Router() {
         
         <ProtectedRoute path="/expenses/create">
           <ExpenseCreatePage />
+        </ProtectedRoute>
+        
+        {/* Files */}
+        <ProtectedRoute path="/files">
+          <FilesPage />
         </ProtectedRoute>
         
         {/* Accounting */}

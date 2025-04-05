@@ -166,7 +166,9 @@ export const journalLines = pgTable("journal_lines", {
 
 // Enum para categorías de archivos
 export const fileCategoryEnum = pgEnum("file_category", [
-  "invoice", "quote", "receipt", "contract", "report", "tax", "other"
+  "invoice", "quote", "receipt", "contract", "report", "tax", "other",
+  "client", "expense", "product", // Nuevas categorías para organización de archivos
+  "client_document", "invoice_attachment", "quote_attachment", "expense_receipt", "product_image"
 ]);
 
 // Enum para el estado de proyectos
@@ -451,7 +453,9 @@ export type InsertJournalLine = z.infer<typeof insertJournalLineSchema>;
 
 export type File = typeof files.$inferSelect;
 export type InsertFile = z.infer<typeof insertFileSchema>;
-export type FileCategory = "invoice" | "quote" | "receipt" | "contract" | "report" | "tax" | "other";
+export type FileCategory = "invoice" | "quote" | "receipt" | "contract" | "report" | "tax" | "other" |
+  "client" | "expense" | "product" | "client_document" | "invoice_attachment" | "quote_attachment" | 
+  "expense_receipt" | "product_image";
 
 export type ClientInvitation = typeof clientInvitations.$inferSelect;
 export type InsertClientInvitation = z.infer<typeof insertClientInvitationSchema>;
