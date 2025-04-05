@@ -59,7 +59,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registrar rutas adicionales
   app.use('/api', filesRoutes);
   app.use('/api', clientPortalRouter);
-  app.use('/api', usersRouter);
   app.use('/api', settingsRouter);
   app.use('/api', profileRouter);
   
