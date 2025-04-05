@@ -12,6 +12,9 @@ export function syncViteEnvVars(): void {
     // Auth
     'VITE_CLERK_PUBLISHABLE_KEY',
     
+    // Compatibilidad con Next.js
+    'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+    
     // Supabase
     'VITE_SUPABASE_URL',
     'VITE_SUPABASE_ANON_KEY',
@@ -33,6 +36,12 @@ export function syncViteEnvVars(): void {
     'VITE_ENABLE_DARK_MODE',
     'VITE_ENABLE_NOTIFICATIONS'
   ];
+  
+  // Sincronizar NEXT_PUBLIC_ a VITE_ para Clerk si es necesario
+  if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && !process.env.VITE_CLERK_PUBLISHABLE_KEY) {
+    process.env.VITE_CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+    console.log('Variable NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY copiada a VITE_CLERK_PUBLISHABLE_KEY');
+  }
   
   // Imprimir las variables que se están sincronizando
   let syncedVars = 0;

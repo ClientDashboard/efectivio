@@ -4,8 +4,15 @@ import { useDevAuth } from './dev-auth';
 
 // Variable para determinar si estamos en modo desarrollo
 const isDevelopmentMode = typeof window !== 'undefined' && 
-                        (typeof (window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY === 'undefined' || 
-                         !(window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY);
+                        (typeof (window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY === 'undefined' && 
+                         typeof (window as any).ENV?.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === 'undefined');
+
+// Verificar si tenemos la clave de Clerk disponible
+const hasClerkKey = typeof window !== 'undefined' && 
+                  ((window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY || 
+                   (window as any).ENV?.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
+console.log("CLERK KEY disponible:", !!hasClerkKey);
 
 // Interfaz unificada para la autenticación
 export interface AuthContextType {
