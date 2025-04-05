@@ -106,11 +106,18 @@
     @apply border-border;
   }
   body {
-    @apply font-sans antialiased bg-white text-foreground;
+    @apply font-sans antialiased text-foreground;
     overflow-x: hidden;
     width: 100%;
-    /* Eliminamos el degradado de fondo y lo mantenemos completamente blanco */
+    /* Fondo blanco puro sin excepciones */
     background-color: #FFFFFF;
+  }
+  
+  /* Asegurarse de que todos los elementos de fondo sean blancos */
+  .bg-gray-50, .bg-gray-100, .bg-gray-50\/60, .bg-gray-100\/60, 
+  .bg-white\/70, .bg-white\/80, .bg-white\/90, 
+  div[class*="bg-gray-"], div[class*="bg-slate-"] {
+    background-color: #FFFFFF !important;
   }
   
   /* Configuración de tipografía */

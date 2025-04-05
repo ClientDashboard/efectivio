@@ -113,7 +113,7 @@ export default function DataTable<T>({
                 <TableRow
                   key={String(item[keyField])}
                   onClick={() => onRowClick && onRowClick(item)}
-                  className={onRowClick ? "cursor-pointer hover:bg-gray-50" : ""}
+                  className={onRowClick ? "cursor-pointer hover:bg-gray-50/30" : "hover:bg-gray-50/30"}
                 >
                   {columns.map((column, index) => (
                     <TableCell key={index}>

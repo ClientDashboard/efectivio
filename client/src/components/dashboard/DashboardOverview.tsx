@@ -126,7 +126,7 @@ export default function DashboardOverview() {
       change: dashboardData?.ingresosChange || 0,
       isPositive: true,
       icon: <LayoutDashboard className="h-5 w-5" />,
-      iconBgClass: "bg-blue-50",
+      iconBgClass: "bg-white border border-gray-200",
       iconClass: "text-blue-500",
       description: "Total de ingresos del mes actual",
     },
@@ -137,7 +137,7 @@ export default function DashboardOverview() {
       change: dashboardData?.gastosChange || 0,
       isPositive: false,
       icon: <Download className="h-5 w-5" />,
-      iconBgClass: "bg-red-50",
+      iconBgClass: "bg-white border border-gray-200",
       iconClass: "text-red-500",
       description: "Total de gastos del mes actual",
     },
@@ -148,7 +148,7 @@ export default function DashboardOverview() {
       change: dashboardData?.facturasPendientesChange || 0,
       isPositive: null,
       icon: <Download className="h-5 w-5" />,
-      iconBgClass: "bg-blue-50",
+      iconBgClass: "bg-white border border-gray-200",
       iconClass: "text-blue-500",
       description: "Facturas por cobrar",
     },
@@ -159,7 +159,7 @@ export default function DashboardOverview() {
       change: null,
       isPositive: null,
       icon: <Download className="h-5 w-5" />,
-      iconBgClass: "bg-purple-50",
+      iconBgClass: "bg-white border border-gray-200",
       iconClass: "text-purple-500",
       description: "Impuesto pendiente por pagar",
     },
@@ -413,7 +413,7 @@ export default function DashboardOverview() {
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
+                <thead className="bg-white">
                   <tr>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
@@ -458,7 +458,7 @@ export default function DashboardOverview() {
                       status: 'paid'
                     }
                   ].map(invoice => (
-                    <tr key={invoice.id} className="hover:bg-gray-50 transition-colors duration-200">
+                    <tr key={invoice.id} className="hover:bg-gray-50/30 transition-colors duration-200">
                       <td className="px-4 py-2 whitespace-nowrap">
                         <div className="text-xs font-medium text-gray-900">{invoice.number}</div>
                       </td>

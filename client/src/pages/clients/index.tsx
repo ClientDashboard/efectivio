@@ -103,9 +103,9 @@ export default function ClientsPage() {
         </Link>
       </div>
 
-      <div className="bg-white border rounded-lg">
-        <div className="px-6 py-5 border-b">
-          <h2 className="text-xl font-semibold">Lista de Clientes</h2>
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="px-6 py-5 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">Lista de Clientes</h2>
         </div>
         <div className="p-6">
           {isLoading ? (
