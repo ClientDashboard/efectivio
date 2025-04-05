@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import MainLayout from "@/components/layout/main-layout";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
@@ -48,7 +47,7 @@ export default function ExpenseCreatePage() {
   };
 
   return (
-    <MainLayout>
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Registrar Nuevo Gasto</h1>
@@ -71,6 +70,6 @@ export default function ExpenseCreatePage() {
           />
         </CardContent>
       </Card>
-    </MainLayout>
+    </>
   );
 }
