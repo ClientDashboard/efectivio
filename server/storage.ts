@@ -593,6 +593,7 @@ export class MemStorage implements IStorage {
       taxId: insertClient.taxId ?? null,
       paymentTerms: insertClient.paymentTerms || "30_days",
       customPaymentTerms: insertClient.customPaymentTerms ?? null,
+      hasPortalAccess: insertClient.hasPortalAccess ?? false,
       notes: insertClient.notes ?? null,
       isActive: insertClient.isActive ?? true
     };

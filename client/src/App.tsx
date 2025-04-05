@@ -36,6 +36,9 @@ import SignUpPage from "@/pages/auth/sign-up";
 import ResetPasswordPage from "@/pages/auth/reset-password";
 import TextAnalysisPage from "@/pages/ai/text-analysis";
 import NotFound from "@/pages/not-found";
+import ClientPortalPage from "@/pages/client-portal";
+import ClientPortalDashboard from "@/pages/client-portal/dashboard";
+import ClientPortalFiles from "@/pages/client-portal/files";
 
 // Componente de layout para todas las páginas autenticadas
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -163,6 +166,19 @@ function Router() {
         {/* AI Tools */}
         <ProtectedRoute path="/ai/text-analysis">
           <TextAnalysisPage />
+        </ProtectedRoute>
+        
+        {/* Client Portal */}
+        <ProtectedRoute path="/client-portal">
+          <ClientPortalPage />
+        </ProtectedRoute>
+        
+        <ProtectedRoute path="/client-portal/:clientId/dashboard">
+          <ClientPortalDashboard />
+        </ProtectedRoute>
+        
+        <ProtectedRoute path="/client-portal/:clientId/files">
+          <ClientPortalFiles />
         </ProtectedRoute>
         
         {/* Fallback para cualquier otra ruta */}

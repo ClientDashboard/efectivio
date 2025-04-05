@@ -1928,6 +1928,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     module.registerFileRoutes(app);
   });
   
+  // Registrar rutas del portal de cliente
+  import('./routes/client-portal').then(module => {
+    app.use('/api/clients', module.default);
+  });
+  
   const httpServer = createServer(app);
   return httpServer;
 }

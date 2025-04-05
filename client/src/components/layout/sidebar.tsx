@@ -88,13 +88,8 @@ export default function Sidebar() {
     { name: 'Impuestos', path: '/accounting/taxes', icon: CircleDollarSign },
   ];
 
-  const clientPortalNavigation = [
-    { name: 'Proyectos', path: '/client-portal/projects', icon: Briefcase },
-    { name: 'Tareas', path: '/client-portal/tasks', icon: ListTodo },
-    { name: 'Registro de Horas', path: '/client-portal/time-tracking', icon: Clock },
-    { name: 'Documentos', path: '/client-portal/documents', icon: FolderArchive },
-    { name: 'Reuniones', path: '/client-portal/meetings', icon: Video },
-  ];
+  // Ya no usamos el menú desplegable para Portal del Cliente
+  const clientPortalNavigation: { name: string; path: string; icon: any }[] = [];
 
   const inventoryNavigation = [
     { name: 'Productos', path: '/inventory/products', icon: Box },
@@ -169,39 +164,19 @@ export default function Sidebar() {
           </Link>
         ))}
 
-        {/* Portal del Cliente - Menú desplegable */}
+        {/* Portal del Cliente - Enlace directo */}
         <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Portal del Cliente</div>
-        <button
-          onClick={() => toggleSubMenu('clientPortal')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+        <Link
+          href="/client-portal"
+          className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
+            location === '/client-portal'
+              ? 'bg-primary/10 text-primary'
+              : 'text-gray-700 hover:bg-gray-50'
+          }`}
         >
-          <div className="flex items-center">
-            <Briefcase className="w-5 h-5 mr-3" />
-            <span>Portal del Cliente</span>
-          </div>
-          <ChevronDown 
-            className={`w-4 h-4 transition-transform ${activeMenus.clientPortal ? 'rotate-180' : ''}`} 
-          />
-        </button>
-        
-        {activeMenus.clientPortal && (
-          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
-            {clientPortalNavigation.map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`flex items-center px-3 py-2 rounded-lg text-sm ${
-                  location === item.path
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <item.icon className="w-4 h-4 mr-3" />
-                {item.name}
-              </Link>
-            ))}
-          </div>
-        )}
+          <Users className="w-5 h-5 mr-3" />
+          Portal del Cliente
+        </Link>
 
         {/* Inventario - Menú desplegable */}
         <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Inventario</div>
