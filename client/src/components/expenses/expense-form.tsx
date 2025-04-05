@@ -219,16 +219,17 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
           name="receipt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Comprobante</FormLabel>
+              <FormLabel>URL del Comprobante</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="URL del comprobante" 
+                  placeholder="https://dgi.mef.gob.pa/factura/8B7C3D2A" 
                   {...field} 
                   disabled={isSubmitting}
                 />
               </FormControl>
               <FormDescription>
-                Enlace o referencia al comprobante del gasto (opcional)
+                URL de la factura electrónica o sistema de validación (ej: https://dgi.mef.gob.pa/factura/123ABC) para 
+                acceder rápidamente al documento original
               </FormDescription>
               <FormMessage />
             </FormItem>
