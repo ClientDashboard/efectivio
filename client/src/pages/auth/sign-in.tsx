@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
-import { useSignIn } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/protected-route';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +19,7 @@ const loginSchema = z.object({
 });
 
 export default function SignInPage() {
-  const { isLoaded, signIn } = useSignIn();
+  const { isLoaded, signIn } = useAuth();
   const [isPending, setIsPending] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();

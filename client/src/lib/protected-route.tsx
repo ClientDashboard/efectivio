@@ -14,7 +14,13 @@ const isDevelopmentMode = typeof window !== 'undefined' &&
 export function useAuth() {
   // En este momento siempre usamos el proveedor de desarrollo para evitar
   // el error de requerir ClerkProvider
-  return useDevAuth();
+  const devAuth = useDevAuth();
+  return {
+    ...devAuth,
+    // Garantizar que signUp y signIn están disponibles
+    signUp: devAuth.signUp,
+    signIn: devAuth.signIn
+  };
 }
 
 interface ProtectedRouteProps {

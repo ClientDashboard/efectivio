@@ -1,6 +1,7 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
 import { ClerkProvider as BaseClerkProvider, useAuth } from '@clerk/clerk-react';
 import { supabase } from './supabase';
+import { DevAuthProvider as EnhancedDevAuthProvider, useDevAuth as useEnhancedDevAuth } from './dev-auth';
 
 // Usar una clave de desarrollo si no hay variable de entorno
 // Considerar tanto VITE_ como NEXT_PUBLIC_ prefijos
@@ -41,25 +42,9 @@ export function useDevAuth() {
   return useContext(DevAuthContext);
 }
 
-// Proveedor para modo desarrollo
+// Proveedor para modo desarrollo (este es un wrapper alrededor del mejorado)
 function DevAuthProvider({ children }: { children: React.ReactNode }) {
-  // Implementación simulada para desarrollo
-  const mockAuthValue: DevAuthContextType = {
-    userId: 'dev-user-123',
-    sessionId: 'dev-session-123',
-    getToken: async (options?: { template?: string }) => 'mock-token-for-development',
-    isSignedIn: true,
-    isLoaded: true,
-    signOut: async () => {
-      console.log('Simulando cierre de sesión en modo desarrollo');
-    },
-  };
-
-  return (
-    <DevAuthContext.Provider value={mockAuthValue}>
-      {children}
-    </DevAuthContext.Provider>
-  );
+  return <EnhancedDevAuthProvider>{children}</EnhancedDevAuthProvider>;
 }
 
 // Componente de sincronización de sesión con Supabase

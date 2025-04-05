@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
-import { useSignUp } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/protected-route';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +24,8 @@ const registerSchema = z.object({
 });
 
 export default function SignUpPage() {
-  const { isLoaded, signUp } = useSignUp();
+  const { isLoaded, signUp } = useAuth();
+  
   const [isPending, setIsPending] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState(false);
   const [, navigate] = useLocation();
