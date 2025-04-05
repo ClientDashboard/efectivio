@@ -40,6 +40,11 @@ import ClientPortalPage from "@/pages/client-portal";
 import ClientPortalDashboard from "@/pages/client-portal/dashboard";
 import ClientPortalFiles from "@/pages/client-portal/files";
 
+// Portal Pages
+import PortalLoginPage from "@/pages/portal/login";
+import PortalRegisterPage from "@/pages/portal/register";
+import PortalGoogleCallbackPage from "@/pages/portal/google-callback";
+
 // Componente de layout para todas las páginas autenticadas
 function AppLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -51,8 +56,8 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     setSidebarOpen(true);
   }, [setSidebarOpen]);
   
-  // No mostrar el layout en páginas públicas o de autenticación
-  if (location === "/" || location.startsWith("/auth") || !userId) {
+  // No mostrar el layout en páginas públicas, portal o de autenticación
+  if (location === "/" || location.startsWith("/auth") || location.startsWith("/portal") || !userId) {
     return <>{children}</>;
   }
 
@@ -180,6 +185,11 @@ function Router() {
         <ProtectedRoute path="/client-portal/:clientId/files">
           <ClientPortalFiles />
         </ProtectedRoute>
+        
+        {/* Portal de Clientes */}
+        <Route path="/portal/login" component={PortalLoginPage} />
+        <Route path="/portal/register" component={PortalRegisterPage} />
+        <Route path="/portal/google-callback" component={PortalGoogleCallbackPage} />
         
         {/* Fallback para cualquier otra ruta */}
         <Route component={NotFound} />

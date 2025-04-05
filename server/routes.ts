@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { HfInference } from '@huggingface/inference';
 import filesRoutes from './routes/files';
+import clientPortalRouter from './routes/client-portal';
 import { 
   insertClientSchema, 
   insertQuoteSchema,
@@ -1929,9 +1930,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Registrar rutas del portal de cliente
-  import('./routes/client-portal').then(module => {
-    app.use('/api/clients', module.default);
-  });
+  app.use('/api/clients/portal', clientPortalRouter);
   
   const httpServer = createServer(app);
   return httpServer;

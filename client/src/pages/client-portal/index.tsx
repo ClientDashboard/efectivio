@@ -14,8 +14,9 @@ import {
 } from '@/components/ui/card';
 import { Client } from '@shared/schema';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Users, Upload, FolderPlus } from 'lucide-react';
+import { Loader2, Users, Upload, FolderPlus, Mail, UserPlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { SendInvitationDialog } from '@/components/clients/send-invitation-dialog';
 
 export default function ClientPortalPage() {
   const [, setLocation] = useLocation();
@@ -165,54 +166,76 @@ interface ClientCardProps {
 }
 
 function ClientCard({ client }: ClientCardProps) {
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{client.displayName || client.companyName}</CardTitle>
-          <Badge variant={client.isActive ? "default" : "secondary"}>
-            {client.isActive ? "Activo" : "Inactivo"}
-          </Badge>
-        </div>
-        <CardDescription>
-          {client.email && (
-            <div className="flex items-center mt-1 text-sm text-muted-foreground">
-              {client.email}
-            </div>
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pb-2">
-        <div className="flex flex-col gap-2">
-          {client.companyName && client.clientType === "company" && (
-            <div className="text-sm">
-              <span className="font-medium">Empresa:</span> {client.companyName}
-            </div>
-          )}
-          {client.firstName && client.lastName && (
-            <div className="text-sm">
-              <span className="font-medium">Contacto:</span> {client.firstName} {client.lastName}
-            </div>
-          )}
-          {client.workPhone && (
-            <div className="text-sm">
-              <span className="font-medium">Teléfono:</span> {client.workPhone}
-            </div>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter className="pt-2 flex justify-between gap-2">
-        <Button variant="outline" size="sm" className="flex-1" asChild>
-          <Link href={`/client-portal/${client.id}/dashboard`}>
-            Ver Portal
-          </Link>
-        </Button>
-        <Button variant="outline" size="sm" className="flex-1" asChild>
-          <Link href={`/client-portal/${client.id}/files`}>
-            <FolderPlus className="mr-1 h-4 w-4" /> Archivos
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+    <>
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-lg">{client.displayName || client.companyName}</CardTitle>
+            <Badge variant={client.isActive ? "default" : "secondary"}>
+              {client.isActive ? "Activo" : "Inactivo"}
+            </Badge>
+          </div>
+          <CardDescription>
+            {client.email && (
+              <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                {client.email}
+              </div>
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pb-2">
+          <div className="flex flex-col gap-2">
+            {client.companyName && client.clientType === "company" && (
+              <div className="text-sm">
+                <span className="font-medium">Empresa:</span> {client.companyName}
+              </div>
+            )}
+            {client.firstName && client.lastName && (
+              <div className="text-sm">
+                <span className="font-medium">Contacto:</span> {client.firstName} {client.lastName}
+              </div>
+            )}
+            {client.workPhone && (
+              <div className="text-sm">
+                <span className="font-medium">Teléfono:</span> {client.workPhone}
+              </div>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="pt-2 flex-col gap-2">
+          <div className="flex w-full gap-2">
+            <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Link href={`/client-portal/${client.id}/dashboard`}>
+                Ver Portal
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Link href={`/client-portal/${client.id}/files`}>
+                <FolderPlus className="mr-1 h-4 w-4" /> Archivos
+              </Link>
+            </Button>
+          </div>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="w-full mt-1" 
+            onClick={() => setShowInviteDialog(true)}
+          >
+            <Mail className="mr-1 h-4 w-4" /> Enviar Invitación
+          </Button>
+        </CardFooter>
+      </Card>
+      
+      {showInviteDialog && (
+        <SendInvitationDialog 
+          client={client} 
+          open={showInviteDialog} 
+          onOpenChange={setShowInviteDialog} 
+        />
+      )}
+    </>
   );
 }
