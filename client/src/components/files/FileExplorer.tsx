@@ -83,11 +83,13 @@ interface FileUploadFormData {
 
 // Constantes
 const FOLDER_TYPES = [
-  { id: 'clientes', name: 'CLIENTES', icon: 'users' },
-  { id: 'facturas', name: 'FACTURAS', icon: 'receipt' },
-  { id: 'cotizaciones', name: 'COTIZACIONES', icon: 'clipboard' },
-  { id: 'gastos', name: 'GASTOS', icon: 'trending-down' },
-  { id: 'productos', name: 'PRODUCTOS', icon: 'box' },
+  { id: 'clientes', name: 'Clientes', icon: 'users', color: 'text-blue-500' },
+  { id: 'facturas', name: 'Facturas', icon: 'receipt', color: 'text-green-500' },
+  { id: 'cotizaciones', name: 'Cotizaciones', icon: 'clipboard', color: 'text-amber-500' },
+  { id: 'gastos', name: 'Gastos', icon: 'trending-down', color: 'text-red-500' },
+  { id: 'productos', name: 'Productos', icon: 'box', color: 'text-purple-500' },
+  { id: 'contratos', name: 'Contratos', icon: 'file-text', color: 'text-indigo-500' },
+  { id: 'reuniones', name: 'Reuniones', icon: 'video', color: 'text-pink-500' },
 ];
 
 // Función para formatear el tamaño de los archivos
@@ -113,17 +115,30 @@ function getFileIcon(mimeType: string) {
 
 // Función para obtener el icono de carpeta según el tipo
 function getFolderIcon(folderType: string) {
+  // Buscar la carpeta en FOLDER_TYPES
+  const folder = FOLDER_TYPES.find(f => f.id === folderType.toLowerCase());
+  
+  if (folder) {
+    // Usar la clase de color del FOLDER_TYPES
+    return <Folder className={`h-5 w-5 ${folder.color}`} />;
+  }
+  
+  // Colores por defecto si no se encuentra
   switch (folderType.toLowerCase()) {
     case 'clientes':
       return <Folder className="h-5 w-5 text-blue-500" />;
     case 'facturas':
       return <Folder className="h-5 w-5 text-green-500" />;
     case 'cotizaciones':
-      return <Folder className="h-5 w-5 text-yellow-500" />;
+      return <Folder className="h-5 w-5 text-amber-500" />;
     case 'gastos':
       return <Folder className="h-5 w-5 text-red-500" />;
     case 'productos':
       return <Folder className="h-5 w-5 text-purple-500" />;
+    case 'contratos':
+      return <Folder className="h-5 w-5 text-indigo-500" />;
+    case 'reuniones':
+      return <Folder className="h-5 w-5 text-pink-500" />;
     default:
       return <Folder className="h-5 w-5 text-gray-500" />;
   }
@@ -390,7 +405,7 @@ export default function FileExplorer() {
                 {searchTerm 
                   ? "No se encontraron archivos con ese término de búsqueda" 
                   : selectedFolder 
-                    ? `Esta carpeta está vacía. Sube archivos a ${selectedFolder.toUpperCase()}.` 
+                    ? `Esta carpeta está vacía. Sube archivos a ${FOLDER_TYPES.find(f => f.id === selectedFolder)?.name || selectedFolder}.` 
                     : "No hay archivos en el sistema. Sube algunos para empezar."}
               </p>
               <Button 
@@ -404,45 +419,79 @@ export default function FileExplorer() {
             </div>
           ) : (
             <div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[300px]">Nombre</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Tamaño</TableHead>
-                    <TableHead>Subido</TableHead>
-                    <TableHead className="w-[80px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredFiles.map((file: FileItem) => (
-                    <TableRow 
-                      key={file.id}
-                      className={`cursor-pointer ${selectedFile?.id === file.id ? 'bg-gray-50' : ''}`}
-                      onClick={() => handleFileSelect(file)}
-                    >
-                      <TableCell className="flex items-center">
-                        <div className="mr-3">
-                          {getFileIcon(file.mimeType)}
+              <div className="mb-4 flex justify-between items-center">
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex items-center"
+                    onClick={() => setSelectedFolder(null)}
+                  >
+                    Mis archivos
+                  </Button>
+                  {selectedFolder && (
+                    <Button size="sm" variant="ghost">
+                      {FOLDER_TYPES.find(f => f.id === selectedFolder)?.name || selectedFolder}
+                    </Button>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500">{filteredFiles.length} {filteredFiles.length === 1 ? 'archivo' : 'archivos'}</span>
+                </div>
+              </div>
+              
+              {/* Vista de tarjetas estilo Google Drive */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {/* Crear carpeta (siempre visible) */}
+                <div 
+                  className="border border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors h-[180px]"
+                  onClick={() => setUploadDialogOpen(true)}
+                >
+                  <Upload className="h-10 w-10 text-gray-400 mb-3" />
+                  <p className="text-sm font-medium text-gray-700">Subir archivo</p>
+                  <p className="text-xs text-gray-500 text-center mt-1">Arrastra o haz clic para subir</p>
+                </div>
+                
+                {/* Mostrar archivos como tarjetas */}
+                {filteredFiles.map((file: FileItem) => (
+                  <div 
+                    key={file.id}
+                    className={`border rounded-lg overflow-hidden hover:shadow-md transition-all ${
+                      selectedFile?.id === file.id ? 'ring-2 ring-primary ring-offset-2' : ''
+                    }`}
+                    onClick={() => handleFileSelect(file)}
+                  >
+                    {/* Vista previa del archivo (simulada) */}
+                    <div className="h-[120px] bg-gray-100 flex items-center justify-center p-4">
+                      {file.mimeType?.startsWith('image/') ? (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          {file.url ? (
+                            <img 
+                              src={file.url} 
+                              alt={file.name} 
+                              className="max-h-full max-w-full object-contain" 
+                            />
+                          ) : (
+                            <Image className="h-12 w-12 text-gray-400" />
+                          )}
                         </div>
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full">
+                          {getFileIcon(file.mimeType || '')}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Información del archivo */}
+                    <div className="p-3">
+                      <div className="flex items-start justify-between">
                         <div className="overflow-hidden">
-                          <p className="font-medium truncate">{file.name}</p>
-                          <p className="text-xs text-gray-500 truncate">{file.path}</p>
+                          <p className="font-medium text-sm truncate">{file.name}</p>
+                          <p className="text-xs text-gray-500">{formatFileSize(file.size)} • {new Date(file.createdAt).toLocaleDateString()}</p>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {file.category || "General"}
-                        </span>
-                      </TableCell>
-                      <TableCell>{formatFileSize(file.size)}</TableCell>
-                      <TableCell>
-                        {new Date(file.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -473,11 +522,16 @@ export default function FileExplorer() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+                      <div className="mt-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {file.category || "General"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -71,16 +71,16 @@ export default function ClientPortalFiles() {
   return (
     <div className="flex-1 space-y-4 p-6">
       <Helmet>
-        <title>Archivos | {client.displayName || client.companyName}</title>
+        <title>Efectivio Drive | {client.displayName || client.companyName}</title>
       </Helmet>
 
       <div className="flex justify-between items-start mb-6 px-1">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Archivos Compartidos
+            Efectivio Drive
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Documentos y archivos compartidos con {client.displayName || client.companyName}
+            Almacenamiento en la nube para {client.displayName || client.companyName}
           </p>
         </div>
       </div>

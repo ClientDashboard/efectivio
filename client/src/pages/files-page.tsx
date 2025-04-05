@@ -6,12 +6,12 @@ export default function FilesPage() {
   return (
     <>
       <Helmet>
-        <title>Archivos | Efectivio</title>
+        <title>Efectivio Drive | Efectivio</title>
       </Helmet>
       
       <PageHeader
-        title="Sistema de Archivos"
-        description="Organiza tus documentos en carpetas estructuradas"
+        title="Efectivio Drive"
+        description="Almacena, organiza y comparte archivos en la nube de manera fácil y segura"
       />
 
       <div className="px-4 py-6 mb-8 bg-white rounded-lg shadow-sm">

@@ -75,7 +75,7 @@ export default function Sidebar() {
     { name: 'Facturas', path: '/invoices', icon: FileText },
     { name: 'Gastos', path: '/expenses', icon: Receipt },
     { name: 'Productos', path: '/products', icon: ShoppingCart },
-    { name: 'Archivos', path: '/files', icon: FolderArchive },
+    { name: 'Efectivio Drive', path: '/files', icon: HardDrive },
     { name: 'Calendario', path: '/calendar', icon: Calendar },
     { name: 'Mensajes', path: '/messages', icon: MessageSquare },
   ];
