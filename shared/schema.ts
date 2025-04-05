@@ -21,7 +21,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
-  fullName: text("full_name"),
+  fullName: text("fullname"),
   role: userRoleEnum("role").default("contabilidad").notNull(),
   clerkId: text("clerk_id").unique(),
   isActive: boolean("is_active").default(true).notNull(),
