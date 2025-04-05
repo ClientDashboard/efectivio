@@ -31,6 +31,8 @@ export function DevAuthProvider({ children }: { children: React.ReactNode }) {
     isLoaded: true,
     signOut: async () => {
       console.log('Simulando cierre de sesión en modo desarrollo');
+      // Redirigir a la página de inicio de sesión
+      window.location.href = '/auth/sign-in';
     },
   };
 

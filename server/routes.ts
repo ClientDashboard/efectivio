@@ -858,8 +858,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API para obtener datos del dashboard
   app.get("/api/dashboard", async (req: Request, res: Response) => {
     try {
-      // En un entorno real, estos datos vendrían de la base de datos
-      // Los formateamos según la interfaz DashboardData definida en el cliente
+      // Verificar si es un usuario nuevo
+      // Si usamos Clerk, podemos verificar la fecha de creación del usuario
+      // Si en el futuro se implementa esta lógica, aquí se puede detectar si un usuario es nuevo
+      
+      // Verificar si hay un query param para test (por ejemplo, /api/dashboard?new=true)
+      const isNewUser = req.query.new === 'true';
+      
+      // Si es un usuario nuevo o si estamos en modo test, mostramos valores en cero
+      if (isNewUser) {
+        const newUserDashboard = {
+          ingresos: "B/. 0.00",
+          ingresosChange: 0,
+          gastos: "B/. 0.00",
+          gastosChange: 0,
+          facturasPendientes: "B/. 0.00",
+          facturasPendientesChange: 0,
+          itbms: "B/. 0.00"
+        };
+        
+        return res.status(200).json(newUserDashboard);
+      }
+      
+      // Datos de ejemplo para usuarios existentes
       const dashboardData = {
         ingresos: "B/. 42,500.00",
         ingresosChange: 8.5,
