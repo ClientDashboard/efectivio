@@ -92,7 +92,7 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto py-6">
       <PageHeader 
         title="Gestión de Usuarios" 
         description="Administre los usuarios del sistema y sus roles"
@@ -130,14 +130,14 @@ export default function UsersPage() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Usuarios</CardTitle>
-          <CardDescription>
+      <div className="bg-white border rounded-lg">
+        <div className="px-6 py-5 border-b">
+          <h2 className="text-xl font-semibold">Usuarios</h2>
+          <p className="text-sm text-gray-500 mt-1">
             Lista de usuarios registrados en el sistema y sus roles asignados
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        <div className="p-6">
           {isLoading ? (
             <div className="space-y-2">
               {[...Array(5)].map((_, i) => (
@@ -215,8 +215,8 @@ export default function UsersPage() {
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

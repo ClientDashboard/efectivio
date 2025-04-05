@@ -186,9 +186,9 @@ export default function DashboardOverview() {
         {stats.map((stat) => (
           <div
             key={stat.id}
-            className={`bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100/60 p-4 
-              transition-all duration-300 hover:shadow-md
-              ${hoveredCard === stat.id ? "ring-1 ring-blue-500 ring-opacity-50 bg-white" : ""}`}
+            className={`bg-white rounded-lg border p-4 
+              transition-all duration-300
+              ${hoveredCard === stat.id ? "ring-1 ring-blue-500 ring-opacity-50" : ""}`}
             onMouseEnter={() => setHoveredCard(stat.id)}
             onMouseLeave={() => setHoveredCard(null)}
           >
@@ -227,7 +227,7 @@ export default function DashboardOverview() {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-sm border border-gray-100/60 transition-all duration-300 hover:shadow-md">
+        <div className="bg-white p-4 rounded-lg border transition-all duration-300">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-base font-medium text-gray-900 flex items-center">
               <i className="ri-funds-line mr-2 text-blue-500"></i>
@@ -390,7 +390,7 @@ export default function DashboardOverview() {
             <i className="ri-time-line mr-2 text-blue-500"></i>
             Actividad Reciente
           </h3>
-          <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100/60 overflow-hidden hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-lg border overflow-hidden transition-all duration-300">
             {/* Tabs */}
             <div className="flex border-b border-gray-100">
               <button 
@@ -413,7 +413,7 @@ export default function DashboardOverview() {
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50/60 backdrop-blur-sm">
+                <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
@@ -423,7 +423,7 @@ export default function DashboardOverview() {
                     <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white/70 backdrop-blur-sm divide-y divide-gray-100/60">
+                <tbody className="bg-white divide-y divide-gray-100">
                   {[
                     {
                       id: '1',
@@ -458,7 +458,7 @@ export default function DashboardOverview() {
                       status: 'paid'
                     }
                   ].map(invoice => (
-                    <tr key={invoice.id} className="hover:bg-white/80 transition-colors duration-200">
+                    <tr key={invoice.id} className="hover:bg-gray-50 transition-colors duration-200">
                       <td className="px-4 py-2 whitespace-nowrap">
                         <div className="text-xs font-medium text-gray-900">{invoice.number}</div>
                       </td>
@@ -493,7 +493,7 @@ export default function DashboardOverview() {
             </div>
             
             {/* Pagination */}
-            <div className="bg-white/80 backdrop-blur-sm px-3 py-2 flex items-center justify-between border-t border-gray-100/50 sm:px-4">
+            <div className="bg-white px-3 py-2 flex items-center justify-between border-t border-gray-100 sm:px-4">
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs text-gray-700">
@@ -502,11 +502,11 @@ export default function DashboardOverview() {
                 </div>
                 <div>
                   <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <a href="#" className="relative inline-flex items-center px-1.5 py-1 rounded-l-md border border-gray-300/60 bg-white/70 backdrop-blur-sm text-xs font-medium text-gray-500 hover:bg-white/90 transition-colors">
+                    <a href="#" className="relative inline-flex items-center px-1.5 py-1 rounded-l-md border border-gray-300 bg-white text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors">
                       <span className="sr-only">Previous</span>
                       ←
                     </a>
-                    <a href="#" className="relative inline-flex items-center px-3 py-1 border border-gray-300/60 bg-primary-50/80 backdrop-blur-sm text-xs font-medium text-primary-600 hover:bg-primary-100/90 transition-colors">
+                    <a href="#" className="relative inline-flex items-center px-3 py-1 border border-gray-300 bg-primary-50 text-xs font-medium text-primary-600 hover:bg-primary-100 transition-colors">
                       1
                     </a>
                     <a href="#" className="relative inline-flex items-center px-3 py-1 border border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50">
@@ -519,7 +519,7 @@ export default function DashboardOverview() {
                     <a href="#" className="relative inline-flex items-center px-3 py-1 border border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50">
                       6
                     </a>
-                    <a href="#" className="relative inline-flex items-center px-1.5 py-1 rounded-r-md border border-gray-300/60 bg-white/70 backdrop-blur-sm text-xs font-medium text-gray-500 hover:bg-white/90 transition-colors">
+                    <a href="#" className="relative inline-flex items-center px-1.5 py-1 rounded-r-md border border-gray-300 bg-white text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors">
                       <span className="sr-only">Next</span>
                       →
                     </a>

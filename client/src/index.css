@@ -109,9 +109,8 @@
     @apply font-sans antialiased bg-white text-foreground;
     overflow-x: hidden;
     width: 100%;
-    background-image: 
-      radial-gradient(at 100% 0%, rgba(57, 255, 189, 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 0%, rgba(6, 38, 68, 0.03) 0px, transparent 50%);
+    /* Eliminamos el degradado de fondo y lo mantenemos completamente blanco */
+    background-color: #FFFFFF;
   }
   
   /* Configuración de tipografía */

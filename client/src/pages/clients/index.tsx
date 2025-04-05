@@ -103,11 +103,11 @@ export default function ClientsPage() {
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Clientes</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-white border rounded-lg">
+        <div className="px-6 py-5 border-b">
+          <h2 className="text-xl font-semibold">Lista de Clientes</h2>
+        </div>
+        <div className="p-6">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p>Cargando clientes...</p>
@@ -146,8 +146,8 @@ export default function ClientsPage() {
               searchable={true}
             />
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </>
   );
 }
