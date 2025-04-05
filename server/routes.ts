@@ -2009,7 +2009,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Registrar rutas del portal de cliente
+  // Rutas para el portal de clientes
   app.use('/api/clients/portal', clientPortalRouter);
+  app.use('/api/client-portal', clientPortalRouter);
   
   const httpServer = createServer(app);
   return httpServer;

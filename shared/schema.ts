@@ -231,6 +231,9 @@ export const clientInvitations = pgTable("client_invitations", {
   token: text("token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   userId: uuid("user_id").notNull(),
+  message: text("message"),
+  status: text("status").default("pendiente"),
+  completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

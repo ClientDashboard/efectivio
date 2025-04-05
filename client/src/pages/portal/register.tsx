@@ -95,23 +95,28 @@ export default function ClientPortalRegisterPage() {
     setTokenValidationStatus('loading');
     
     try {
-      const response = await fetch(`/api/client-portal/invitations/${tokenFromUrl}/validate`);
+      const response = await fetch(`/api/client-portal/verify-token/${tokenFromUrl}`);
       const data = await response.json();
       
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         throw new Error(data.message || 'El token de invitación no es válido');
       }
       
       // Token válido
       setTokenValidationStatus('valid');
-      setClientName(data.clientName || '');
       
-      // Prellenar el email si está disponible en la respuesta
-      if (data.email) {
-        form.setValue('email', data.email);
+      // Extraer datos de la respuesta
+      if (data.data) {
+        setClientName(data.data.clientName || '');
+        
+        // Prellenar el email si está disponible
+        if (data.data.email) {
+          form.setValue('email', data.data.email);
+        }
       }
       
     } catch (error: any) {
+      console.error('Error al verificar token:', error);
       setTokenValidationStatus('invalid');
       setTokenError(error.message || 'No se pudo validar el token de invitación');
     }
@@ -141,25 +146,23 @@ export default function ClientPortalRegisterPage() {
         throw new Error('No se pudo crear la cuenta');
       }
       
-      // 2. Registrar el usuario en el portal de clientes
+      // 2. Registrar el usuario en el portal de clientes usando la API
       const response = await fetch('/api/client-portal/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: authData.user.id,
-          name: data.name,
-          email: data.email,
-          invitationToken: data.invitationToken,
+          token: data.invitationToken,
+          password: data.password,
+          name: data.name
         }),
       });
       
       const responseData = await response.json();
       
       if (!response.ok) {
-        // Si falla el registro en el portal, eliminar el usuario de Supabase Auth
-        await supabase.auth.admin.deleteUser(authData.user.id);
+        // Si falla el registro en el portal
         throw new Error(responseData.message || 'Error al registrar la cuenta');
       }
       
