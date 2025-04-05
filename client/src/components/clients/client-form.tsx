@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, HelpCircle } from "lucide-react";
+import { Loader2, HelpCircle, AlertTriangle } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useEffect } from "react";
@@ -38,6 +39,8 @@ const clientFormSchema = z.object({
   taxId: z.string().optional(),
   paymentTerms: z.enum(["immediate", "15_days", "30_days", "45_days", "60_days", "custom"]).default("30_days"),
   customPaymentTerms: z.string().optional(),
+  hasPortalAccess: z.boolean().default(false),
+  sendPortalInvitation: z.boolean().default(false),
   notes: z.string().optional(),
   
   // Campos específicos para empresas
@@ -82,6 +85,8 @@ export function ClientForm({ initialData, onSubmit, isSubmitting }: ClientFormPr
       taxId: initialData?.taxId || "",
       paymentTerms: initialData?.paymentTerms || "30_days",
       customPaymentTerms: initialData?.customPaymentTerms || "",
+      hasPortalAccess: initialData?.hasPortalAccess || false,
+      sendPortalInvitation: false, // Esto siempre inicia como falso
       notes: initialData?.notes || "",
     },
   });
@@ -554,6 +559,89 @@ export function ClientForm({ initialData, onSubmit, isSubmitting }: ClientFormPr
               )}
             />
           )}
+        </div>
+
+        {/* Portal de cliente */}
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <h3 className="text-sm font-medium">Portal de cliente</h3>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
+                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="w-[280px] text-sm">Habilita el acceso al portal para que el cliente pueda ver sus facturas, cotizaciones y documentos.</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="hasPortalAccess"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Habilitar portal de cliente</FormLabel>
+                    <FormDescription>
+                      El cliente podrá acceder a sus documentos, facturas y cotizaciones.
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            
+            {form.watch("hasPortalAccess") && form.watch("email") && (
+              <FormField
+                control={form.control}
+                name="sendPortalInvitation"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting || !form.watch("email")}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Enviar invitación por correo</FormLabel>
+                      <FormDescription>
+                        Se enviará un correo a <strong>{form.watch("email")}</strong> con un link para registrarse en el portal.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            )}
+            
+            {form.watch("hasPortalAccess") && !form.watch("email") && (
+              <div className="rounded-md bg-yellow-50 p-4 border border-yellow-200">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-yellow-800">Correo electrónico requerido</h3>
+                    <div className="mt-2 text-sm text-yellow-700">
+                      <p>
+                        Para habilitar el portal de cliente, es necesario proporcionar una dirección de correo electrónico.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <FormField

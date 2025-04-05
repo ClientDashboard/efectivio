@@ -45,6 +45,7 @@ export const clients = pgTable("clients", {
   taxId: text("tax_id"),
   paymentTerms: paymentTermsEnum("payment_terms").default("30_days"),
   customPaymentTerms: text("custom_payment_terms"),
+  hasPortalAccess: boolean("has_portal_access").default(false),
   notes: text("notes"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
