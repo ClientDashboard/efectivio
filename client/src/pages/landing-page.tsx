@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -22,6 +22,7 @@ import darkLogo from "../assets/dark-logo.png";
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -61,13 +62,13 @@ export default function LandingPage() {
             <Button 
               variant="ghost" 
               className="text-sm font-medium hover:text-[#39FFBD]"
-              onClick={() => window.location.href = "/auth/sign-in"}
+              onClick={() => setLocation("/auth/sign-in")}
             >
               Iniciar Sesión
             </Button>
             <Button 
               className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] text-sm font-medium"
-              onClick={() => window.location.href = "/auth/sign-up"}
+              onClick={() => setLocation("/auth/sign-up")}
             >
               Registrarse
             </Button>
@@ -118,14 +119,14 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2 mt-4">
                 <Button 
                   className="w-full bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644]"
-                  onClick={() => window.location.href = "/auth/sign-up"}
+                  onClick={() => setLocation("/auth/sign-up")}
                 >
                   Registrarse
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => window.location.href = "/auth/sign-in"}
+                  onClick={() => setLocation("/auth/sign-in")}
                 >
                   Iniciar Sesión
                 </Button>
@@ -196,7 +197,7 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2 min-[400px]:flex-row mt-6">
                 <Button 
                   className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] font-medium text-base px-6 py-6 h-auto group relative overflow-hidden"
-                  onClick={() => window.location.href = "/auth/sign-up"}
+                  onClick={() => setLocation("/auth/sign-up")}
                 >
                   <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
                   <span className="relative">Prueba Gratis</span>
@@ -316,7 +317,7 @@ export default function LandingPage() {
           <div className="flex justify-center mt-12">
             <Button 
               className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] px-8 py-6 h-auto"
-              onClick={() => window.location.href = "/auth/sign-up"}
+              onClick={() => setLocation("/auth/sign-up")}
             >
               Comenzar ahora
             </Button>
@@ -338,14 +339,14 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-4 mt-8">
                 <Button 
                   className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] w-full sm:w-auto font-medium px-6 py-6 h-auto"
-                  onClick={() => window.location.href = "/auth/sign-up"}
+                  onClick={() => setLocation("/auth/sign-up")}
                 >
                   Comenzar prueba gratuita
                 </Button>
                 <Button 
                   variant="outline" 
                   className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto font-medium px-6 py-6 h-auto"
-                  onClick={() => window.location.href = "/auth/sign-in"}
+                  onClick={() => setLocation("/auth/sign-in")}
                 >
                   Iniciar sesión
                 </Button>
