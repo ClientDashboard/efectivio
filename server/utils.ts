@@ -1,5 +1,30 @@
 import { Request } from "express";
 import { storage } from "./storage";
+import { ZodError, ZodSchema } from "zod";
+
+/**
+ * Valida y analiza datos con un esquema de Zod
+ * @param schema Esquema de validación Zod
+ * @param data Datos a validar
+ * @returns Objeto con los datos validados o errores
+ */
+export function validateRequest(schema: ZodSchema, data: any) {
+  try {
+    const validatedData = schema.parse(data);
+    return { success: true, data: validatedData };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return { 
+        success: false, 
+        error: error.errors.map(e => ({
+          path: e.path.join('.'),
+          message: e.message
+        }))
+      };
+    }
+    return { success: false, error: "Error de validación desconocido" };
+  }
+}
 
 /**
  * Obtiene el ID del usuario actual a partir de la sesión
@@ -49,6 +74,20 @@ export function isAdmin(req: Request): boolean {
 }
 
 /**
+ * Crea un registro de auditoría
+ * @param data Datos del log de auditoría
+ * @returns Registro de auditoría creado
+ */
+export async function createAuditLog(data: any) {
+  try {
+    return await storage.createAuditLog(data);
+  } catch (error) {
+    console.error("Error al crear registro de auditoría:", error);
+    throw error;
+  }
+}
+
+/**
  * Registra una acción en el log de auditoría
  * @param req Request de Express
  * @param action Tipo de acción realizada
@@ -62,7 +101,7 @@ export async function logAuditAction(
   req: Request,
   action: string,
   entity: string,
-  entityId?: number | string,
+  entityId: string | number | null = null,
   details?: string,
   prevData?: any,
   newData?: any
@@ -87,8 +126,8 @@ export async function logAuditAction(
       userName,
       userRole,
       action: action as any,
-      entity: entity as any,
-      entityId: entityId?.toString(),
+      entityType: entity as any,
+      entityId: entityId?.toString() || "",
       details,
       ipAddress: req.ip,
       userAgent: req.headers["user-agent"] || null,

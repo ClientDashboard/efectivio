@@ -1,556 +1,611 @@
-import { Router } from "express";
-import { db } from "../db";
-import { systemConfig, whiteLabel, insertSystemConfigSchema, insertWhiteLabelSchema } from "@shared/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { Router, Response, NextFunction } from "express";
 import { storage } from "../storage";
-import { randomBytes } from "crypto";
-import { createAuditLog } from "../utils";
+import { db } from "../db";
+import { systemConfig, whiteLabel } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { validateRequest, createAuditLog } from "../utils";
+import { z } from "zod";
+
+// Extender la interfaz Request para incluir isAuthenticated
+import { Request as ExpressRequest } from "express";
+interface Request extends ExpressRequest {
+  isAuthenticated(): boolean;
+}
 
 const router = Router();
 
-// Middleware para verificar permisos de administrador
-const requireAdmin = async (req, res, next) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: "No autenticado" });
+// Middleware para verificar si el usuario es administrador
+const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "No autorizado" });
   }
-  
-  // Verificar si el usuario tiene rol de administrador
-  if (req.user?.role !== "administrador_sistema") {
-    return res.status(403).json({ error: "No autorizado" });
+
+  if (req.user.role !== "administrador_sistema") {
+    return res.status(403).json({ message: "Acceso denegado. Se requiere rol de administrador" });
   }
-  
+
   next();
 };
 
 // Obtener todas las configuraciones del sistema
-router.get("/settings", async (req, res) => {
+router.get("/settings", async (req: Request, res: Response) => {
   try {
     const configs = await storage.getSystemConfigs();
     res.json(configs);
   } catch (error) {
     console.error("Error al obtener configuraciones:", error);
-    res.status(500).json({ error: "Error al obtener configuraciones" });
+    res.status(500).json({ message: "Error al obtener configuraciones", error });
   }
 });
 
 // Obtener configuraciones por categoría
-router.get("/settings/category/:category", async (req, res) => {
+router.get("/settings/category/:category", async (req: Request, res: Response) => {
   try {
-    const { category } = req.params;
+    const category = req.params.category;
     const configs = await storage.getSystemConfigsByCategory(category);
     res.json(configs);
   } catch (error) {
     console.error("Error al obtener configuraciones por categoría:", error);
-    res.status(500).json({ error: "Error al obtener configuraciones por categoría" });
+    res.status(500).json({ message: "Error al obtener configuraciones por categoría", error });
   }
 });
 
-// Obtener una configuración específica
-router.get("/settings/:id", async (req, res) => {
+// Obtener una configuración específica por clave
+router.get("/settings/:key", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    const config = await storage.getSystemConfig(id);
+    const key = req.params.key;
+    const config = await storage.getSystemConfig(key);
     
     if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
+      return res.status(404).json({ message: "Configuración no encontrada" });
     }
     
     res.json(config);
   } catch (error) {
     console.error("Error al obtener configuración:", error);
-    res.status(500).json({ error: "Error al obtener configuración" });
+    res.status(500).json({ message: "Error al obtener configuración", error });
   }
 });
 
-// Obtener configuración por clave
-router.get("/settings/key/:key", async (req, res) => {
-  try {
-    const { key } = req.params;
-    
-    // Buscar por clave
-    const [config] = await db.select()
-      .from(systemConfig)
-      .where(eq(systemConfig.key, key));
-    
-    if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
-    }
-    
-    // Si la configuración no está activa, verificar si el usuario es administrador
-    if (!config.isActive && req.user?.role !== "administrador_sistema") {
-      return res.status(403).json({ error: "No autorizado" });
-    }
-    
-    res.json(config);
-  } catch (error) {
-    console.error("Error al obtener configuración por clave:", error);
-    res.status(500).json({ error: "Error al obtener configuración por clave" });
-  }
+// Esquema para validar configuraciones del sistema
+const systemConfigSchema = z.object({
+  key: z.string().min(1, "La clave es requerida"),
+  value: z.string().min(1, "El valor es requerido"),
+  description: z.string().optional(),
+  category: z.string().min(1, "La categoría es requerida")
 });
 
-// Crear una nueva configuración
-router.post("/settings", requireAdmin, async (req, res) => {
+// Crear una nueva configuración del sistema
+router.post("/settings", requireAdmin, async (req: Request, res: Response) => {
   try {
-    // Validar el cuerpo de la solicitud
-    const validatedData = insertSystemConfigSchema.parse(req.body);
+    // Validar datos de entrada
+    const validation = validateRequest(systemConfigSchema, req.body);
     
-    // Verificar si ya existe una configuración con la misma clave
-    const existing = await storage.getSystemConfig(0, validatedData.key);
-    if (existing) {
-      return res.status(400).json({ error: "Ya existe una configuración con esa clave" });
+    if (!validation.success) {
+      return res.status(400).json({ message: "Datos de configuración inválidos", errors: validation.error });
+    }
+    
+    // Verificar si la clave ya existe
+    const existingConfig = await storage.getSystemConfig(validation.data.key);
+    
+    if (existingConfig) {
+      return res.status(409).json({ message: "Ya existe una configuración con esta clave" });
     }
     
     // Crear la configuración
-    const newConfig = await storage.createSystemConfig(validatedData);
+    const newConfig = await storage.createSystemConfig(validation.data);
     
-    // Registrar la acción en el log de auditoría
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "create",
-      entity: "setting",
-      entityId: newConfig.id.toString(),
-      details: `Creó la configuración ${newConfig.key}`,
+      entityType: "system_config",
+      entityId: newConfig.key,
+      entityName: newConfig.key,
+      details: JSON.stringify({
+        message: `Configuración "${newConfig.key}" creada`,
+        category: newConfig.category
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
     res.status(201).json(newConfig);
   } catch (error) {
     console.error("Error al crear configuración:", error);
-    res.status(400).json({ error: error.message || "Error al crear configuración" });
+    res.status(500).json({ message: "Error al crear configuración", error });
   }
 });
 
 // Actualizar una configuración existente
-router.put("/settings/:id", requireAdmin, async (req, res) => {
+router.put("/settings/:key", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const key = req.params.key;
     
-    // Buscar la configuración
-    const config = await storage.getSystemConfig(id);
-    if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
+    // Verificar si la configuración existe
+    const existingConfig = await storage.getSystemConfig(key);
+    
+    if (!existingConfig) {
+      return res.status(404).json({ message: "Configuración no encontrada" });
     }
     
-    // Validar los datos
-    const validatedData = insertSystemConfigSchema.parse(req.body);
+    // Validar datos de entrada
+    const validation = validateRequest(systemConfigSchema.partial(), req.body);
+    
+    if (!validation.success) {
+      return res.status(400).json({ message: "Datos de configuración inválidos", errors: validation.error });
+    }
     
     // Actualizar la configuración
-    const updatedConfig = await storage.updateSystemConfig(id, validatedData);
+    const updatedConfig = await storage.updateSystemConfig(key, validation.data);
     
-    // Registrar la acción en el log de auditoría
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "update",
-      entity: "setting",
-      entityId: id.toString(),
-      details: `Actualizó la configuración ${config.key}`,
+      entityType: "system_config",
+      entityId: key,
+      entityName: key,
+      details: JSON.stringify({
+        message: `Configuración "${key}" actualizada`,
+        changedFields: Object.keys(validation.data)
+      }),
+      changes: JSON.stringify({
+        previous: existingConfig,
+        new: updatedConfig
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
     res.json(updatedConfig);
   } catch (error) {
     console.error("Error al actualizar configuración:", error);
-    res.status(400).json({ error: error.message || "Error al actualizar configuración" });
+    res.status(500).json({ message: "Error al actualizar configuración", error });
   }
 });
 
-// Eliminar una configuración
-router.delete("/settings/:id", requireAdmin, async (req, res) => {
+// Eliminar una configuración del sistema
+router.delete("/settings/:key", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const key = req.params.key;
     
-    // Buscar la configuración
-    const config = await storage.getSystemConfig(id);
-    if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
-    }
+    // Verificar si la configuración existe
+    const existingConfig = await storage.getSystemConfig(key);
     
-    // No permitir eliminar configuraciones requeridas
-    if (config.isRequired) {
-      return res.status(400).json({ error: "No se puede eliminar una configuración requerida por el sistema" });
+    if (!existingConfig) {
+      return res.status(404).json({ message: "Configuración no encontrada" });
     }
     
     // Eliminar la configuración
-    await storage.deleteSystemConfig(id);
+    const success = await storage.deleteSystemConfig(key);
     
-    // Registrar la acción en el log de auditoría
+    if (!success) {
+      return res.status(500).json({ message: "Error al eliminar configuración" });
+    }
+    
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "delete",
-      entity: "setting",
-      entityId: id.toString(),
-      details: `Eliminó la configuración ${config.key}`,
+      entityType: "system_config",
+      entityId: key,
+      entityName: key,
+      details: JSON.stringify({
+        message: `Configuración "${key}" eliminada`,
+        category: existingConfig.category
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
-    res.json({ success: true });
+    res.json({ message: "Configuración eliminada correctamente" });
   } catch (error) {
     console.error("Error al eliminar configuración:", error);
-    res.status(500).json({ error: "Error al eliminar configuración" });
+    res.status(500).json({ message: "Error al eliminar configuración", error });
   }
 });
 
-// RUTAS PARA WHITE LABEL
-
-// Obtener todas las configuraciones de white label (solo admin)
-router.get("/white-label", requireAdmin, async (req, res) => {
+// Obtener todas las configuraciones de marca blanca
+router.get("/white-label", async (req: Request, res: Response) => {
   try {
     const configs = await storage.getWhiteLabels();
     
-    // Añadir información del cliente
-    const configsWithClientData = await Promise.all(
-      configs.map(async (config) => {
-        if (config.clientId) {
-          // Obtener información del cliente
-          const [client] = await db.select({ name: sql`name` })
-            .from(sql`clients`)
-            .where(sql`id = ${config.clientId}`);
-          
-          return {
-            ...config,
-            clientName: client ? client.name : null
-          };
-        }
-        return config;
-      })
-    );
+    // Mapear los resultados para formatear las fechas
+    const formattedConfigs = configs.map(config => ({
+      ...config,
+      createdAt: config.createdAt.toISOString(),
+      updatedAt: config.updatedAt.toISOString()
+    }));
     
-    res.json(configsWithClientData);
+    res.json(formattedConfigs);
   } catch (error) {
-    console.error("Error al obtener configuraciones de white label:", error);
-    res.status(500).json({ error: "Error al obtener configuraciones de white label" });
+    console.error("Error al obtener configuraciones de marca blanca:", error);
+    res.status(500).json({ message: "Error al obtener configuraciones de marca blanca", error });
   }
 });
 
-// Obtener la configuración white label activa
-router.get("/white-label/active", async (req, res) => {
+// Obtener la configuración activa de marca blanca
+router.get("/white-label/active", async (req: Request, res: Response) => {
   try {
-    const config = await storage.getActiveWhiteLabel();
+    const activeConfig = await storage.getActiveWhiteLabel();
     
-    if (!config) {
-      return res.status(404).json({ error: "No hay configuración activa" });
+    if (!activeConfig) {
+      return res.status(404).json({ message: "No hay configuración de marca blanca activa" });
     }
     
-    // Añadir información del cliente si corresponde
-    if (config.clientId) {
-      const [client] = await db.select({ name: sql`name` })
-        .from(sql`clients`)
-        .where(sql`id = ${config.clientId}`);
-      
-      if (client) {
-        config.clientName = client.name;
-      }
-    }
+    // Formatear las fechas
+    const formattedConfig = {
+      ...activeConfig,
+      createdAt: activeConfig.createdAt.toISOString(),
+      updatedAt: activeConfig.updatedAt.toISOString()
+    };
     
-    res.json(config);
+    res.json(formattedConfig);
   } catch (error) {
-    console.error("Error al obtener configuración white label activa:", error);
-    res.status(500).json({ error: "Error al obtener configuración white label activa" });
+    console.error("Error al obtener configuración de marca blanca activa:", error);
+    res.status(500).json({ message: "Error al obtener configuración de marca blanca activa", error });
   }
 });
 
-// Obtener la configuración white label para un cliente específico
-router.get("/white-label/client/:clientId", async (req, res) => {
+// Obtener configuración de marca blanca para un cliente específico
+router.get("/white-label/client/:clientId", async (req: Request, res: Response) => {
   try {
     const clientId = parseInt(req.params.clientId);
     
-    // Verificar permisos
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "No autenticado" });
+    if (isNaN(clientId)) {
+      return res.status(400).json({ message: "ID de cliente inválido" });
     }
     
-    // Si no es admin, verificar que el usuario tenga acceso a este cliente
-    if (req.user.role !== "administrador_sistema") {
-      // Aquí podríamos añadir lógica para verificar si este usuario puede acceder a este cliente
+    // Si es una solicitud autenticada, verificar permisos
+    if (req.isAuthenticated()) {
+      // El usuario solo puede acceder a su propia configuración, a menos que sea administrador
+      const userId = req.user?.id;
+      const isAdmin = req.user?.role === "administrador_sistema";
+      
+      if (!isAdmin && userId && userId.toString() !== clientId.toString()) {
+        return res.status(403).json({ message: "No tiene permisos para acceder a esta configuración" });
+      }
     }
     
-    // Obtener configuración white label para el cliente
     const config = await storage.getWhiteLabelByClient(clientId);
     
     if (!config) {
-      return res.status(404).json({ error: "No hay configuración para este cliente" });
+      return res.status(404).json({ message: "Configuración de marca blanca no encontrada para este cliente" });
     }
     
-    // Añadir información del cliente
-    const [client] = await db.select({ name: sql`name` })
-      .from(sql`clients`)
-      .where(sql`id = ${clientId}`);
+    // Formatear las fechas
+    const formattedConfig = {
+      ...config,
+      createdAt: config.createdAt.toISOString(),
+      updatedAt: config.updatedAt.toISOString()
+    };
     
-    if (client) {
-      config.clientName = client.name;
-    }
-    
-    res.json(config);
+    res.json(formattedConfig);
   } catch (error) {
-    console.error("Error al obtener configuración white label para cliente:", error);
-    res.status(500).json({ error: "Error al obtener configuración white label para cliente" });
+    console.error("Error al obtener configuración por cliente:", error);
+    res.status(500).json({ message: "Error al obtener configuración por cliente", error });
   }
 });
 
-// Obtener una configuración white label específica
-router.get("/white-label/:id", async (req, res) => {
+// Obtener una configuración específica de marca blanca
+router.get("/white-label/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     
-    // Verificar permisos
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "No autenticado" });
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "ID de configuración inválido" });
     }
     
-    // Obtener la configuración
+    // Si es una solicitud autenticada, verificar permisos
+    if (req.isAuthenticated()) {
+      // Solo los administradores pueden acceder a configuraciones específicas por ID
+      const isAdmin = req.user?.role === "administrador_sistema";
+      
+      if (!isAdmin) {
+        return res.status(403).json({ message: "No tiene permisos para acceder a esta configuración" });
+      }
+    }
+    
     const config = await storage.getWhiteLabel(id);
     
     if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
+      return res.status(404).json({ message: "Configuración de marca blanca no encontrada" });
     }
     
-    // Si no es admin, verificar que tenga acceso a la configuración
-    if (req.user.role !== "administrador_sistema") {
-      // Si la configuración está asociada a un cliente, verificar que el usuario tenga acceso a ese cliente
-      if (config.clientId) {
-        // Aquí podríamos añadir lógica para verificar si este usuario puede acceder a este cliente
-      }
-    }
+    // Formatear las fechas
+    const formattedConfig = {
+      ...config,
+      createdAt: config.createdAt.toISOString(),
+      updatedAt: config.updatedAt.toISOString()
+    };
     
-    // Añadir información del cliente si corresponde
-    if (config.clientId) {
-      const [client] = await db.select({ name: sql`name` })
-        .from(sql`clients`)
-        .where(sql`id = ${config.clientId}`);
-      
-      if (client) {
-        config.clientName = client.name;
-      }
-    }
-    
-    res.json(config);
+    res.json(formattedConfig);
   } catch (error) {
-    console.error("Error al obtener configuración white label:", error);
-    res.status(500).json({ error: "Error al obtener configuración white label" });
+    console.error("Error al obtener configuración de marca blanca:", error);
+    res.status(500).json({ message: "Error al obtener configuración de marca blanca", error });
   }
 });
 
-// Crear una nueva configuración white label
-router.post("/white-label", requireAdmin, async (req, res) => {
+// Esquema para validar configuraciones de marca blanca
+const whiteLabelSchema = z.object({
+  id: z.number().optional(),
+  companyName: z.string().min(1, "El nombre de la empresa es requerido"),
+  domain: z.string().min(1, "El dominio es requerido"),
+  primaryColor: z.string().min(1, "El color primario es requerido"),
+  logoUrl: z.string().optional(),
+  faviconUrl: z.string().optional(),
+  footerText: z.string().optional(),
+  enablePoweredBy: z.boolean().default(true),
+  isActive: z.boolean().default(false),
+  clientId: z.number().nullable().optional(),
+  contactEmail: z.string().email("Debe ser un email válido").optional().or(z.literal("")),
+  contactPhone: z.string().optional(),
+  additionalCss: z.string().optional(),
+});
+
+// Crear una nueva configuración de marca blanca
+router.post("/white-label", requireAdmin, async (req: Request, res: Response) => {
   try {
-    // Validar el cuerpo de la solicitud
-    const validatedData = insertWhiteLabelSchema.parse(req.body);
+    // Validar datos de entrada
+    const validation = validateRequest(whiteLabelSchema, req.body);
+    
+    if (!validation.success) {
+      return res.status(400).json({ message: "Datos de configuración inválidos", errors: validation.error });
+    }
     
     // Crear la configuración
-    const newConfig = await storage.createWhiteLabel(validatedData);
+    const newConfig = await storage.createWhiteLabel(validation.data);
     
-    // Si se marca como activa, desactivar las demás
-    if (newConfig.isActive) {
-      // Obtener todas las configuraciones
+    // Si se marcó como activa, desactivar las demás
+    if (validation.data.isActive) {
       const allConfigs = await storage.getWhiteLabels();
       
-      // Desactivar todas excepto la nueva
       for (const config of allConfigs) {
         if (config.id !== newConfig.id && config.isActive) {
-          await storage.updateWhiteLabel(config.id, { ...config, isActive: false });
+          await storage.updateWhiteLabel(config.id, { isActive: false });
         }
       }
     }
     
-    // Registrar la acción en el log de auditoría
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "create",
-      entity: "white_label",
+      entityType: "white_label",
       entityId: newConfig.id.toString(),
-      details: `Creó la configuración de marca blanca ${newConfig.name}`,
+      entityName: newConfig.companyName,
+      details: JSON.stringify({
+        message: `Configuración de marca blanca para "${newConfig.companyName}" creada`,
+        domain: newConfig.domain,
+        isActive: newConfig.isActive
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
     res.status(201).json(newConfig);
   } catch (error) {
-    console.error("Error al crear configuración white label:", error);
-    res.status(400).json({ error: error.message || "Error al crear configuración white label" });
+    console.error("Error al crear configuración de marca blanca:", error);
+    res.status(500).json({ message: "Error al crear configuración de marca blanca", error });
   }
 });
 
-// Actualizar una configuración white label
-router.put("/white-label/:id", requireAdmin, async (req, res) => {
+// Actualizar una configuración de marca blanca existente
+router.put("/white-label/:id", requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     
-    // Buscar la configuración
-    const config = await storage.getWhiteLabel(id);
-    if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "ID de configuración inválido" });
     }
     
-    // Validar los datos
-    const validatedData = insertWhiteLabelSchema.parse(req.body);
+    // Verificar si la configuración existe
+    const existingConfig = await storage.getWhiteLabel(id);
+    
+    if (!existingConfig) {
+      return res.status(404).json({ message: "Configuración de marca blanca no encontrada" });
+    }
+    
+    // Validar datos de entrada
+    const validation = validateRequest(whiteLabelSchema.partial(), req.body);
+    
+    if (!validation.success) {
+      return res.status(400).json({ message: "Datos de configuración inválidos", errors: validation.error });
+    }
     
     // Actualizar la configuración
-    const updatedConfig = await storage.updateWhiteLabel(id, validatedData);
+    const updatedConfig = await storage.updateWhiteLabel(id, validation.data);
     
-    // Si se marca como activa, desactivar las demás
-    if (updatedConfig.isActive) {
-      // Obtener todas las configuraciones
+    // Si se marcó como activa, desactivar las demás
+    if (validation.data.isActive && validation.data.isActive !== existingConfig.isActive) {
       const allConfigs = await storage.getWhiteLabels();
       
-      // Desactivar todas excepto la actualizada
       for (const config of allConfigs) {
         if (config.id !== id && config.isActive) {
-          await storage.updateWhiteLabel(config.id, { ...config, isActive: false });
+          await storage.updateWhiteLabel(config.id, { isActive: false });
         }
       }
     }
     
-    // Registrar la acción en el log de auditoría
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "update",
-      entity: "white_label",
+      entityType: "white_label",
       entityId: id.toString(),
-      details: `Actualizó la configuración de marca blanca ${config.name}`,
+      entityName: updatedConfig.companyName,
+      details: JSON.stringify({
+        message: `Configuración de marca blanca para "${updatedConfig.companyName}" actualizada`,
+        changedFields: Object.keys(validation.data)
+      }),
+      changes: JSON.stringify({
+        previous: existingConfig,
+        new: updatedConfig
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
     res.json(updatedConfig);
   } catch (error) {
-    console.error("Error al actualizar configuración white label:", error);
-    res.status(400).json({ error: error.message || "Error al actualizar configuración white label" });
+    console.error("Error al actualizar configuración de marca blanca:", error);
+    res.status(500).json({ message: "Error al actualizar configuración de marca blanca", error });
   }
 });
 
-// Eliminar una configuración white label
-router.delete("/white-label/:id", requireAdmin, async (req, res) => {
+// Eliminar una configuración de marca blanca
+router.delete("/white-label/:id", requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     
-    // Buscar la configuración
-    const config = await storage.getWhiteLabel(id);
-    if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "ID de configuración inválido" });
     }
     
-    // Verificar si está activa
-    if (config.isActive) {
-      return res.status(400).json({ 
-        error: "No se puede eliminar una configuración activa. Desactive la configuración primero." 
-      });
+    // Verificar si la configuración existe
+    const existingConfig = await storage.getWhiteLabel(id);
+    
+    if (!existingConfig) {
+      return res.status(404).json({ message: "Configuración de marca blanca no encontrada" });
+    }
+    
+    // No permitir eliminar configuraciones activas
+    if (existingConfig.isActive) {
+      return res.status(400).json({ message: "No se puede eliminar una configuración activa. Desactívela primero." });
     }
     
     // Eliminar la configuración
-    await storage.deleteWhiteLabel(id);
+    const success = await storage.deleteWhiteLabel(id);
     
-    // Registrar la acción en el log de auditoría
+    if (!success) {
+      return res.status(500).json({ message: "Error al eliminar configuración de marca blanca" });
+    }
+    
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "delete",
-      entity: "white_label",
+      entityType: "white_label",
       entityId: id.toString(),
-      details: `Eliminó la configuración de marca blanca ${config.name}`,
+      entityName: existingConfig.companyName,
+      details: JSON.stringify({
+        message: `Configuración de marca blanca para "${existingConfig.companyName}" eliminada`,
+        domain: existingConfig.domain
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
-    res.json({ success: true });
+    res.json({ message: "Configuración de marca blanca eliminada correctamente" });
   } catch (error) {
-    console.error("Error al eliminar configuración white label:", error);
-    res.status(500).json({ error: "Error al eliminar configuración white label" });
+    console.error("Error al eliminar configuración de marca blanca:", error);
+    res.status(500).json({ message: "Error al eliminar configuración de marca blanca", error });
   }
 });
 
-// Activar una configuración white label
-router.put("/white-label/:id/activate", requireAdmin, async (req, res) => {
+// Activar una configuración de marca blanca específica
+router.put("/white-label/:id/activate", requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     
-    // Buscar la configuración
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "ID de configuración inválido" });
+    }
+    
+    // Verificar si la configuración existe
     const config = await storage.getWhiteLabel(id);
+    
     if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
+      return res.status(404).json({ message: "Configuración de marca blanca no encontrada" });
     }
     
     // Si ya está activa, no hacer nada
     if (config.isActive) {
-      return res.json(config);
+      return res.json({ message: "La configuración ya está activa", config });
     }
     
-    // Obtener todas las configuraciones
+    // Desactivar todas las configuraciones
     const allConfigs = await storage.getWhiteLabels();
     
-    // Desactivar todas
-    for (const c of allConfigs) {
-      if (c.isActive) {
-        await storage.updateWhiteLabel(c.id, { ...c, isActive: false });
+    for (const existingConfig of allConfigs) {
+      if (existingConfig.isActive) {
+        await storage.updateWhiteLabel(existingConfig.id, { isActive: false });
       }
     }
     
-    // Activar la seleccionada
-    const updatedConfig = await storage.updateWhiteLabel(id, { ...config, isActive: true });
+    // Activar la configuración seleccionada
+    const updatedConfig = await storage.updateWhiteLabel(id, { isActive: true });
     
-    // Registrar la acción en el log de auditoría
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "update",
-      entity: "white_label",
+      entityType: "white_label",
       entityId: id.toString(),
-      details: `Activó la configuración de marca blanca ${config.name}`,
+      entityName: config.companyName,
+      details: JSON.stringify({
+        message: `Configuración de marca blanca para "${config.companyName}" activada`,
+        domain: config.domain
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
-    res.json(updatedConfig);
+    res.json({ message: "Configuración de marca blanca activada correctamente", config: updatedConfig });
   } catch (error) {
-    console.error("Error al activar configuración white label:", error);
-    res.status(500).json({ error: "Error al activar configuración white label" });
+    console.error("Error al activar configuración de marca blanca:", error);
+    res.status(500).json({ message: "Error al activar configuración de marca blanca", error });
   }
 });
 
-// Desactivar todas las configuraciones white label
-router.put("/white-label/deactivate-all", requireAdmin, async (req, res) => {
+// Desactivar todas las configuraciones de marca blanca
+router.put("/white-label/deactivate-all", requireAdmin, async (req: Request, res: Response) => {
   try {
     // Obtener todas las configuraciones
     const allConfigs = await storage.getWhiteLabels();
     
-    // Desactivar todas
+    // Desactivar todas las configuraciones activas
     for (const config of allConfigs) {
       if (config.isActive) {
-        await storage.updateWhiteLabel(config.id, { ...config, isActive: false });
+        await storage.updateWhiteLabel(config.id, { isActive: false });
       }
     }
     
-    // Registrar la acción en el log de auditoría
+    // Registrar acción en log de auditoría
     await createAuditLog({
-      userId: req.user.id.toString(),
-      userName: req.user.fullName || req.user.username,
-      userRole: req.user.role,
+      userId: req.user?.id,
+      userName: req.user?.fullName || req.user?.username,
+      userRole: req.user?.role,
       action: "update",
-      entity: "white_label",
+      entityType: "white_label",
       entityId: "all",
-      details: "Desactivó todas las configuraciones de marca blanca",
+      entityName: "all",
+      details: JSON.stringify({
+        message: "Todas las configuraciones de marca blanca han sido desactivadas"
+      }),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"],
+      userAgent: req.headers['user-agent'] || null
     });
     
-    res.json({ success: true });
+    res.json({ message: "Todas las configuraciones de marca blanca han sido desactivadas" });
   } catch (error) {
-    console.error("Error al desactivar todas las configuraciones white label:", error);
-    res.status(500).json({ error: "Error al desactivar todas las configuraciones white label" });
+    console.error("Error al desactivar configuraciones de marca blanca:", error);
+    res.status(500).json({ message: "Error al desactivar configuraciones de marca blanca", error });
   }
 });
 

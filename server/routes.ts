@@ -2053,7 +2053,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Registrar rutas de usuarios
   app.use('/api/users', usersRouter);
-  app.use(settingsRouter);
   
   // Registrar rutas del portal de cliente
   // Rutas para el portal de clientes
