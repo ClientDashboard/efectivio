@@ -50,22 +50,31 @@ const clientFormSchema = z.object({
   salutation: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-}).refine(
-  (data) => {
-    // Si es una empresa, el nombre de la empresa es obligatorio
-    if (data.clientType === "company") {
-      return !!data.companyName && data.companyName.length >= 2;
+}).superRefine((data, ctx) => {
+  // Si es una empresa, el nombre de la empresa es obligatorio
+  if (data.clientType === "company") {
+    if (!data.companyName || data.companyName.length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El nombre de la empresa es obligatorio (mínimo 2 caracteres)",
+        path: ["companyName"]
+      });
+      return false;
     }
+  } else {
     // Si es un individuo, el nombre es obligatorio
-    return !!data.firstName && data.firstName.length >= 2;
-  },
-  {
-    message: data => data.clientType === "company" 
-      ? "El nombre de la empresa es obligatorio (mínimo 2 caracteres)" 
-      : "El nombre es obligatorio (mínimo 2 caracteres)",
-    path: data => data.clientType === "company" ? ["companyName"] : ["firstName"]
+    if (!data.firstName || data.firstName.length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El nombre es obligatorio (mínimo 2 caracteres)",
+        path: ["firstName"]
+      });
+      return false;
+    }
   }
-);
+  
+  return true;
+});
 
 type ClientFormValues = z.infer<typeof clientFormSchema>;
 

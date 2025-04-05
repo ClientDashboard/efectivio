@@ -60,9 +60,38 @@ export default function ClientCreatePage() {
     },
   });
 
-  const handleSubmit = (data: InsertClient) => {
+  // Manejador de envío que añade el campo 'name' requerido
+  const handleSubmit = (formData: any) => {
     setIsSubmitting(true);
-    createClientMutation.mutate(data);
+    
+    // Preparamos los datos para incluir el campo 'name' requerido
+    let nameValue = formData.displayName;
+    
+    if (!nameValue) {
+      if (formData.clientType === "company" && formData.companyName) {
+        nameValue = formData.companyName;
+      } else if (formData.firstName) {
+        nameValue = formData.firstName;
+        if (formData.lastName) {
+          nameValue += " " + formData.lastName;
+        }
+      }
+    }
+    
+    // Si aún no tenemos un nombre, usamos un valor predeterminado
+    if (!nameValue) {
+      nameValue = formData.clientType === "company" 
+        ? "Empresa sin nombre" 
+        : "Cliente sin nombre";
+    }
+    
+    // Crear una versión adaptada de los datos que incluya el campo 'name'
+    const clientData: InsertClient = {
+      ...formData,
+      name: nameValue
+    };
+    
+    createClientMutation.mutate(clientData);
   };
 
   return (

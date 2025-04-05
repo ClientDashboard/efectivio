@@ -129,7 +129,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Datos validados, crear el cliente
       let client;
       try {
-        client = await storage.createClient(validation.data);
+        // Asignar el campo "name" que es requerido por la base de datos
+        // Usamos displayName si existe, o generamos uno basado en el tipo de cliente
+        let nameValue = validation.data.displayName;
+        
+        if (!nameValue) {
+          if (validation.data.clientType === "company" && validation.data.companyName) {
+            nameValue = validation.data.companyName;
+          } else if (validation.data.firstName) {
+            nameValue = validation.data.firstName;
+            if (validation.data.lastName) {
+              nameValue += " " + validation.data.lastName;
+            }
+          }
+        }
+        
+        // Si aún no tenemos un nombre, usamos un valor predeterminado
+        if (!nameValue) {
+          nameValue = validation.data.clientType === "company" 
+            ? "Empresa sin nombre" 
+            : "Cliente sin nombre";
+        }
+        
+        console.log(`Asignando nombre para la base de datos: "${nameValue}"`);
+        
+        // Crear el cliente con el campo name asignado
+        client = await storage.createClient({
+          ...validation.data,
+          name: nameValue
+        });
+        
         console.log("Cliente creado exitosamente:", client);
       } catch (dbError) {
         console.error("Error en base de datos al crear cliente:", dbError);

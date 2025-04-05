@@ -28,6 +28,8 @@ export const paymentTermsEnum = pgEnum("payment_terms", [
 // Client/Customer model
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
+  // Campo name requerido por la base de datos
+  name: text("name").notNull(),
   clientType: clientTypeEnum("client_type").default("company").notNull(),
   companyName: text("company_name"),
   displayName: text("display_name"),
