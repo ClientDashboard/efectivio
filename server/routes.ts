@@ -2054,7 +2054,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Registrar rutas de usuarios
-  app.use('/api/users', usersRouter);
+  // La ruta /api/users ya está registrada arriba
   
   // Registrar rutas del portal de cliente
   // Rutas para el portal de clientes
