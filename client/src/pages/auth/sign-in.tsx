@@ -134,14 +134,14 @@ export default function SignInPage() {
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
             ¿Olvidaste tu contraseña?{' '}
-            <Link to="/auth/reset-password">
-              <a className="underline text-primary hover:text-primary/90">Recuperar</a>
+            <Link to="/auth/reset-password" className="underline text-primary hover:text-primary/90">
+              Recuperar
             </Link>
           </div>
           <div className="text-sm text-center text-muted-foreground">
             ¿No tienes una cuenta?{' '}
-            <Link to="/auth/sign-up">
-              <a className="underline text-primary hover:text-primary/90">Regístrate</a>
+            <Link to="/auth/sign-up" className="underline text-primary hover:text-primary/90">
+              Regístrate
             </Link>
           </div>
         </CardFooter>

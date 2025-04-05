@@ -292,8 +292,8 @@ export default function SignUpPage() {
         <CardFooter>
           <div className="text-sm text-center text-muted-foreground w-full">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/auth/sign-in">
-              <a className="underline text-primary hover:text-primary/90">Iniciar Sesión</a>
+            <Link to="/auth/sign-in" className="underline text-primary hover:text-primary/90">
+              Iniciar Sesión
             </Link>
           </div>
         </CardFooter>
