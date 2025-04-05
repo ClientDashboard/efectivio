@@ -34,7 +34,8 @@ import {
   HardDrive,
   Shield,
   Store,
-  ChevronRight
+  ChevronRight,
+  Activity
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -111,6 +112,7 @@ export default function Sidebar() {
     { name: 'Almacenamiento', path: '/settings/storage', icon: HardDrive },
     { name: 'Usuarios', path: '/settings/users', icon: UserCog },
     { name: 'General', path: '/settings/general', icon: Settings },
+    { name: 'Registros de Auditoría', path: '/audit', icon: Activity },
   ];
 
   return (
