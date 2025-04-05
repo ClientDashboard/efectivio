@@ -39,6 +39,7 @@ import NotFound from "@/pages/not-found";
 import ClientPortalPage from "@/pages/client-portal";
 import ClientPortalDashboard from "@/pages/client-portal/dashboard";
 import ClientPortalFiles from "@/pages/client-portal/files";
+import AuditLogsPage from "@/pages/audit";
 
 // Portal Pages
 import PortalLoginPage from "@/pages/portal/login";
@@ -184,6 +185,11 @@ function Router() {
         
         <ProtectedRoute path="/client-portal/:clientId/files">
           <ClientPortalFiles />
+        </ProtectedRoute>
+        
+        {/* Audit Logs */}
+        <ProtectedRoute path="/audit">
+          <AuditLogsPage />
         </ProtectedRoute>
         
         {/* Portal de Clientes */}

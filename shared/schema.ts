@@ -373,6 +373,29 @@ export const meetingIntegrations = pgTable("meeting_integrations", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Enum para tipos de acciones de auditoría
+export const auditActionEnum = pgEnum("audit_action", [
+  "create", "update", "delete", "view", "export", "import", "restore", "login", "logout", "other"
+]);
+
+// Enum para tipos de entidades en auditoría
+export const auditEntityEnum = pgEnum("audit_entity", [
+  "client", "invoice", "quote", "expense", "account", "journal", "file", "project", "task", "appointment", "user", "setting", "other"
+]);
+
+// Modelo para registrar acciones de auditoría
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id").notNull(), // Usuario que realizó la acción
+  action: auditActionEnum("action").notNull(), // Tipo de acción realizada
+  entityType: auditEntityEnum("entity_type").notNull(), // Tipo de entidad afectada
+  entityId: text("entity_id").notNull(), // ID de la entidad afectada (puede ser numérico o UUID)
+  details: text("details"), // Detalles adicionales (JSON)
+  ipAddress: text("ip_address"), // Dirección IP desde donde se realizó la acción
+  userAgent: text("user_agent"), // Detalles del navegador/dispositivo
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas for validation
 export const insertUserSchema = createInsertSchema(users)
   .omit({ id: true, createdAt: true, updatedAt: true });
@@ -433,6 +456,9 @@ export const insertTranscriptionSegmentSchema = createInsertSchema(transcription
 
 export const insertMeetingIntegrationSchema = createInsertSchema(meetingIntegrations)
   .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs)
+  .omit({ id: true, createdAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -509,3 +535,8 @@ export type InsertTranscriptionSegment = z.infer<typeof insertTranscriptionSegme
 
 export type MeetingIntegration = typeof meetingIntegrations.$inferSelect;
 export type InsertMeetingIntegration = z.infer<typeof insertMeetingIntegrationSchema>;
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditAction = "create" | "update" | "delete" | "view" | "export" | "import" | "restore" | "login" | "logout" | "other";
+export type AuditEntity = "client" | "invoice" | "quote" | "expense" | "account" | "journal" | "file" | "project" | "task" | "appointment" | "user" | "setting" | "other";

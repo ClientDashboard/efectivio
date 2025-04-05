@@ -18,6 +18,8 @@ import {
   insertJournalLineSchema,
   insertUserSchema,
   insertFileSchema,
+  insertAuditLogSchema,
+  type AuditLog, type InsertAuditLog, type AuditAction, type AuditEntity,
   insertClientInvitationSchema,
   insertClientPortalUserSchema,
   insertProjectSchema,
@@ -222,14 +224,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/clients/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Primero obtenemos la información del cliente que se va a eliminar
+      const client = await storage.getClient(id);
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Registrar la acción en el log de auditoría
+      const userId = req.user?.id || null;
+      const clientName = client.companyName || (client.firstName ? `${client.firstName} ${client.lastName || ''}` : 'Cliente');
+      
+      // Detalles para el log de auditoría
+      const auditDetails = {
+        clientId: client.id,
+        clientName: clientName.trim(),
+        userId: userId,
+        action: "delete" as AuditAction,
+        timestamp: new Date()
+      };
+      
+      // Crear log de auditoría
+      await storage.createAuditLog({
+        userId: userId ? userId.toString() : null,
+        action: "delete",
+        entityType: "client",
+        entityId: id.toString(),
+        details: JSON.stringify(auditDetails),
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'] || null
+      });
+      
+      // Proceder con la eliminación
       const success = await storage.deleteClient(id);
       
       if (!success) {
-        return res.status(404).json({ message: "Client not found" });
+        return res.status(404).json({ message: "Client not found or could not be deleted" });
       }
       
       res.status(204).end();
     } catch (error) {
+      console.error("Error al eliminar cliente:", error);
       res.status(500).json({ message: "Error deleting client", error });
     }
   });
@@ -2051,6 +2086,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.use('/api/clients/portal', clientPortalRouter);
   app.use('/api/client-portal', clientPortalRouter);
+  
+  // API para logs de auditoría
+  app.get("/api/audit-logs", async (req: Request, res: Response) => {
+    try {
+      const entityType = req.query.entityType as AuditEntity | undefined;
+      const entityId = req.query.entityId as string | undefined;
+      
+      const logs = await storage.getAuditLogs(entityType, entityId);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error al obtener logs de auditoría:", error);
+      res.status(500).json({ message: "Error al obtener logs de auditoría", error });
+    }
+  });
+  
+  // API para crear logs de auditoría manualmente
+  app.post("/api/audit-logs", async (req: Request, res: Response) => {
+    try {
+      const validation = validateRequest(insertAuditLogSchema, req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ message: "Validation error", errors: validation.error });
+      }
+      
+      // Añadir información de la solicitud HTTP
+      const logData = {
+        ...validation.data,
+        ipAddress: req.ip || null,
+        userAgent: req.headers['user-agent'] || null
+      };
+      
+      const log = await storage.createAuditLog(logData);
+      res.status(201).json(log);
+    } catch (error) {
+      console.error("Error al crear log de auditoría:", error);
+      res.status(500).json({ message: "Error al crear log de auditoría", error });
+    }
+  });
   
   const httpServer = createServer(app);
   return httpServer;

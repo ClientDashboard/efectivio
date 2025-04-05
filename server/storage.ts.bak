@@ -16,13 +16,17 @@ import createMemoryStore from "memorystore";
 
 // Storage interface
 export interface IStorage {
-  // User methods
+  // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByClerkId(clerkId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
-  // Client methods
+  // Audit Logs
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(entityType?: AuditEntity, entityId?: string): Promise<AuditLog[]>;
+  
+  // Clients
   getClients(): Promise<Client[]>;
   getClient(id: number): Promise<Client | undefined>;
   createClient(client: InsertClient): Promise<Client>;
@@ -31,7 +35,7 @@ export interface IStorage {
   searchClients(query: string): Promise<Client[]>;
   getClientsWithPortalAccess(): Promise<Client[]>;
   
-  // Quote methods
+  // Quotes/Presupuestos
   getQuotes(): Promise<Quote[]>;
   getQuotesByClient(clientId: number): Promise<Quote[]>;
   getQuote(id: number): Promise<Quote | undefined>;
@@ -42,7 +46,7 @@ export interface IStorage {
   deleteQuote(id: number): Promise<boolean>;
   convertQuoteToInvoice(quoteId: number): Promise<Invoice | undefined>;
   
-  // Invoice methods
+  // Invoices
   getInvoices(): Promise<Invoice[]>;
   getInvoicesByClient(clientId: number): Promise<Invoice[]>;
   getInvoice(id: number): Promise<Invoice | undefined>;
@@ -52,21 +56,21 @@ export interface IStorage {
   updateInvoiceStatus(id: number, status: InvoiceStatus): Promise<Invoice | undefined>;
   deleteInvoice(id: number): Promise<boolean>;
   
-  // Expense methods
+  // Expenses
   getExpenses(): Promise<Expense[]>;
   getExpense(id: number): Promise<Expense | undefined>;
   createExpense(expense: InsertExpense): Promise<Expense>;
   updateExpense(id: number, expense: Partial<InsertExpense>): Promise<Expense | undefined>;
   deleteExpense(id: number): Promise<boolean>;
   
-  // Chart of Accounts methods
+  // Chart of Accounts
   getAccounts(): Promise<Account[]>;
   getAccount(id: number): Promise<Account | undefined>;
   createAccount(account: InsertAccount): Promise<Account>;
   updateAccount(id: number, account: Partial<InsertAccount>): Promise<Account | undefined>;
   deleteAccount(id: number): Promise<boolean>;
   
-  // Journal Entry methods
+  // Journal Entries
   getJournalEntries(): Promise<JournalEntry[]>;
   getJournalEntry(id: number): Promise<JournalEntry | undefined>;
   getJournalEntryWithLines(id: number): Promise<{entry: JournalEntry, lines: JournalLine[]} | undefined>;
@@ -116,6 +120,43 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+  
+  // Audit Log methods
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [auditLog] = await db.insert(auditLogs).values(log).returning();
+    return auditLog;
+  }
+  
+  async getAuditLogs(entityType?: AuditEntity, entityId?: string): Promise<AuditLog[]> {
+    // Si se proporcionan el tipo de entidad y el ID, filtrar por ellos
+    if (entityType && entityId) {
+      return await db
+        .select()
+        .from(auditLogs)
+        .where(
+          and(
+            eq(auditLogs.entityType, entityType),
+            eq(auditLogs.entityId, entityId)
+          )
+        )
+        .orderBy(desc(auditLogs.createdAt));
+    }
+    
+    // Si solo se proporciona el tipo de entidad, filtrar solo por ese campo
+    if (entityType) {
+      return await db
+        .select()
+        .from(auditLogs)
+        .where(eq(auditLogs.entityType, entityType))
+        .orderBy(desc(auditLogs.createdAt));
+    }
+    
+    // Si no se proporcionan filtros, devolver todos los registros ordenados por fecha
+    return await db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.createdAt));
   }
   
   // Client methods
@@ -1044,20 +1085,27 @@ export class MemStorage implements IStorage {
       updatedAt: now,
       date: insertEntry.date || now,
       reference: insertEntry.reference || null,
-      description: insertEntry.description || null,
-      notes: insertEntry.notes || null,
-      isAdjustment: insertEntry.isAdjustment || false
+      sourceType: insertEntry.sourceType || null,
+      sourceId: insertEntry.sourceId || null
     };
     
     this.journalEntriesData.set(id, entry);
     
-    // Create journal lines with the entry ID
-    const journalLines: JournalLine[] = lines.map(line => ({
-      ...line,
-      id: this.currentJournalLineId++,
-      journalEntryId: id,
-      description: line.description || null
-    }));
+    // Create journal lines with proper type enforcement
+    const journalLines: JournalLine[] = lines.map(line => {
+      // Ensure debit and credit are never undefined
+      const debitValue: string = line.debit || "0";
+      const creditValue: string = line.credit || "0";
+      
+      return {
+        id: this.currentJournalLineId++,
+        journalEntryId: id,
+        accountId: line.accountId,
+        description: line.description || null,
+        debit: debitValue,
+        credit: creditValue,
+      };
+    });
     
     this.journalLinesData.set(id, journalLines);
     

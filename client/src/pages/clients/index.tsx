@@ -5,19 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { User, Plus } from "lucide-react";
+import { User, Plus, PenSquare, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-
-interface Client {
-  id: number;
-  companyName: string;
-  contactName: string | null;
-  email: string | null;
-  phone: string | null;
-  taxId: string | null;
-  createdAt: string;
-}
+import { Client } from "@shared/schema";
+import { DeleteClientConfirmation } from "@/components/clients/delete-client-confirmation";
 
 export default function ClientsPage() {
   const { toast } = useToast();
@@ -33,13 +25,21 @@ export default function ClientsPage() {
 
   const columns: Column<Client>[] = [
     {
-      header: "Empresa",
-      accessorKey: "companyName",
+      header: "Empresa/Cliente",
+      accessorKey: "name",
+      cell: (client) => client.companyName || client.name || "—",
     },
     {
       header: "Contacto",
-      accessorKey: "contactName",
-      cell: (client) => client.contactName || "—",
+      accessorKey: "displayName",
+      cell: (client) => {
+        // Si es una empresa, mostrar el nombre de contacto
+        if (client.clientType === "company") {
+          return client.displayName || `${client.firstName || ''} ${client.lastName || ''}`.trim() || "—";
+        }
+        // Si es un individuo, mostrar su nombre completo
+        return `${client.firstName || ''} ${client.lastName || ''}`.trim() || client.displayName || "—";
+      }
     },
     {
       header: "Email",
@@ -48,8 +48,8 @@ export default function ClientsPage() {
     },
     {
       header: "Teléfono",
-      accessorKey: "phone",
-      cell: (client) => client.phone || "—",
+      accessorKey: "workPhone",
+      cell: (client) => client.workPhone || client.mobilePhone || "—",
     },
     {
       header: "ID Fiscal",
@@ -59,18 +59,25 @@ export default function ClientsPage() {
     {
       header: "Fecha de registro",
       accessorKey: "createdAt",
-      cell: (client) => formatDate(client.createdAt),
+      cell: (client) => client.createdAt ? formatDate(client.createdAt.toString()) : "—",
     },
     {
       header: "Acciones",
       accessorKey: "id",
       cell: (client) => (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
           <Link href={`/clients/${client.id}`}>
             <Button variant="outline" size="sm">
-              Ver
+              <PenSquare className="h-4 w-4 mr-2" />
+              Editar
             </Button>
           </Link>
+          <DeleteClientConfirmation client={client}>
+            <Button variant="destructive" size="sm">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar
+            </Button>
+          </DeleteClientConfirmation>
         </div>
       ),
     },
