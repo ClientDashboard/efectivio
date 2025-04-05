@@ -2,6 +2,7 @@ import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ClerkProvider } from "./lib/clerk-provider";
 import { ProtectedRoute, PublicRoute, useAuth } from "./lib/protected-route";
 import { HelmetProvider } from "react-helmet-async";
@@ -176,8 +177,10 @@ function App() {
     <HelmetProvider>
       <ClerkProvider>
         <QueryClientProvider client={queryClient}>
-          <Router />
-          <Toaster />
+          <TooltipProvider>
+            <Router />
+            <Toaster />
+          </TooltipProvider>
         </QueryClientProvider>
       </ClerkProvider>
     </HelmetProvider>
