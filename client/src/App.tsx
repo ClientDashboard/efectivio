@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "./lib/clerk-provider";
 import { ProtectedRoute, PublicRoute, useAuth } from "./lib/protected-route";
+import { HelmetProvider } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useAppStore } from "./lib/store";
@@ -172,12 +173,14 @@ function Router() {
 
 function App() {
   return (
-    <ClerkProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router />
-        <Toaster />
-      </QueryClientProvider>
-    </ClerkProvider>
+    <HelmetProvider>
+      <ClerkProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router />
+          <Toaster />
+        </QueryClientProvider>
+      </ClerkProvider>
+    </HelmetProvider>
   );
 }
 
