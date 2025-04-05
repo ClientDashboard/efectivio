@@ -44,22 +44,38 @@ export default function SignUpPage() {
 
   // Manejar envío del formulario
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
+    console.log("Formulario enviado", values);
+    
     if (!isLoaded) {
+      console.log("Auth no está cargado");
       return;
     }
     
     setIsPending(true);
+    console.log("signUp disponible:", !!signUp);
 
     try {
       const [firstName, ...lastNameParts] = values.fullName.split(' ');
       const lastName = lastNameParts.join(' ');
       
-      await signUp.create({
+      console.log("Intentando crear usuario con:", {
+        email: values.email,
+        firstName,
+        lastName: lastName || undefined
+      });
+      
+      if (!signUp || typeof signUp.create !== 'function') {
+        throw new Error("La función de registro no está disponible");
+      }
+      
+      const result = await signUp.create({
         emailAddress: values.email,
         password: values.password,
         firstName,
         lastName: lastName || undefined,
       });
+      
+      console.log("Resultado del registro:", result);
 
       // Iniciar proceso de verificación de email
       await signUp.prepareEmailAddressVerification({
@@ -73,9 +89,10 @@ export default function SignUpPage() {
         description: 'Te hemos enviado un código de verificación a tu correo electrónico.',
       });
     } catch (err: any) {
+      console.error("Error en el registro:", err);
       toast({
         title: 'Error al registrarse',
-        description: err.errors?.[0]?.message || 'No se pudo completar el registro',
+        description: err.message || err.errors?.[0]?.message || 'No se pudo completar el registro',
         variant: 'destructive'
       });
     } finally {
