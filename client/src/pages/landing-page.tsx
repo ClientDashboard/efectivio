@@ -59,19 +59,21 @@ export default function LandingPage() {
           
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              className="text-sm font-medium hover:text-[#39FFBD]"
-              onClick={() => setLocation("/auth/sign-in")}
-            >
-              Iniciar Sesión
-            </Button>
-            <Button 
-              className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] text-sm font-medium"
-              onClick={() => setLocation("/auth/sign-up")}
-            >
-              Registrarse
-            </Button>
+            <Link href="/auth/sign-in">
+              <Button 
+                variant="ghost" 
+                className="text-sm font-medium hover:text-[#39FFBD]"
+              >
+                Iniciar Sesión
+              </Button>
+            </Link>
+            <Link href="/auth/sign-up">
+              <Button 
+                className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] text-sm font-medium"
+              >
+                Registrarse
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -117,19 +119,21 @@ export default function LandingPage() {
                 Precios
               </a>
               <div className="flex flex-col gap-2 mt-4">
-                <Button 
-                  className="w-full bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644]"
-                  onClick={() => setLocation("/auth/sign-up")}
-                >
-                  Registrarse
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => setLocation("/auth/sign-in")}
-                >
-                  Iniciar Sesión
-                </Button>
+                <Link href="/auth/sign-up" className="w-full">
+                  <Button 
+                    className="w-full bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644]"
+                  >
+                    Registrarse
+                  </Button>
+                </Link>
+                <Link href="/auth/sign-in" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                  >
+                    Iniciar Sesión
+                  </Button>
+                </Link>
               </div>
             </nav>
           </div>
@@ -195,14 +199,15 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row mt-6">
-                <Button 
-                  className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] font-medium text-base px-6 py-6 h-auto group relative overflow-hidden"
-                  onClick={() => setLocation("/auth/sign-up")}
-                >
-                  <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
-                  <span className="relative">Prueba Gratis</span>
-                  <ArrowRight className="ml-2 h-4 w-4 relative group-hover:translate-x-1 transition-transform" />
-                </Button>
+                <Link href="/auth/sign-up">
+                  <Button 
+                    className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] font-medium text-base px-6 py-6 h-auto group relative overflow-hidden"
+                  >
+                    <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
+                    <span className="relative">Prueba Gratis</span>
+                    <ArrowRight className="ml-2 h-4 w-4 relative group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   className="border-white/30 text-white hover:bg-white/10 font-medium text-base px-6 py-6 h-auto"
@@ -315,12 +320,13 @@ export default function LandingPage() {
           </div>
           
           <div className="flex justify-center mt-12">
-            <Button 
-              className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] px-8 py-6 h-auto"
-              onClick={() => setLocation("/auth/sign-up")}
-            >
-              Comenzar ahora
-            </Button>
+            <Link href="/auth/sign-up">
+              <Button 
+                className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] px-8 py-6 h-auto"
+              >
+                Comenzar ahora
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -337,19 +343,21 @@ export default function LandingPage() {
                 Únete a miles de empresas que ya confían en Efectivio para su gestión contable diaria.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                <Button 
-                  className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] w-full sm:w-auto font-medium px-6 py-6 h-auto"
-                  onClick={() => setLocation("/auth/sign-up")}
-                >
-                  Comenzar prueba gratuita
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto font-medium px-6 py-6 h-auto"
-                  onClick={() => setLocation("/auth/sign-in")}
-                >
-                  Iniciar sesión
-                </Button>
+                <Link href="/auth/sign-up">
+                  <Button 
+                    className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] w-full sm:w-auto font-medium px-6 py-6 h-auto"
+                  >
+                    Comenzar prueba gratuita
+                  </Button>
+                </Link>
+                <Link href="/auth/sign-in">
+                  <Button 
+                    variant="outline" 
+                    className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto font-medium px-6 py-6 h-auto"
+                  >
+                    Iniciar sesión
+                  </Button>
+                </Link>
               </div>
             </div>
             <div className="space-y-4 lg:space-y-6">
