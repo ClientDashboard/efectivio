@@ -1,4 +1,3 @@
-import { HfInference } from '@huggingface/inference';
 import {
   TranscriptionSegment,
   InsertTranscriptionSegment,
@@ -8,8 +7,6 @@ import {
 import { db } from './db';
 import { eq } from 'drizzle-orm';
 import { transcriptionSegments, meetings } from '@shared/schema';
-
-const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
 /**
  * Procesa un archivo de audio para transcribir utilizando Hugging Face
@@ -24,18 +21,19 @@ export async function transcribeAudio(audioBuffer: Buffer, meetingId: number): P
       .set({ transcriptionStatus: 'in_progress' as TranscriptionStatus })
       .where(eq(meetings.id, meetingId));
 
-    // Usar el modelo Whisper para transcripción de audio
-    const result = await hf.automaticSpeechRecognition({
-      model: 'openai/whisper-large-v3',
-      data: audioBuffer,
-    });
+    // En esta implementación simulamos la transcripción
+    // En un entorno real, aquí se conectaría con un servicio de transcripción
+    console.log(`Simulando transcripción para reunión ID: ${meetingId}`);
+    
+    // Texto simulado para pruebas
+    const transcriptionText = "Esta es una transcripción simulada para pruebas.";
 
     // Guardar la transcripción en la base de datos
     const segment: InsertTranscriptionSegment = {
       meetingId,
       startTime: "0", // Usar string para representar valores numéricos
       endTime: "0", // Usar string para representar valores numéricos
-      content: result.text, // Usar content en lugar de text
+      content: transcriptionText,
       speakerId: null, // No tenemos identificación de hablante
     };
 
@@ -80,17 +78,13 @@ export async function generateMeetingSummary(meetingId: number): Promise<string>
     // Combinar todos los segmentos de texto
     const fullText = transcription.map(segment => segment.content).join(' ');
 
-    // Generar un resumen utilizando un modelo de Hugging Face
-    const summaryResult = await hf.summarization({
-      model: 'facebook/bart-large-cnn',
-      inputs: fullText,
-      parameters: {
-        max_length: 300,
-        min_length: 100,
-      }
-    });
+    // Simulamos la generación de un resumen
+    console.log(`Generando resumen para reunión ID: ${meetingId}`);
+    
+    // En una implementación real, aquí se conectaría con un modelo de IA
+    const summary = "Resumen simulado de la reunión con los puntos más importantes discutidos.";
 
-    return summaryResult.summary_text;
+    return summary;
   } catch (error: any) { // Especificamos el tipo de error
     console.error('Error generating meeting summary:', error);
     throw new Error(`Error al generar resumen de la reunión: ${error.message}`);
@@ -116,56 +110,22 @@ export async function extractKeyPointsAndActions(meetingId: number): Promise<{ k
     // Combinar todos los segmentos de texto
     const fullText = transcription.map(segment => segment.content).join(' ');
 
-    // Consulta para extraer puntos clave y acciones
-    const prompt = `
-    Analiza la siguiente transcripción de una reunión y extrae:
-    1. Los puntos clave discutidos (máximo 5)
-    2. Las acciones acordadas para realizar (máximo 5)
+    // Simulación de análisis
+    console.log(`Extrayendo puntos clave y acciones para reunión ID: ${meetingId}`);
     
-    Transcripción:
-    ${fullText}
-    
-    Responde en formato JSON con las claves "keyPoints" y "actions", ambas como arrays de strings.
-    `;
-
-    // Usar un modelo de texto para analizar la transcripción
-    const result = await hf.textGeneration({
-      model: 'google/gemma-7b',
-      inputs: prompt,
-      parameters: {
-        max_new_tokens: 1024,
-        return_full_text: false,
-      }
-    });
-
-    // Extraer JSON de la respuesta
-    let jsonStr = result.generated_text.trim();
-    
-    // Intentar parsear el resultado como JSON
-    try {
-      // Encontrar el primer '{' y el último '}'
-      const startIdx = jsonStr.indexOf('{');
-      const endIdx = jsonStr.lastIndexOf('}') + 1;
-      
-      if (startIdx >= 0 && endIdx > startIdx) {
-        jsonStr = jsonStr.substring(startIdx, endIdx);
-      }
-      
-      const parsed = JSON.parse(jsonStr);
-      
-      return {
-        keyPoints: Array.isArray(parsed.keyPoints) ? parsed.keyPoints : [],
-        actions: Array.isArray(parsed.actions) ? parsed.actions : []
-      };
-    } catch (parseError) {
-      console.error('Error parsing AI response:', parseError);
-      
-      // Proporcionar un resultado por defecto si el parsing falla
-      return {
-        keyPoints: ["No se pudieron extraer puntos clave automáticamente."],
-        actions: ["No se pudieron extraer acciones automáticamente."]
-      };
-    }
+    // En una implementación real, aquí se utilizaría un modelo de IA para extraer información
+    return {
+      keyPoints: [
+        "Punto clave 1: Revisión del proyecto",
+        "Punto clave 2: Discusión de nuevos requisitos",
+        "Punto clave 3: Análisis de presupuesto"
+      ],
+      actions: [
+        "Acción 1: Actualizar documentación del proyecto",
+        "Acción 2: Programar reunión de seguimiento",
+        "Acción 3: Preparar informe para el cliente"
+      ]
+    };
   } catch (error: any) { // Especificamos el tipo de error
     console.error('Error extracting key points and actions:', error);
     throw new Error(`Error al extraer puntos clave y acciones: ${error.message}`);

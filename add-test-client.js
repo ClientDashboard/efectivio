@@ -1,6 +1,8 @@
 // Script para agregar un cliente de prueba directamente en Supabase
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+import { config } from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+
+config();
 
 // Crear un cliente de Supabase con las credenciales de admin
 const supabase = createClient(
@@ -47,4 +49,5 @@ async function addTestClient() {
   }
 }
 
+// Ejecutar la función principal
 addTestClient();

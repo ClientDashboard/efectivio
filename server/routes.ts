@@ -8,6 +8,7 @@ import filesRoutes from './routes/files';
 import clientPortalRouter from './routes/client-portal';
 import usersRouter from './routes/users';
 import settingsRouter from './routes/settings';
+import profileRouter from './routes/profile';
 import { 
   insertClientSchema, 
   insertQuoteSchema,
@@ -36,7 +37,8 @@ import {
   transcriptionSegments,
 } from "@shared/schema";
 import { ZodError } from "zod";
-import { supabaseAdmin, uploadFile, deleteFile, getSignedUrl, createFilePath, STORAGE_BUCKETS } from "./supabase";
+import { getSupabaseClient, uploadFile, deleteFile, getSignedUrl, createFilePath, STORAGE_BUCKETS } from "./supabase";
+const supabaseAdmin = getSupabaseClient();
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { 
@@ -59,6 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api', clientPortalRouter);
   app.use('/api', usersRouter);
   app.use('/api', settingsRouter);
+  app.use('/api', profileRouter);
   
   // Helper function to handle validation errors
   const validateRequest = (schema: any, data: any) => {

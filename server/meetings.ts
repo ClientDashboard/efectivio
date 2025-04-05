@@ -10,7 +10,8 @@ import {
 import { db } from './db';
 import { eq, and } from 'drizzle-orm';
 import { meetings, meetingIntegrations } from '@shared/schema';
-import { supabaseAdmin as supabase } from './supabase';
+import { getSupabaseClient } from './supabase';
+const supabase = getSupabaseClient();
 import { transcribeAudio, generateMeetingSummary, extractKeyPointsAndActions } from './ai';
 
 // Constante para el bucket de almacenamiento de grabaciones
