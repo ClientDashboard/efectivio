@@ -435,6 +435,7 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
 export type ClientType = "company" | "individual";
+export type PaymentTerms = "immediate" | "15_days" | "30_days" | "45_days" | "60_days" | "custom";
 
 export type Quote = typeof quotes.$inferSelect;
 export type InsertQuote = z.infer<typeof insertQuoteSchema>;

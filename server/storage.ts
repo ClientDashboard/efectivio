@@ -1,6 +1,6 @@
 import {
   users, clients, quotes, quoteItems, invoices, invoiceItems, expenses, accounts, journalEntries, journalLines,
-  type User, type InsertUser, type Client, type InsertClient, type ClientType,
+  type User, type InsertUser, type Client, type InsertClient, type ClientType, type PaymentTerms,
   type Quote, type InsertQuote, type QuoteItem, type InsertQuoteItem, type QuoteStatus,
   type Invoice, type InsertInvoice, type InvoiceItem, type InsertInvoiceItem, type InvoiceStatus,
   type Expense, type InsertExpense, type Account, type InsertAccount,
@@ -149,7 +149,9 @@ export class DatabaseStorage implements IStorage {
       .where(
         or(
           like(clients.companyName || '', searchQuery),
-          like(clients.contactName || '', searchQuery),
+          like(clients.displayName || '', searchQuery),
+          like(clients.firstName || '', searchQuery),
+          like(clients.lastName || '', searchQuery),
           like(clients.email || '', searchQuery)
         )
       );
@@ -576,13 +578,21 @@ export class MemStorage implements IStorage {
       updatedAt: now,
       clientType: insertClient.clientType || "company",
       companyName: insertClient.companyName ?? null,
+      displayName: insertClient.displayName ?? null,
+      salutation: insertClient.salutation ?? null,
       firstName: insertClient.firstName ?? null,
       lastName: insertClient.lastName ?? null,
       email: insertClient.email ?? null,
-      contactName: insertClient.contactName ?? null,
-      phone: insertClient.phone ?? null,
+      workPhone: insertClient.workPhone ?? null,
+      mobilePhone: insertClient.mobilePhone ?? null,
       address: insertClient.address ?? null,
+      city: insertClient.city ?? null,
+      state: insertClient.state ?? null,
+      postalCode: insertClient.postalCode ?? null,
+      country: insertClient.country ?? null,
       taxId: insertClient.taxId ?? null,
+      paymentTerms: insertClient.paymentTerms || "30_days",
+      customPaymentTerms: insertClient.customPaymentTerms ?? null,
       notes: insertClient.notes ?? null,
       isActive: insertClient.isActive ?? true
     };
@@ -613,7 +623,9 @@ export class MemStorage implements IStorage {
     return Array.from(this.clientsData.values()).filter(
       client => 
         (client.companyName && client.companyName.toLowerCase().includes(lowercaseQuery)) ||
-        (client.contactName && client.contactName.toLowerCase().includes(lowercaseQuery)) ||
+        (client.displayName && client.displayName.toLowerCase().includes(lowercaseQuery)) ||
+        (client.firstName && client.firstName.toLowerCase().includes(lowercaseQuery)) ||
+        (client.lastName && client.lastName.toLowerCase().includes(lowercaseQuery)) ||
         (client.email && client.email.toLowerCase().includes(lowercaseQuery))
     );
   }
