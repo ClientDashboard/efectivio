@@ -17,8 +17,25 @@ export default function ClientCreatePage() {
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData: InsertClient) => {
-      const res = await apiRequest("POST", "/api/clients", clientData);
-      return res.json();
+      try {
+        console.log("Enviando datos del cliente:", clientData);
+        const res = await apiRequest("POST", "/api/clients", clientData);
+        
+        if (!res.ok) {
+          // Intentar obtener detalles del error
+          const errorData = await res.json().catch(() => null);
+          console.error("Error en respuesta del servidor:", errorData);
+          throw new Error(
+            errorData?.message || 
+            `Error del servidor: ${res.status} ${res.statusText}`
+          );
+        }
+        
+        return await res.json();
+      } catch (error) {
+        console.error("Error al crear cliente:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       toast({
@@ -28,11 +45,16 @@ export default function ClientCreatePage() {
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
       navigate("/clients");
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Error en mutación de cliente:", error);
+      
+      const errorMessage = error?.message || 
+                          "No se pudo crear el cliente. Intente de nuevo más tarde.";
+                          
       toast({
         variant: "destructive",
         title: "Error al crear cliente",
-        description: "No se pudo crear el cliente. Intente de nuevo más tarde.",
+        description: errorMessage,
       });
       setIsSubmitting(false);
     },

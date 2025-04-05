@@ -40,11 +40,26 @@ async function bucketExists(bucketName: string): Promise<boolean> {
 export async function createClientStorageStructure(clientId: number): Promise<Record<string, boolean>> {
   console.log(`Creando estructura de almacenamiento para cliente ID: ${clientId}`);
   
+  // Verificar que la conexión a Supabase está configurada correctamente
+  console.log(`SUPABASE_URL configurada: ${!!process.env.SUPABASE_URL}`);
+  console.log(`SUPABASE_SERVICE_ROLE_KEY configurada: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
+  
+  // Si faltan las variables de entorno, devolvemos false para todos los buckets
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error("Error: Variables de entorno de Supabase no configuradas correctamente");
+    return CLIENT_STORAGE_BUCKETS.reduce((acc, bucket) => {
+      acc[bucket] = false;
+      return acc;
+    }, {} as Record<string, boolean>);
+  }
+  
   const results: Record<string, boolean> = {};
   
   // Para cada bucket, creamos la carpeta del cliente
   for (const bucketName of CLIENT_STORAGE_BUCKETS) {
     try {
+      console.log(`Procesando bucket: ${bucketName}`);
+      
       // Verificar primero si el bucket existe
       const exists = await bucketExists(bucketName);
       if (!exists) {
@@ -58,49 +73,78 @@ export async function createClientStorageStructure(clientId: number): Promise<Re
       const placeholderFile = new Uint8Array([]);
       const clientFolderPath = `${clientId}/.keep`;
       
-      // Verificar si la carpeta ya existe para este cliente
-      const { data: existingFiles } = await supabaseAdmin
-        .storage
-        .from(bucketName)
-        .list(clientId.toString());
+      console.log(`Verificando si ya existe la carpeta para cliente ${clientId} en bucket ${bucketName}`);
+      
+      try {
+        // Verificar si la carpeta ya existe para este cliente
+        const { data: existingFiles, error: listError } = await supabaseAdmin
+          .storage
+          .from(bucketName)
+          .list(clientId.toString());
+          
+        if (listError) {
+          console.error(`Error al listar archivos en bucket ${bucketName}:`, listError);
+        }
         
-      if (existingFiles && existingFiles.length > 0) {
-        console.log(`ℹ️ La carpeta para el cliente ${clientId} ya existe en el bucket ${bucketName}.`);
-        results[bucketName] = true;
-        continue;
+        if (existingFiles && existingFiles.length > 0) {
+          console.log(`ℹ️ La carpeta para el cliente ${clientId} ya existe en el bucket ${bucketName}.`);
+          results[bucketName] = true;
+          continue;
+        }
+      } catch (listError) {
+        console.error(`Error al listar archivos en bucket ${bucketName}:`, listError);
+        // Continuamos intentando crear la carpeta
       }
       
-      const { error } = await supabaseAdmin
-        .storage
-        .from(bucketName)
-        .upload(clientFolderPath, placeholderFile, {
-          contentType: 'text/plain',
-          upsert: true // Cambiado a true para asegurar que se cree incluso si ya existe
-        });
+      console.log(`Creando carpeta principal para cliente ${clientId} en bucket ${bucketName}`);
       
-      if (error) {
-        console.error(`Error al crear carpeta en bucket ${bucketName} para cliente ${clientId}:`, error);
-        results[bucketName] = false;
-      } else {
-        console.log(`✅ Carpeta creada en bucket ${bucketName} para cliente ${clientId}`);
-        results[bucketName] = true;
+      try {
+        const { data: uploadData, error: uploadError } = await supabaseAdmin
+          .storage
+          .from(bucketName)
+          .upload(clientFolderPath, placeholderFile, {
+            contentType: 'text/plain',
+            upsert: true // Cambiado a true para asegurar que se cree incluso si ya existe
+          });
         
-        // Configurar políticas de acceso específicas para este cliente
-        // Esto permitirá que solo este cliente acceda a sus archivos
-        await configureClientStorageAccess(bucketName, clientId);
-        
-        // Crear subcarpetas comunes para mejor organización
-        const subfolders = ['facturas', 'recibos', 'contratos', 'documentos', 'otros'];
-        for (const subfolder of subfolders) {
-          const subfolderPath = `${clientId}/${subfolder}/.keep`;
-          await supabaseAdmin
-            .storage
-            .from(bucketName)
-            .upload(subfolderPath, placeholderFile, {
-              contentType: 'text/plain',
-              upsert: true
-            });
+        if (uploadError) {
+          console.error(`Error al crear carpeta en bucket ${bucketName} para cliente ${clientId}:`, uploadError);
+          results[bucketName] = false;
+        } else {
+          console.log(`✅ Carpeta creada en bucket ${bucketName} para cliente ${clientId}`, uploadData);
+          results[bucketName] = true;
+          
+          // Configurar políticas de acceso específicas para este cliente
+          // Esto permitirá que solo este cliente acceda a sus archivos
+          await configureClientStorageAccess(bucketName, clientId);
+          
+          // Crear subcarpetas comunes para mejor organización
+          console.log(`Creando subcarpetas para cliente ${clientId} en bucket ${bucketName}`);
+          const subfolders = ['facturas', 'recibos', 'contratos', 'documentos', 'otros'];
+          for (const subfolder of subfolders) {
+            try {
+              const subfolderPath = `${clientId}/${subfolder}/.keep`;
+              const { error: subfolderError } = await supabaseAdmin
+                .storage
+                .from(bucketName)
+                .upload(subfolderPath, placeholderFile, {
+                  contentType: 'text/plain',
+                  upsert: true
+                });
+                
+              if (subfolderError) {
+                console.warn(`⚠️ Error al crear subcarpeta ${subfolder} para cliente ${clientId}:`, subfolderError);
+              } else {
+                console.log(`✅ Subcarpeta ${subfolder} creada para cliente ${clientId}`);
+              }
+            } catch (subfolderError) {
+              console.error(`Error al crear subcarpeta ${subfolder} para cliente ${clientId}:`, subfolderError);
+            }
+          }
         }
+      } catch (uploadError) {
+        console.error(`Error al subir archivo a bucket ${bucketName}:`, uploadError);
+        results[bucketName] = false;
       }
     } catch (error) {
       console.error(`Error general al crear carpeta en bucket ${bucketName}:`, error);
@@ -108,6 +152,7 @@ export async function createClientStorageStructure(clientId: number): Promise<Re
     }
   }
   
+  console.log(`Resultado final de creación de estructura para cliente ${clientId}:`, results);
   return results;
 }
 

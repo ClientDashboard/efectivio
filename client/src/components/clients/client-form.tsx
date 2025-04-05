@@ -44,15 +44,28 @@ const clientFormSchema = z.object({
   notes: z.string().optional(),
   
   // Campos específicos para empresas
-  companyName: z.string().min(2, {
-    message: "El nombre de la empresa debe tener al menos 2 caracteres",
-  }).optional(),
+  companyName: z.string().optional(),
   
   // Campos para el contacto
   salutation: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    // Si es una empresa, el nombre de la empresa es obligatorio
+    if (data.clientType === "company") {
+      return !!data.companyName && data.companyName.length >= 2;
+    }
+    // Si es un individuo, el nombre es obligatorio
+    return !!data.firstName && data.firstName.length >= 2;
+  },
+  {
+    message: data => data.clientType === "company" 
+      ? "El nombre de la empresa es obligatorio (mínimo 2 caracteres)" 
+      : "El nombre es obligatorio (mínimo 2 caracteres)",
+    path: data => data.clientType === "company" ? ["companyName"] : ["firstName"]
+  }
+);
 
 type ClientFormValues = z.infer<typeof clientFormSchema>;
 

@@ -95,27 +95,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/clients", async (req: Request, res: Response) => {
     try {
+      console.log("Recibida solicitud para crear cliente:", req.body);
+      
+      // Validar los datos del cliente
       const validation = validateRequest(insertClientSchema, req.body);
       
       if (!validation.success) {
-        return res.status(400).json({ message: "Validation error", errors: validation.error });
+        console.error("Error de validación:", validation.error);
+        return res.status(400).json({ 
+          message: "Error de validación de datos del cliente", 
+          errors: validation.error 
+        });
       }
       
-      const client = await storage.createClient(validation.data);
+      // Si el tipo de cliente es "company", asegurar que tenga un nombre de empresa
+      if (validation.data.clientType === "company" && !validation.data.companyName) {
+        return res.status(400).json({
+          message: "Para clientes de tipo empresa, el nombre de la empresa es obligatorio",
+          field: "companyName"
+        });
+      }
       
-      // Crear estructura de almacenamiento para este cliente
+      // Si el tipo de cliente es "individual", asegurar que tenga al menos un nombre
+      if (validation.data.clientType === "individual" && !validation.data.firstName) {
+        return res.status(400).json({
+          message: "Para clientes individuales, el nombre es obligatorio",
+          field: "firstName"
+        });
+      }
+      
+      console.log("Datos validados correctamente, creando cliente...");
+      
+      // Datos validados, crear el cliente
+      let client;
       try {
+        client = await storage.createClient(validation.data);
+        console.log("Cliente creado exitosamente:", client);
+      } catch (dbError) {
+        console.error("Error en base de datos al crear cliente:", dbError);
+        return res.status(500).json({ 
+          message: "Error al guardar cliente en la base de datos",
+          error: dbError instanceof Error ? dbError.message : String(dbError)
+        });
+      }
+      
+      // Crear estructura de almacenamiento para este cliente (no bloquea la respuesta)
+      try {
+        console.log("Importando función createClientStorageStructure...");
         const { createClientStorageStructure } = await import('./storage-utils');
-        const storageResult = await createClientStorageStructure(client.id);
-        console.log(`Resultado de creación de almacenamiento para cliente ${client.id}:`, storageResult);
-      } catch (storageError) {
-        console.error(`Error al crear estructura de almacenamiento para cliente ${client.id}:`, storageError);
+        console.log("Creando estructura de almacenamiento para cliente:", client.id);
+        
+        // No esperamos a que termine para responder al cliente
+        createClientStorageStructure(client.id)
+          .then(storageResult => {
+            console.log(`Resultado de creación de almacenamiento para cliente ${client.id}:`, storageResult);
+          })
+          .catch(storageError => {
+            console.error(`Error detallado al crear estructura de almacenamiento para cliente ${client.id}:`, storageError);
+          });
+      } catch (importError) {
+        console.error(`Error al importar o iniciar la creación de almacenamiento:`, importError);
         // No fallamos la creación del cliente si hay error en storage
       }
       
+      // Responder con el cliente creado
       res.status(201).json(client);
     } catch (error) {
-      res.status(500).json({ message: "Error creating client", error });
+      console.error("Error general al crear cliente:", error);
+      res.status(500).json({ 
+        message: "Error interno al crear cliente", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 
