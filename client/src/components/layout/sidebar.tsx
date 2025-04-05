@@ -110,7 +110,7 @@ export default function Sidebar() {
     { name: 'Seguridad', path: '/settings/security', icon: Shield },
     { name: 'Respaldo', path: '/settings/backup', icon: Database },
     { name: 'Almacenamiento', path: '/settings/storage', icon: HardDrive },
-    { name: 'Usuarios', path: '/settings/users', icon: UserCog },
+    { name: 'Usuarios', path: '/users', icon: UserCog },
     { name: 'General', path: '/settings/general', icon: Settings },
     { name: 'Registros de Auditoría', path: '/audit', icon: Activity },
   ];

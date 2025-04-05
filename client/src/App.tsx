@@ -40,6 +40,7 @@ import ClientPortalPage from "@/pages/client-portal";
 import ClientPortalDashboard from "@/pages/client-portal/dashboard";
 import ClientPortalFiles from "@/pages/client-portal/files";
 import AuditLogsPage from "@/pages/audit";
+import UsersPage from "@/pages/users";
 
 // Portal Pages
 import PortalLoginPage from "@/pages/portal/login";
@@ -190,6 +191,11 @@ function Router() {
         {/* Audit Logs */}
         <ProtectedRoute path="/audit">
           <AuditLogsPage />
+        </ProtectedRoute>
+        
+        {/* Gestión de Usuarios */}
+        <ProtectedRoute path="/users">
+          <UsersPage />
         </ProtectedRoute>
         
         {/* Portal de Clientes */}

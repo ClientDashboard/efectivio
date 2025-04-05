@@ -2,6 +2,19 @@ import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum, uu
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Enum para roles de usuario
+export const userRoleEnum = pgEnum("user_role", [
+  "gerente_general",
+  "contabilidad",
+  "director_ventas",
+  "director_recursos_humanos",
+  "director_produccion",
+  "director_logistica",
+  "operario",
+  "vendedor",
+  "administrador_sistema"
+]);
+
 // Auth user model - basic structure to be extended with Clerk
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -9,8 +22,11 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   fullName: text("full_name"),
-  role: text("role").default("user").notNull(),
+  role: userRoleEnum("role").default("contabilidad").notNull(),
   clerkId: text("clerk_id").unique(),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastLogin: timestamp("last_login"),
+  profileImageUrl: text("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -387,10 +403,14 @@ export const auditEntityEnum = pgEnum("audit_entity", [
 export const auditLogs = pgTable("audit_logs", {
   id: serial("id").primaryKey(),
   userId: uuid("user_id").notNull(), // Usuario que realizó la acción
+  userName: text("user_name"), // Nombre del usuario que realizó la acción
+  userRole: text("user_role"), // Rol del usuario que realizó la acción
   action: auditActionEnum("action").notNull(), // Tipo de acción realizada
   entityType: auditEntityEnum("entity_type").notNull(), // Tipo de entidad afectada
   entityId: text("entity_id").notNull(), // ID de la entidad afectada (puede ser numérico o UUID)
+  entityName: text("entity_name"), // Nombre descriptivo de la entidad afectada
   details: text("details"), // Detalles adicionales (JSON)
+  changes: text("changes"), // Cambios realizados en formato JSON (antes/después)
   ipAddress: text("ip_address"), // Dirección IP desde donde se realizó la acción
   userAgent: text("user_agent"), // Detalles del navegador/dispositivo
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -463,6 +483,7 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs)
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UserRole = "gerente_general" | "contabilidad" | "director_ventas" | "director_recursos_humanos" | "director_produccion" | "director_logistica" | "operario" | "vendedor" | "administrador_sistema";
 
 export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;

@@ -6,6 +6,7 @@ import { storage } from "./storage";
 import { HfInference } from '@huggingface/inference';
 import filesRoutes from './routes/files';
 import clientPortalRouter from './routes/client-portal';
+import usersRouter from './routes/users';
 import { 
   insertClientSchema, 
   insertQuoteSchema,
@@ -2042,6 +2043,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   import('./routes/files').then(module => {
     module.registerFileRoutes(app);
   });
+  
+  // Registrar rutas de usuarios
+  app.use('/api/users', usersRouter);
   
   // Registrar rutas del portal de cliente
   // Rutas para el portal de clientes

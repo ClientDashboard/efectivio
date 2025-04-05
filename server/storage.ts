@@ -17,10 +17,13 @@ import createMemoryStore from "memorystore";
 // Storage interface
 export interface IStorage {
   // User methods
+  getUsers(): Promise<User[]>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByClerkId(clerkId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  deleteUser(id: number): Promise<boolean>;
   
   // Client methods
   getClients(): Promise<Client[]>;
@@ -98,6 +101,10 @@ export class DatabaseStorage implements IStorage {
   }
   
   // User methods
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+  
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
@@ -116,6 +123,20 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+  
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ ...userData, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return !!result;
   }
   
   // Client methods
@@ -588,6 +609,10 @@ export class MemStorage implements IStorage {
   }
 
   // User methods
+  async getUsers(): Promise<User[]> {
+    return Array.from(this.usersData.values());
+  }
+  
   async getUser(id: number): Promise<User | undefined> {
     return this.usersData.get(id);
   }
@@ -613,11 +638,31 @@ export class MemStorage implements IStorage {
       createdAt: now, 
       updatedAt: now,
       fullName: insertUser.fullName ?? null,
-      role: insertUser.role ?? 'user',
+      role: insertUser.role ?? 'administrador_sistema',
       clerkId: insertUser.clerkId ?? null
     };
     this.usersData.set(id, user);
     return user;
+  }
+  
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
+    const existingUser = this.usersData.get(id);
+    if (!existingUser) {
+      throw new Error(`Usuario con ID ${id} no encontrado`);
+    }
+    
+    const updatedUser: User = {
+      ...existingUser,
+      ...userData,
+      updatedAt: new Date()
+    };
+    
+    this.usersData.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    return this.usersData.delete(id);
   }
   
   // Client methods
