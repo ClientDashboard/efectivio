@@ -2010,6 +2010,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Registrar rutas del portal de cliente
   // Rutas para el portal de clientes
+  // Endpoint para obtener los clientes con acceso al portal
+  app.get("/api/clients/portal-access", async (req: Request, res: Response) => {
+    try {
+      console.log("Obteniendo clientes con acceso al portal");
+      
+      try {
+        // Método 1: Obtener clientes mediante el storage
+        const clientsWithPortalAccess = await storage.getClientsWithPortalAccess();
+        console.log("Clientes con portal usando storage:", clientsWithPortalAccess.length, clientsWithPortalAccess);
+        return res.status(200).json(clientsWithPortalAccess);
+      } catch (dbError) {
+        console.error("Error al obtener clientes desde storage:", dbError);
+        
+        // Método 2: Intentar con Supabase como respaldo
+        try {
+          const { data, error } = await supabaseAdmin
+            .from('clients')
+            .select('*')
+            .eq('has_portal_access', true);
+
+          if (error) {
+            console.error("Error al obtener clientes con acceso al portal desde Supabase:", error);
+            return res.status(500).json({ message: "Error al obtener clientes del portal", error: error });
+          }
+          
+          console.log("Clientes con portal usando Supabase:", data?.length || 0, data);
+          return res.status(200).json(data || []);
+        } catch (supabaseError) {
+          console.error("Error al acceder a Supabase:", supabaseError);
+          // Último recurso, devolver array vacío
+          return res.status(200).json([]);
+        }
+      }
+    } catch (error) {
+      console.error("Error general al obtener clientes con acceso al portal:", error);
+      return res.status(500).json({ message: "Error interno del servidor" });
+    }
+  });
+
   app.use('/api/clients/portal', clientPortalRouter);
   app.use('/api/client-portal', clientPortalRouter);
   

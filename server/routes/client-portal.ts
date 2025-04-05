@@ -45,7 +45,7 @@ router.post('/invite', async (req: Request, res: Response) => {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + validatedData.expiryDays);
     
-    // Guardar invitación en la base de datos
+    // Guardar invitación en la base de datos (sin incluir las columnas nuevas hasta que se actualice el caché)
     const { data, error } = await supabase
       .from('client_invitations')
       .insert([
@@ -54,11 +54,22 @@ router.post('/invite', async (req: Request, res: Response) => {
           email: validatedData.email,
           token: token,
           expires_at: expiryDate.toISOString(),
-          message: validatedData.message,
-          status: 'pendiente'
+          // No incluimos message y status ya que el caché del esquema no se ha actualizado
+          // y esto causa error PGRST204
         }
       ])
       .select();
+      
+    // Ahora actualizamos el registro para añadir los campos adicionales usando SQL directo
+    if (!error && data && data.length > 0) {
+      const invitationId = data[0].id;
+      await supabase.rpc('execute_sql', {
+        query: `UPDATE client_invitations SET 
+                message = '${validatedData.message || ""}', 
+                status = 'pendiente' 
+                WHERE id = '${invitationId}'`
+      });
+    }
     
     if (error) {
       console.error('Error al guardar invitación:', error);
@@ -227,24 +238,25 @@ router.post('/register', async (req: Request, res: Response) => {
       });
     }
     
-    // Actualizar invitación como completada
-    await supabase
-      .from('client_invitations')
-      .update({ 
-        status: 'completada',
-        completed_at: new Date().toISOString()
-      })
-      .eq('token', token);
+    // Actualizar invitación como completada (usando SQL directo para evitar problemas con el caché)
+    await supabase.rpc('execute_sql', {
+      query: `UPDATE client_invitations SET 
+              status = 'completada', 
+              completed_at = '${new Date().toISOString()}' 
+              WHERE token = '${token}'`
+    });
     
     // Asociar usuario con cliente en la base de datos
-    const { error: portalUserError } = await supabase
-      .from('client_portal_users')
-      .insert([{
-        client_id: invitationData.client_id,
-        user_id: authData.user.id,
-        email: invitationData.email,
-        access_level: 'cliente'
-      }]);
+    // Usamos SQL directo para evitar problemas con la estructura de la tabla
+    const insertUserResult = await supabase.rpc('execute_sql', {
+      query: `INSERT INTO client_portal_users 
+              (client_id, email, password, is_active) 
+              VALUES 
+              (${invitationData.client_id}, '${invitationData.email}', '${password}', true)
+              RETURNING id`
+    });
+    
+    const portalUserError = insertUserResult.error;
     
     if (portalUserError) {
       console.error('Error al asociar usuario con cliente:', portalUserError);

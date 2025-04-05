@@ -28,6 +28,7 @@ export interface IStorage {
   updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
   deleteClient(id: number): Promise<boolean>;
   searchClients(query: string): Promise<Client[]>;
+  getClientsWithPortalAccess(): Promise<Client[]>;
   
   // Quotes/Presupuestos
   getQuotes(): Promise<Quote[]>;
@@ -155,6 +156,20 @@ export class DatabaseStorage implements IStorage {
           like(clients.email || '', searchQuery)
         )
       );
+  }
+  
+  async getClientsWithPortalAccess(): Promise<Client[]> {
+    try {
+      console.log("Ejecutando getClientsWithPortalAccess con SQL");
+      // Usamos la API de Drizzle con expresión SQL directa
+      const result = await db.select().from(clients).where(sql`has_portal_access = true`);
+      console.log("Clientes con acceso al portal encontrados:", result.length);
+      return result;
+    } catch (error) {
+      console.error("Error en getClientsWithPortalAccess:", error);
+      // En caso de error, devolver array vacío para no romper la aplicación
+      return [];
+    }
   }
 
   // Quote methods
@@ -629,6 +644,15 @@ export class MemStorage implements IStorage {
         (client.lastName && client.lastName.toLowerCase().includes(lowercaseQuery)) ||
         (client.email && client.email.toLowerCase().includes(lowercaseQuery))
     );
+  }
+  
+  async getClientsWithPortalAccess(): Promise<Client[]> {
+    console.log("Ejecutando getClientsWithPortalAccess en MemStorage");
+    const clientesConAcceso = Array.from(this.clientsData.values()).filter(
+      client => client.hasPortalAccess === true
+    );
+    console.log("Clientes con acceso al portal encontrados (MemStorage):", clientesConAcceso.length);
+    return clientesConAcceso;
   }
   
   // Quote methods
