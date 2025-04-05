@@ -20,18 +20,31 @@ export const clientTypeEnum = pgEnum("client_type", [
   "company", "individual"
 ]);
 
+// Payment terms enum
+export const paymentTermsEnum = pgEnum("payment_terms", [
+  "immediate", "15_days", "30_days", "45_days", "60_days", "custom"
+]);
+
 // Client/Customer model
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
   clientType: clientTypeEnum("client_type").default("company").notNull(),
   companyName: text("company_name"),
-  contactName: text("contact_name"),
+  displayName: text("display_name"),
+  salutation: text("salutation"),
   firstName: text("first_name"),
   lastName: text("last_name"),
   email: text("email"),
-  phone: text("phone"),
+  workPhone: text("work_phone"),
+  mobilePhone: text("mobile_phone"),
   address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  postalCode: text("postal_code"),
+  country: text("country"),
   taxId: text("tax_id"),
+  paymentTerms: paymentTermsEnum("payment_terms").default("30_days"),
+  customPaymentTerms: text("custom_payment_terms"),
   notes: text("notes"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

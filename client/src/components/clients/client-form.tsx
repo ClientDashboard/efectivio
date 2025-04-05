@@ -31,7 +31,13 @@ const clientFormSchema = z.object({
   workPhone: z.string().optional(),
   mobilePhone: z.string().optional(),
   address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postalCode: z.string().optional(),
+  country: z.string().optional(),
   taxId: z.string().optional(),
+  paymentTerms: z.enum(["immediate", "15_days", "30_days", "45_days", "60_days", "custom"]).default("30_days"),
+  customPaymentTerms: z.string().optional(),
   notes: z.string().optional(),
   
   // Campos específicos para empresas
@@ -69,7 +75,13 @@ export function ClientForm({ initialData, onSubmit, isSubmitting }: ClientFormPr
       workPhone: initialData?.workPhone || "",
       mobilePhone: initialData?.mobilePhone || "",
       address: initialData?.address || "",
+      city: initialData?.city || "",
+      state: initialData?.state || "",
+      postalCode: initialData?.postalCode || "",
+      country: initialData?.country || "",
       taxId: initialData?.taxId || "",
+      paymentTerms: initialData?.paymentTerms || "30_days",
+      customPaymentTerms: initialData?.customPaymentTerms || "",
       notes: initialData?.notes || "",
     },
   });
@@ -360,7 +372,9 @@ export function ClientForm({ initialData, onSubmit, isSubmitting }: ClientFormPr
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Información fiscal */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">Información fiscal</h3>
           <FormField
             control={form.control}
             name="taxId"
@@ -374,20 +388,172 @@ export function ClientForm({ initialData, onSubmit, isSubmitting }: ClientFormPr
               </FormItem>
             )}
           />
+        </div>
 
+        {/* Dirección */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium">Dirección</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Calle y número</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Calle y número" {...field} disabled={isSubmitting} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ciudad</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ciudad" {...field} disabled={isSubmitting} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado/Provincia</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Estado o provincia" {...field} disabled={isSubmitting} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="postalCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Código postal</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Código postal" {...field} disabled={isSubmitting} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>País</FormLabel>
+                  <FormControl>
+                    <Input placeholder="País" {...field} disabled={isSubmitting} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Términos de pago */}
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <h3 className="text-sm font-medium">Términos de pago</h3>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
+                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="w-[280px] text-sm">Términos de pago por defecto para este cliente. Se aplicarán automáticamente al crear facturas.</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          
           <FormField
             control={form.control}
-            name="address"
+            name="paymentTerms"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dirección</FormLabel>
                 <FormControl>
-                  <Input placeholder="Dirección completa" {...field} disabled={isSubmitting} />
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-col space-y-1"
+                    disabled={isSubmitting}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="immediate" id="immediate" />
+                      <label htmlFor="immediate" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Al contado
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="15_days" id="15_days" />
+                      <label htmlFor="15_days" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        15 días
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="30_days" id="30_days" />
+                      <label htmlFor="30_days" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        30 días
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="45_days" id="45_days" />
+                      <label htmlFor="45_days" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        45 días
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="60_days" id="60_days" />
+                      <label htmlFor="60_days" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        60 días
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="custom" id="custom" />
+                      <label htmlFor="custom" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Personalizado
+                      </label>
+                    </div>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          
+          {form.watch("paymentTerms") === "custom" && (
+            <FormField
+              control={form.control}
+              name="customPaymentTerms"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Términos de pago personalizados</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ej: 50% adelanto, 50% contra entrega" {...field} disabled={isSubmitting} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <FormField
