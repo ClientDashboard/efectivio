@@ -9,6 +9,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useAppStore } from "./lib/store";
+import React from "react";
 
 // Importación del layout
 import Sidebar from "@/components/layout/sidebar";
@@ -41,6 +42,7 @@ import ClientPortalDashboard from "@/pages/client-portal/dashboard";
 import ClientPortalFiles from "@/pages/client-portal/files";
 import AuditLogsPage from "@/pages/audit";
 import UsersPage from "@/pages/users";
+import SettingsPage from "@/pages/settings";
 
 // Portal Pages
 import PortalLoginPage from "@/pages/portal/login";
@@ -196,6 +198,11 @@ function Router() {
         {/* Gestión de Usuarios */}
         <ProtectedRoute path="/users">
           <UsersPage />
+        </ProtectedRoute>
+        
+        {/* Configuraciones */}
+        <ProtectedRoute path="/settings">
+          <SettingsPage />
         </ProtectedRoute>
         
         {/* Portal de Clientes */}

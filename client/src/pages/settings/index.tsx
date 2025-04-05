@@ -85,7 +85,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="text-sm text-red-500">
-            {error?.toString()}
+            {configsError?.toString()}
           </div>
         </CardContent>
       </Card>
