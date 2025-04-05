@@ -250,8 +250,24 @@ export default function Sidebar() {
 
       <div className="p-4 border-t border-gray-200">
         <button
-          onClick={() => signOut && signOut()}
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50"
+          onClick={() => {
+            if (signOut) {
+              try {
+                signOut();
+                
+                // Redirigir a la página principal tras cerrar sesión
+                if (window.location.hostname === 'efectivio.com') {
+                  window.location.href = 'https://efectivio.com';
+                } else {
+                  // En desarrollo, redirigimos a la raíz
+                  window.location.href = '/';
+                }
+              } catch (error) {
+                console.error('Error al cerrar sesión desde sidebar:', error);
+              }
+            }
+          }}
+          className="flex items-center w-full px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50"
         >
           <LogOut className="w-5 h-5 mr-3" />
           Cerrar Sesión

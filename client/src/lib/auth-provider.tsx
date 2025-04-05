@@ -166,6 +166,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: 'Sesión cerrada',
         description: 'Has cerrado sesión exitosamente.',
       });
+      
+      // Redirigir a la página principal tras cerrar sesión
+      if (window.location.hostname === 'efectivio.com') {
+        window.location.href = 'https://efectivio.com';
+      } else {
+        // En desarrollo, redirigimos a la raíz
+        window.location.href = '/';
+      }
     } catch (error: unknown) {
       console.error('Error al cerrar sesión:', error);
       const errorMessage = error instanceof Error 

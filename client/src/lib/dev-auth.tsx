@@ -31,8 +31,17 @@ export function DevAuthProvider({ children }: { children: React.ReactNode }) {
     isLoaded: true,
     signOut: async () => {
       console.log('Simulando cierre de sesión en modo desarrollo');
-      // Redirigir a la página de inicio de sesión
-      window.location.href = '/auth/sign-in';
+      // Limpiar cualquier sesión almacenada en localStorage
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('clerk-db');
+      
+      // Redirigir a la página principal (efectivio.com o raíz)
+      if (window.location.hostname === 'efectivio.com') {
+        window.location.href = 'https://efectivio.com';
+      } else {
+        // En desarrollo, solo redirigimos a la raíz
+        window.location.href = '/';
+      }
     },
   };
 

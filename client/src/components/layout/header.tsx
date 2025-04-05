@@ -30,7 +30,21 @@ export default function Header() {
   const [customLogo, setCustomLogo] = useState<string | null>(null);
   
   const handleLogout = () => {
-    if (signOut) signOut();
+    if (signOut) {
+      try {
+        signOut();
+        
+        // Redirigir a la página principal tras cerrar sesión
+        if (window.location.hostname === 'efectivio.com') {
+          window.location.href = 'https://efectivio.com';
+        } else {
+          // En desarrollo, redirigimos a la raíz
+          window.location.href = '/';
+        }
+      } catch (error) {
+        console.error('Error al cerrar sesión desde header:', error);
+      }
+    }
   };
   
   return (
