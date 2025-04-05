@@ -7,6 +7,7 @@ import { HfInference } from '@huggingface/inference';
 import filesRoutes from './routes/files';
 import clientPortalRouter from './routes/client-portal';
 import usersRouter from './routes/users';
+import settingsRouter from './routes/settings';
 import { 
   insertClientSchema, 
   insertQuoteSchema,
@@ -53,6 +54,12 @@ import {
 } from "./ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Registrar rutas adicionales
+  app.use('/api', filesRoutes);
+  app.use('/api', clientPortalRouter);
+  app.use('/api', usersRouter);
+  app.use('/api', settingsRouter);
+  
   // Helper function to handle validation errors
   const validateRequest = (schema: any, data: any) => {
     try {
@@ -2046,6 +2053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Registrar rutas de usuarios
   app.use('/api/users', usersRouter);
+  app.use(settingsRouter);
   
   // Registrar rutas del portal de cliente
   // Rutas para el portal de clientes

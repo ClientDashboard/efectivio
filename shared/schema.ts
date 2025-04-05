@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, numeric, timestamp, boolean, pgEnum, uuid, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -558,6 +558,52 @@ export type MeetingIntegration = typeof meetingIntegrations.$inferSelect;
 export type InsertMeetingIntegration = z.infer<typeof insertMeetingIntegrationSchema>;
 
 export type AuditLog = typeof auditLogs.$inferSelect;
+
+// Modelo para configuración del sistema y personalización (white labeling)
+export const systemConfig = pgTable("system_config", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value"),
+  jsonValue: jsonb("json_value"),
+  description: text("description"),
+  category: text("category").default("general").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const whiteLabel = pgTable("white_label", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  clientId: integer("client_id").references(() => clients.id),
+  primaryColor: text("primary_color"),
+  secondaryColor: text("secondary_color"),
+  logoUrl: text("logo_url"),
+  faviconUrl: text("favicon_url"),
+  customCss: text("custom_css"),
+  customDomain: text("custom_domain"),
+  redirectUrl: text("redirect_url"),
+  poweredByInfo: boolean("powered_by_info").default(true).notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Tipo para la configuración
+export type SystemConfig = typeof systemConfig.$inferSelect;
+export type InsertSystemConfig = typeof systemConfig.$inferInsert;
+
+// Creamos los esquemas de validación con zod
+export const insertSystemConfigSchema = createInsertSchema(systemConfig)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+// Tipo para white label
+export type WhiteLabel = typeof whiteLabel.$inferSelect;
+export type InsertWhiteLabel = typeof whiteLabel.$inferInsert;
+
+// Creamos los esquemas de validación con zod
+export const insertWhiteLabelSchema = createInsertSchema(whiteLabel)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditAction = "create" | "update" | "delete" | "view" | "export" | "import" | "restore" | "login" | "logout" | "other";
 export type AuditEntity = "client" | "invoice" | "quote" | "expense" | "account" | "journal" | "file" | "project" | "task" | "appointment" | "user" | "setting" | "other";

@@ -1,11 +1,13 @@
 import {
   users, clients, quotes, quoteItems, invoices, invoiceItems, expenses, accounts, journalEntries, journalLines, auditLogs,
+  systemConfig, whiteLabel,
   type User, type InsertUser, type Client, type InsertClient, type ClientType, type PaymentTerms,
   type Quote, type InsertQuote, type QuoteItem, type InsertQuoteItem, type QuoteStatus,
   type Invoice, type InsertInvoice, type InvoiceItem, type InsertInvoiceItem, type InvoiceStatus,
   type Expense, type InsertExpense, type Account, type InsertAccount,
   type JournalEntry, type InsertJournalEntry, type JournalLine, type InsertJournalLine,
-  type AuditLog, type InsertAuditLog, type AuditAction, type AuditEntity
+  type AuditLog, type InsertAuditLog, type AuditAction, type AuditEntity,
+  type SystemConfig, type InsertSystemConfig, type WhiteLabel, type InsertWhiteLabel
 } from "@shared/schema";
 
 import { db } from "./db";
@@ -16,6 +18,8 @@ import createMemoryStore from "memorystore";
 
 // Storage interface
 export interface IStorage {
+  sessionStore: session.Store;
+  
   // User methods
   getUsers(): Promise<User[]>;
   getUser(id: number): Promise<User | undefined>;
@@ -33,6 +37,23 @@ export interface IStorage {
   deleteClient(id: number): Promise<boolean>;
   searchClients(query: string): Promise<Client[]>;
   getClientsWithPortalAccess(): Promise<Client[]>;
+  
+  // System Config methods
+  getSystemConfigs(): Promise<SystemConfig[]>;
+  getSystemConfigsByCategory(category: string): Promise<SystemConfig[]>;
+  getSystemConfig(key: string): Promise<SystemConfig | undefined>;
+  createSystemConfig(config: InsertSystemConfig): Promise<SystemConfig>;
+  updateSystemConfig(key: string, config: Partial<InsertSystemConfig>): Promise<SystemConfig | undefined>;
+  deleteSystemConfig(key: string): Promise<boolean>;
+  
+  // White Label methods
+  getWhiteLabels(): Promise<WhiteLabel[]>;
+  getWhiteLabel(id: number): Promise<WhiteLabel | undefined>;
+  getActiveWhiteLabel(): Promise<WhiteLabel | undefined>;
+  getWhiteLabelByClient(clientId: number): Promise<WhiteLabel | undefined>;
+  createWhiteLabel(config: InsertWhiteLabel): Promise<WhiteLabel>;
+  updateWhiteLabel(id: number, config: Partial<InsertWhiteLabel>): Promise<WhiteLabel | undefined>;
+  deleteWhiteLabel(id: number): Promise<boolean>;
   
   // Quote methods
   getQuotes(): Promise<Quote[]>;
@@ -80,9 +101,6 @@ export interface IStorage {
   // Audit Log methods
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
   getAuditLogs(entityType?: AuditEntity, entityId?: string): Promise<AuditLog[]>;
-  
-  // Session store
-  sessionStore: session.Store;
 }
 
 // Implementation using database storage
@@ -1164,6 +1182,108 @@ export class MemStorage implements IStorage {
     
     // Si no se proporcionan filtros, devolver todos los registros ordenados por fecha
     return logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  // System Config methods
+  async getSystemConfigs(): Promise<SystemConfig[]> {
+    return await db.select().from(systemConfig).orderBy(systemConfig.key);
+  }
+  
+  async getSystemConfigsByCategory(category: string): Promise<SystemConfig[]> {
+    return await db
+      .select()
+      .from(systemConfig)
+      .where(eq(systemConfig.category, category))
+      .orderBy(systemConfig.key);
+  }
+  
+  async getSystemConfig(key: string): Promise<SystemConfig | undefined> {
+    const [config] = await db
+      .select()
+      .from(systemConfig)
+      .where(eq(systemConfig.key, key));
+    return config;
+  }
+  
+  async createSystemConfig(config: InsertSystemConfig): Promise<SystemConfig> {
+    const [newConfig] = await db
+      .insert(systemConfig)
+      .values(config)
+      .returning();
+    return newConfig;
+  }
+  
+  async updateSystemConfig(key: string, config: Partial<InsertSystemConfig>): Promise<SystemConfig | undefined> {
+    const [updatedConfig] = await db
+      .update(systemConfig)
+      .set({ 
+        ...config, 
+        updatedAt: new Date() 
+      })
+      .where(eq(systemConfig.key, key))
+      .returning();
+    return updatedConfig;
+  }
+  
+  async deleteSystemConfig(key: string): Promise<boolean> {
+    const result = await db.delete(systemConfig).where(eq(systemConfig.key, key));
+    return !!result;
+  }
+  
+  // White Label methods
+  async getWhiteLabels(): Promise<WhiteLabel[]> {
+    return await db.select().from(whiteLabel);
+  }
+  
+  async getWhiteLabel(id: number): Promise<WhiteLabel | undefined> {
+    const [config] = await db
+      .select()
+      .from(whiteLabel)
+      .where(eq(whiteLabel.id, id));
+    return config;
+  }
+  
+  async getActiveWhiteLabel(): Promise<WhiteLabel | undefined> {
+    const [config] = await db
+      .select()
+      .from(whiteLabel)
+      .where(eq(whiteLabel.isActive, true))
+      .limit(1);
+    return config;
+  }
+  
+  async getWhiteLabelByClient(clientId: number): Promise<WhiteLabel | undefined> {
+    const [config] = await db
+      .select()
+      .from(whiteLabel)
+      .where(eq(whiteLabel.clientId, clientId))
+      .limit(1);
+    return config;
+  }
+  
+  async createWhiteLabel(config: InsertWhiteLabel): Promise<WhiteLabel> {
+    const [newConfig] = await db
+      .insert(whiteLabel)
+      .values(config)
+      .returning();
+    return newConfig;
+  }
+  
+  async updateWhiteLabel(id: number, config: Partial<InsertWhiteLabel>): Promise<WhiteLabel | undefined> {
+    const [updatedConfig] = await db
+      .update(whiteLabel)
+      .set({ 
+        ...config, 
+        updatedAt: new Date() 
+      })
+      .where(eq(whiteLabel.id, id))
+      .returning();
+    return updatedConfig;
+  }
+  
+  async deleteWhiteLabel(id: number): Promise<boolean> {
+    const result = await db.delete(whiteLabel).where(eq(whiteLabel.id, id));
+    return !!result;
   }
 }
 

@@ -106,6 +106,7 @@ export default function Sidebar() {
   ];
 
   const configNavigation = [
+    { name: 'Configuración', path: '/settings', icon: Settings2 },
     { name: 'Empresa', path: '/settings/company', icon: Building2 },
     { name: 'Seguridad', path: '/settings/security', icon: Shield },
     { name: 'Respaldo', path: '/settings/backup', icon: Database },
