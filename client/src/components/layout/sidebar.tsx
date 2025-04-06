@@ -52,9 +52,9 @@ export default function Sidebar() {
   
   // Datos de usuario para la interfaz (en un sistema real, estos datos vendrían de la base de datos)
   const user = {
-    name: 'Administrador',
-    initials: 'A',
-    role: 'Administrador'
+    name: 'Usuario',
+    initials: 'U',
+    role: ''
   };
   
   // Si el sidebar no está abierto (aunque debería estarlo siempre), no renderizar nada
@@ -130,7 +130,7 @@ export default function Sidebar() {
           </div>
           <div className="ml-3">
             <div className="font-medium text-gray-900">{user?.name || 'Usuario'}</div>
-            <div className="text-sm text-gray-500">{user?.role || 'Administrador'}</div>
+            {user?.role && <div className="text-sm text-gray-500">{user.role}</div>}
           </div>
         </div>
       </div>
