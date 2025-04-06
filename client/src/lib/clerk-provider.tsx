@@ -12,12 +12,13 @@ const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
 // Para fines de depuración - remover en producción
 console.log('CLERK KEY disponible:', !!publishableKey);
 
-// Variable para indicar si estamos en modo desarrollo sin Clerk o si la clave es de producción y no estamos en efectivio.com
-const isDevelopmentMode = !publishableKey || 
-                         (publishableKey.startsWith('pk_live_') && 
-                          window.location.hostname !== 'efectivio.com');
+// Variable para indicar si estamos en modo desarrollo sin Clerk o en modo de prueba
+// Nota: En modo de prueba usamos clave de desarrollo pk_test_ que debe ser aceptada en cualquier dominio
+// Definir como false para obligar a usar Clerk y no el modo desarrollo
+const isDevelopmentMode = false; // FORZANDO USO DE CLERK
 
 // Interfaz para el contexto de autenticación en desarrollo
+// Extendida para compatibilidad con Clerk
 interface DevAuthContextType {
   userId: string | null;
   sessionId: string | null;
@@ -25,6 +26,27 @@ interface DevAuthContextType {
   isSignedIn: boolean;
   isLoaded: boolean;
   signOut: () => Promise<void>;
+  
+  // Agregar funciones de Clerk para compatibilidad
+  signUp?: {
+    isLoaded: boolean;
+    setActive: (params: { session: string }) => Promise<any>;
+    create: (params: any) => Promise<any>;
+    prepareEmailAddressVerification: (params: any) => Promise<any>;
+    attemptEmailAddressVerification: (params: any) => Promise<any>;
+  };
+  signIn?: {
+    isLoaded: boolean;
+    setActive: (params: { session: string }) => Promise<any>;
+    create: (params: any) => Promise<any>;
+  };
+  user?: {
+    isLoaded: boolean;
+    id: string | null;
+    emailAddresses: Array<{emailAddress: string}>;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 // Contexto de autenticación para desarrollo
@@ -115,6 +137,9 @@ export function ClerkProvider({ children }: { children: React.ReactNode }) {
           card: 'bg-background border border-border shadow-sm',
           formFieldInput: 'bg-background border border-input',
         },
+      }}
+      localization={{
+        socialButtonsBlockButton: "Continuar con {{provider}}"
       }}
     >
       <SupabaseSessionSyncProvider>

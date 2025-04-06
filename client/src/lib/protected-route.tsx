@@ -1,19 +1,21 @@
 import { ReactNode } from 'react';
 import { Redirect, Route } from 'wouter';
 import { Loader2 } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
 import { useDevAuth } from './clerk-provider';
 
 // Variable para determinar si estamos en modo desarrollo
-const isDevelopmentMode = typeof window !== 'undefined' && 
-                        (typeof (window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY === 'undefined' || 
-                        !(window as any).ENV?.VITE_CLERK_PUBLISHABLE_KEY ||
-                        window.location.hostname !== 'efectivio.com');
+const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
+                      import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 
+                      '';
 
-// En desarrollo, siempre usamos el DevAuth para evitar problemas con Clerk
+// Forzar a que siempre use Clerk, no importa el entorno
+const isDevelopmentMode = false; // FORZANDO USO DE CLERK
+
+// Hook combinado para autenticación - elige automáticamente entre Clerk y DevAuth
 export function useAuth() {
-  // Usar el proveedor de desarrollo que incluye todas las propiedades necesarias
-  return useDevAuth();
+  // Siempre usamos Clerk para forzar que aparezca el formulario
+  return useClerkAuth();
 }
 
 interface ProtectedRouteProps {

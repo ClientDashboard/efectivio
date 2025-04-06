@@ -4,13 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/lib/protected-route';
+import { useSignIn } from '@clerk/clerk-react';
+import { FcGoogle } from 'react-icons/fc';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 // Esquema de validación para el formulario de inicio de sesión
 const loginSchema = z.object({
@@ -19,7 +21,7 @@ const loginSchema = z.object({
 });
 
 export default function SignInPage() {
-  const { isLoaded, signIn } = useAuth();
+  const { isLoaded, signIn } = useSignIn();
   const [isPending, setIsPending] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -72,6 +74,25 @@ export default function SignInPage() {
     }
   };
 
+  // Manejar inicio de sesión con Google
+  const handleGoogleSignIn = async () => {
+    if (!isLoaded) return;
+    
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/dashboard",
+        redirectUrlComplete: "/dashboard"
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Error al iniciar sesión con Google',
+        description: err.message || 'No se pudo completar el inicio de sesión',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md mx-auto">
@@ -82,6 +103,28 @@ export default function SignInPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Botón de Google */}
+          <Button 
+            variant="outline" 
+            className="w-full mb-5 flex items-center justify-center" 
+            onClick={handleGoogleSignIn}
+            disabled={isPending || !isLoaded}
+          >
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continuar con Google
+          </Button>
+          
+          <div className="relative mb-5">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                O con tu correo
+              </span>
+            </div>
+          </div>
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField

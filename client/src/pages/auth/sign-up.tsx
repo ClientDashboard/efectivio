@@ -4,13 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/lib/protected-route';
+import { useSignUp } from '@clerk/clerk-react';
+import { FcGoogle } from 'react-icons/fc';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 // Esquema de validación para el formulario de registro
 const registerSchema = z.object({
@@ -24,7 +26,7 @@ const registerSchema = z.object({
 });
 
 export default function SignUpPage() {
-  const { isLoaded, signUp } = useAuth();
+  const { isLoaded, signUp } = useSignUp();
   
   const [isPending, setIsPending] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState(false);
@@ -100,6 +102,25 @@ export default function SignUpPage() {
     }
   };
 
+  // Manejar registro con Google
+  const handleGoogleSignUp = async () => {
+    if (!isLoaded || !signUp) return;
+    
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/dashboard",
+        redirectUrlComplete: "/dashboard"
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Error al registrarse con Google',
+        description: err.message || 'No se pudo completar el registro',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md mx-auto">
@@ -111,90 +132,114 @@ export default function SignUpPage() {
         </CardHeader>
         <CardContent>
           {!verifyEmail ? (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="correo@ejemplo.com" 
-                          {...field} 
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre Completo</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Juan Pérez" 
-                          {...field} 
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="******" 
-                          {...field} 
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirmar Contraseña</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="******" 
-                          {...field} 
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isPending}>
-                  {isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creando cuenta...
-                    </>
-                  ) : (
-                    'Registrarse'
-                  )}
-                </Button>
-              </form>
-            </Form>
+            <>
+              {/* Botón de Google */}
+              <Button 
+                variant="outline" 
+                className="w-full mb-5 flex items-center justify-center" 
+                onClick={handleGoogleSignUp}
+                disabled={isPending || !isLoaded}
+              >
+                <FcGoogle className="mr-2 h-5 w-5" />
+                Continuar con Google
+              </Button>
+              
+              <div className="relative mb-5">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    O con tu correo
+                  </span>
+                </div>
+              </div>
+            
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="correo@ejemplo.com" 
+                            {...field} 
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre Completo</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Juan Pérez" 
+                            {...field} 
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contraseña</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="******" 
+                            {...field} 
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirmar Contraseña</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="******" 
+                            {...field} 
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creando cuenta...
+                      </>
+                    ) : (
+                      'Registrarse'
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </>
           ) : (
             <div className="flex flex-col items-center space-y-4">
               <p className="text-center text-muted-foreground mb-4">
@@ -220,6 +265,10 @@ export default function SignUpPage() {
                     setIsPending(true);
                     
                     try {
+                      if (!signUp) {
+                        throw new Error("La función de verificación no está disponible");
+                      }
+                      
                       const completeSignUp = await signUp.attemptEmailAddressVerification({
                         code,
                       });
