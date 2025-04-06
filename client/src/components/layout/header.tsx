@@ -51,7 +51,7 @@ export default function Header() {
     <header className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
       <button
         type="button"
-        className="px-4 border-r border-gray-200 text-gray-500 flex items-center justify-center"
+        className="w-16 border-r border-gray-200 text-gray-500 flex items-center justify-center"
         onClick={toggleSidebar}
         aria-label={isSidebarOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
       >
@@ -60,23 +60,6 @@ export default function Header() {
       
       <div className="flex-1 px-4 flex justify-between md:px-6">
         <div className="flex-1 flex items-center">
-          <div className="flex items-center mr-4">
-            {customLogo ? (
-              <img 
-                src={customLogo} 
-                alt="Logo personalizado" 
-                className="h-8"
-                onClick={() => setCustomLogo(null)}
-              />
-            ) : (
-              <img 
-                src="/images/primary-logo.png" 
-                alt="Efectivio" 
-                className="h-9"
-              />
-            )}
-          </div>
-
           {/* Barra de búsqueda en pantallas medianas y grandes */}
           <div className="hidden md:flex items-center relative flex-1 max-w-md">
             <div className="relative w-full">
