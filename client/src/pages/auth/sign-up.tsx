@@ -63,43 +63,51 @@ export default function SignUpPage() {
       
       if (mode === 'development') {
         // En modo desarrollo, usamos la autenticación simulada
-        result = await auth.signUp.create({
-          emailAddress: values.email,
-          password: values.password,
-          firstName,
-          lastName: lastName || undefined,
-        });
-        
-        // En desarrollo, no enviamos código de verificación real
-        setVerifyEmail(false);
-        
-        toast({
-          title: 'Registro exitoso',
-          description: 'Cuenta creada correctamente en modo desarrollo.',
-        });
-        
-        // Redirigir directamente al dashboard
-        window.location.href = '/dashboard';
+        if (auth && auth.signUp) {
+          result = await auth.signUp.create({
+            emailAddress: values.email,
+            password: values.password,
+            firstName,
+            lastName: lastName || undefined,
+          });
+          
+          // En desarrollo, no enviamos código de verificación real
+          setVerifyEmail(false);
+          
+          toast({
+            title: 'Registro exitoso',
+            description: 'Cuenta creada correctamente en modo desarrollo.',
+          });
+          
+          // Redirigir directamente al dashboard
+          window.location.href = '/dashboard';
+        } else {
+          throw new Error("La función de registro no está disponible");
+        }
       } else {
         // En producción, usamos Clerk
-        result = await auth.signUp.create({
-          emailAddress: values.email,
-          password: values.password,
-          firstName,
-          lastName: lastName || undefined,
-        });
+        if (auth && auth.signUp) {
+          result = await auth.signUp.create({
+            emailAddress: values.email,
+            password: values.password,
+            firstName,
+            lastName: lastName || undefined,
+          });
 
-        // Iniciar proceso de verificación de email
-        await auth.signUp.prepareEmailAddressVerification({
-          strategy: "email_code",
-        });
+          // Iniciar proceso de verificación de email
+          await auth.signUp.prepareEmailAddressVerification({
+            strategy: "email_code",
+          });
 
-        setVerifyEmail(true);
-        
-        toast({
-          title: 'Registro exitoso',
-          description: 'Te hemos enviado un código de verificación a tu correo electrónico.',
-        });
+          setVerifyEmail(true);
+          
+          toast({
+            title: 'Registro exitoso',
+            description: 'Te hemos enviado un código de verificación a tu correo electrónico.',
+          });
+        } else {
+          throw new Error("La función de registro no está disponible");
+        }
       }
     } catch (err: any) {
       console.error("Error en el registro:", err);
@@ -120,29 +128,38 @@ export default function SignUpPage() {
     try {
       if (mode === 'development') {
         // En desarrollo, simulamos el registro con Google
-        const result = await auth.signUp.create({
-          emailAddress: 'google-user@example.com',
-          password: 'password123',
-          firstName: 'Usuario',
-          lastName: 'Google',
-        });
-        
-        toast({
-          title: 'Registro exitoso',
-          description: 'Cuenta creada correctamente con Google (simulado).',
-        });
-        
-        // Redirigir directamente al dashboard
-        window.location.href = '/dashboard';
+        if (auth && auth.signUp) {
+          const result = await auth.signUp.create({
+            emailAddress: 'google-user@example.com',
+            password: 'password123',
+            firstName: 'Usuario',
+            lastName: 'Google',
+          });
+          
+          toast({
+            title: 'Registro exitoso',
+            description: 'Cuenta creada correctamente con Google (simulado).',
+          });
+          
+          // Redirigir directamente al dashboard
+          window.location.href = '/dashboard';
+        } else {
+          throw new Error("La función de registro no está disponible");
+        }
       } else {
         // En producción, usamos la autenticación real de Google con Clerk
-        await auth.signUp.authenticateWithRedirect({
-          strategy: "oauth_google",
-          redirectUrl: "/dashboard",
-          redirectUrlComplete: "/dashboard"
-        });
+        if (auth && auth.signUp && auth.signUp.authenticateWithRedirect) {
+          await auth.signUp.authenticateWithRedirect({
+            strategy: "oauth_google",
+            redirectUrl: "/dashboard",
+            redirectUrlComplete: "/dashboard"
+          });
+        } else {
+          throw new Error("La función de autenticación con Google no está disponible");
+        }
       }
     } catch (err: any) {
+      console.error("Error al registrarse con Google:", err);
       toast({
         title: 'Error al registrarse con Google',
         description: err.message || 'No se pudo completar el registro',
@@ -165,7 +182,7 @@ export default function SignUpPage() {
     setIsPending(true);
     
     try {
-      if (!auth.signUp) {
+      if (!auth || !auth.signUp) {
         throw new Error("La función de verificación no está disponible");
       }
       
@@ -188,9 +205,10 @@ export default function SignUpPage() {
         });
       }
     } catch (err: any) {
+      console.error("Error de verificación:", err);
       toast({
         title: "Error de verificación",
-        description: err.errors?.[0]?.message || "Código inválido o expirado",
+        description: err.errors?.[0]?.message || err.message || "Código inválido o expirado",
         variant: "destructive"
       });
     } finally {

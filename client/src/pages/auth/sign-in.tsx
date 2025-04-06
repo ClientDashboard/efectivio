@@ -50,20 +50,28 @@ export default function SignInPage() {
       let result;
       
       if (mode === 'development') {
-        // Usar DevAuth en modo desarrollo
-        result = await auth.signIn.create({
-          identifier: values.email,
-          password: values.password,
-        });
+        // En modo desarrollo, usamos la autenticación simulada
+        if (auth && auth.signIn) {
+          result = await auth.signIn.create({
+            identifier: values.email,
+            password: values.password,
+          });
+        } else {
+          throw new Error("La función de inicio de sesión no está disponible");
+        }
       } else {
-        // Usar Clerk en modo producción
-        result = await auth.signIn.create({
-          identifier: values.email,
-          password: values.password,
-        });
+        // En modo producción, usamos Clerk
+        if (auth && auth.signIn) {
+          result = await auth.signIn.create({
+            identifier: values.email,
+            password: values.password,
+          });
+        } else {
+          throw new Error("La función de inicio de sesión no está disponible");
+        }
       }
 
-      if (result.status === "complete") {
+      if (result && result.status === "complete") {
         toast({
           title: 'Inicio de sesión exitoso',
           description: 'Bienvenido a Efectivio',
@@ -78,9 +86,10 @@ export default function SignInPage() {
         });
       }
     } catch (err: any) {
+      console.error("Error al iniciar sesión:", err);
       toast({
         title: 'Error al iniciar sesión',
-        description: err.errors?.[0]?.message || 'Credenciales incorrectas',
+        description: err.errors?.[0]?.message || err.message || 'Credenciales incorrectas',
         variant: 'destructive'
       });
     } finally {
@@ -95,23 +104,36 @@ export default function SignInPage() {
     try {
       if (mode === 'development') {
         // En desarrollo, simulamos el inicio de sesión con Google
-        const result = await auth.signIn.create({
-          identifier: 'google-user@example.com',
-          password: 'password123',
-        });
-        
-        if (result.status === "complete") {
-          window.location.href = '/dashboard';
+        if (auth && auth.signIn) {
+          const result = await auth.signIn.create({
+            identifier: 'google-user@example.com',
+            password: 'password123',
+          });
+          
+          if (result.status === "complete") {
+            toast({
+              title: 'Inicio de sesión exitoso',
+              description: 'Bienvenido a Efectivio (modo Google simulado)',
+            });
+            window.location.href = '/dashboard';
+          }
+        } else {
+          throw new Error("La función de inicio de sesión no está disponible");
         }
       } else {
         // En producción, usamos la autenticación real de Google con Clerk
-        await auth.signIn.authenticateWithRedirect({
-          strategy: "oauth_google",
-          redirectUrl: "/dashboard",
-          redirectUrlComplete: "/dashboard"
-        });
+        if (auth && auth.signIn && auth.signIn.authenticateWithRedirect) {
+          await auth.signIn.authenticateWithRedirect({
+            strategy: "oauth_google",
+            redirectUrl: "/dashboard",
+            redirectUrlComplete: "/dashboard"
+          });
+        } else {
+          throw new Error("La función de autenticación con Google no está disponible");
+        }
       }
     } catch (err: any) {
+      console.error("Error al iniciar sesión con Google:", err);
       toast({
         title: 'Error al iniciar sesión con Google',
         description: err.message || 'No se pudo completar el inicio de sesión',
@@ -128,9 +150,9 @@ export default function SignInPage() {
           <CardDescription className="text-center">
             Ingresa tus credenciales para acceder a tu cuenta
             {mode === 'development' && (
-              <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded text-xs">
+              <span className="block mt-2 p-2 bg-yellow-100 text-yellow-800 rounded text-xs">
                 Modo desarrollo - La autenticación es simulada
-              </div>
+              </span>
             )}
           </CardDescription>
         </CardHeader>
