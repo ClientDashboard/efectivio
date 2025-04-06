@@ -1,88 +1,44 @@
-import React, { useEffect, useState, createContext, useContext } from 'react';
-import { ClerkProvider as BaseClerkProvider, useAuth } from '@clerk/clerk-react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { ClerkProvider as BaseClerkProvider, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { supabase } from './supabase';
-import { DevAuthProvider as EnhancedDevAuthProvider, useDevAuth as useEnhancedDevAuth } from './dev-auth';
+import { DevAuthProvider, useDevAuth } from './dev-auth';
 
 // Usar una clave de desarrollo si no hay variable de entorno
-// Considerar tanto VITE_ como NEXT_PUBLIC_ prefijos
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-                       import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 
-                       '';
+                        import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 
+                        '';
 
 // Para fines de depuración - remover en producción
 console.log('CLERK KEY disponible:', !!publishableKey);
 
-// Variable para indicar si estamos en modo desarrollo sin Clerk o en modo de prueba
-// Nota: En modo de prueba usamos clave de desarrollo pk_test_ que debe ser aceptada en cualquier dominio
-// Definir como false para obligar a usar Clerk y no el modo desarrollo
-const isDevelopmentMode = false; // FORZANDO USO DE CLERK
+// Variable para indicar si estamos en modo desarrollo o en producción
+const isDevelopmentMode = true; // USAR MODO DESARROLLO PARA PRUEBAS LOCALES
 
-// Interfaz para el contexto de autenticación en desarrollo
-// Extendida para compatibilidad con Clerk
-interface DevAuthContextType {
-  userId: string | null;
-  sessionId: string | null;
-  getToken: (options?: { template?: string }) => Promise<string | null>;
-  isSignedIn: boolean;
-  isLoaded: boolean;
-  signOut: () => Promise<void>;
-  
-  // Agregar funciones de Clerk para compatibilidad
-  signUp?: {
-    isLoaded: boolean;
-    setActive: (params: { session: string }) => Promise<any>;
-    create: (params: any) => Promise<any>;
-    prepareEmailAddressVerification: (params: any) => Promise<any>;
-    attemptEmailAddressVerification: (params: any) => Promise<any>;
-  };
-  signIn?: {
-    isLoaded: boolean;
-    setActive: (params: { session: string }) => Promise<any>;
-    create: (params: any) => Promise<any>;
-  };
-  user?: {
-    isLoaded: boolean;
-    id: string | null;
-    emailAddresses: Array<{emailAddress: string}>;
-    firstName: string;
-    lastName: string;
-  };
+// Contexto para exponer información sobre el modo de autenticación actual
+interface AuthModeContextType {
+  mode: 'development' | 'production';
 }
 
-// Contexto de autenticación para desarrollo
-const DevAuthContext = createContext<DevAuthContextType>({
-  userId: 'dev-user-123',
-  sessionId: 'dev-session-123',
-  getToken: async () => 'mock-token-for-development',
-  isSignedIn: true,
-  isLoaded: true,
-  signOut: async () => {},
+const AuthModeContext = createContext<AuthModeContextType>({
+  mode: 'development',
 });
 
-// Hook para usar en modo desarrollo
-export function useDevAuth() {
-  return useContext(DevAuthContext);
-}
+export const useAuthMode = () => useContext(AuthModeContext);
 
-// Proveedor para modo desarrollo (este es un wrapper alrededor del mejorado)
-function DevAuthProvider({ children }: { children: React.ReactNode }) {
-  return <EnhancedDevAuthProvider>{children}</EnhancedDevAuthProvider>;
-}
-
-// Componente de sincronización de sesión con Supabase
-function SupabaseSessionSyncProvider({ children }: { children: React.ReactNode }) {
-  const { getToken, userId, sessionId } = useAuth();
-
+// Componente de sincronización para modo Clerk
+function ClerkSupabaseSync({ children }: { children: React.ReactNode }) {
+  const auth = useClerkAuth();
+  
   useEffect(() => {
-    if (!userId) {
+    if (!auth.userId) {
       supabase.auth.signOut();
       return;
     }
 
     const syncSupabaseSession = async () => {
       try {
-        const token = await getToken({ template: 'supabase' });
-
+        const token = await auth.getToken({ template: 'supabase' });
+        
         if (!token) {
           console.warn('No se pudo obtener el token JWT para Supabase');
           return;
@@ -97,16 +53,44 @@ function SupabaseSessionSyncProvider({ children }: { children: React.ReactNode }
           console.warn('Error al sincronizar la sesión con Supabase:', error);
         }
       } catch (error) {
-        console.warn('Error al sincronizar la sesión:', error);
+        console.warn('Error al sincronizar la sesión con Supabase:', error);
       }
     };
 
     syncSupabaseSession();
-  }, [userId, sessionId, getToken]);
+  }, [auth.userId, auth.sessionId, auth.getToken]);
 
   return <>{children}</>;
 }
 
+// Componente de sincronización para modo desarrollo
+function DevSupabaseSync({ children }: { children: React.ReactNode }) {
+  const devAuth = useDevAuth();
+  
+  useEffect(() => {
+    if (!devAuth.userId) {
+      supabase.auth.signOut();
+      return;
+    }
+
+    const syncSessionForDev = async () => {
+      try {
+        // En desarrollo usamos un token simulado
+        console.log('Modo desarrollo: Simulando sincronización con Supabase');
+        
+        // No hacemos nada realmente con Supabase en modo desarrollo
+      } catch (error) {
+        console.warn('Error simulando sesión de Supabase:', error);
+      }
+    };
+
+    syncSessionForDev();
+  }, [devAuth.userId, devAuth.sessionId]);
+
+  return <>{children}</>;
+}
+
+// Proveedor principal de autenticación
 export function ClerkProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
@@ -116,35 +100,45 @@ export function ClerkProvider({ children }: { children: React.ReactNode }) {
 
   if (!mounted) return null;
 
-  // Si estamos en modo desarrollo y no hay clave de Clerk, usar el proveedor de desarrollo
+  // En modo desarrollo, usamos el proveedor de desarrollo
   if (isDevelopmentMode) {
     console.log('Usando proveedor de autenticación para desarrollo');
-    return <DevAuthProvider>{children}</DevAuthProvider>;
+    return (
+      <AuthModeContext.Provider value={{ mode: 'development' }}>
+        <DevAuthProvider>
+          <DevSupabaseSync>
+            {children}
+          </DevSupabaseSync>
+        </DevAuthProvider>
+      </AuthModeContext.Provider>
+    );
   }
 
-  // Si tenemos una clave de Clerk, usar el proveedor normal
+  // En modo producción, usamos Clerk
   console.log('Usando proveedor de autenticación Clerk');
   return (
-    <BaseClerkProvider
-      publishableKey={publishableKey}
-      appearance={{
-        variables: {
-          colorPrimary: '#39FFBD',
-          colorBackground: '#062644',
-        },
-        elements: {
-          formButtonPrimary: 'bg-primary text-primary-foreground hover:bg-primary/90',
-          card: 'bg-background border border-border shadow-sm',
-          formFieldInput: 'bg-background border border-input',
-        },
-      }}
-      localization={{
-        socialButtonsBlockButton: "Continuar con {{provider}}"
-      }}
-    >
-      <SupabaseSessionSyncProvider>
-        {children}
-      </SupabaseSessionSyncProvider>
-    </BaseClerkProvider>
+    <AuthModeContext.Provider value={{ mode: 'production' }}>
+      <BaseClerkProvider
+        publishableKey={publishableKey}
+        appearance={{
+          variables: {
+            colorPrimary: '#39FFBD',
+            colorBackground: '#062644',
+          },
+          elements: {
+            formButtonPrimary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+            card: 'bg-background border border-border shadow-sm',
+            formFieldInput: 'bg-background border border-input',
+          },
+        }}
+        localization={{
+          socialButtonsBlockButton: "Continuar con {{provider}}"
+        }}
+      >
+        <ClerkSupabaseSync>
+          {children}
+        </ClerkSupabaseSync>
+      </BaseClerkProvider>
+    </AuthModeContext.Provider>
   );
 }

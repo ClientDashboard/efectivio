@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
-import { useSignIn } from '@clerk/clerk-react';
+import { useSignIn as useClerkSignIn } from '@clerk/clerk-react';
 import { FcGoogle } from 'react-icons/fc';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/protected-route';
+import { useAuthMode } from '@/lib/clerk-provider';
 
 // Esquema de validación para el formulario de inicio de sesión
 const loginSchema = z.object({
@@ -21,7 +23,8 @@ const loginSchema = z.object({
 });
 
 export default function SignInPage() {
-  const { isLoaded, signIn } = useSignIn();
+  const { mode } = useAuthMode();
+  const auth = useAuth();
   const [isPending, setIsPending] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -37,17 +40,28 @@ export default function SignInPage() {
 
   // Manejar envío del formulario
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-    if (!isLoaded) {
+    if (!auth.isLoaded) {
       return;
     }
     
     setIsPending(true);
 
     try {
-      const result = await signIn.create({
-        identifier: values.email,
-        password: values.password,
-      });
+      let result;
+      
+      if (mode === 'development') {
+        // Usar DevAuth en modo desarrollo
+        result = await auth.signIn.create({
+          identifier: values.email,
+          password: values.password,
+        });
+      } else {
+        // Usar Clerk en modo producción
+        result = await auth.signIn.create({
+          identifier: values.email,
+          password: values.password,
+        });
+      }
 
       if (result.status === "complete") {
         toast({
@@ -76,14 +90,27 @@ export default function SignInPage() {
 
   // Manejar inicio de sesión con Google
   const handleGoogleSignIn = async () => {
-    if (!isLoaded) return;
+    if (!auth.isLoaded) return;
     
     try {
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/dashboard",
-        redirectUrlComplete: "/dashboard"
-      });
+      if (mode === 'development') {
+        // En desarrollo, simulamos el inicio de sesión con Google
+        const result = await auth.signIn.create({
+          identifier: 'google-user@example.com',
+          password: 'password123',
+        });
+        
+        if (result.status === "complete") {
+          window.location.href = '/dashboard';
+        }
+      } else {
+        // En producción, usamos la autenticación real de Google con Clerk
+        await auth.signIn.authenticateWithRedirect({
+          strategy: "oauth_google",
+          redirectUrl: "/dashboard",
+          redirectUrlComplete: "/dashboard"
+        });
+      }
     } catch (err: any) {
       toast({
         title: 'Error al iniciar sesión con Google',
@@ -100,6 +127,11 @@ export default function SignInPage() {
           <CardTitle className="text-2xl font-bold text-center">Iniciar Sesión</CardTitle>
           <CardDescription className="text-center">
             Ingresa tus credenciales para acceder a tu cuenta
+            {mode === 'development' && (
+              <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded text-xs">
+                Modo desarrollo - La autenticación es simulada
+              </div>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -108,7 +140,7 @@ export default function SignInPage() {
             variant="outline" 
             className="w-full mb-5 flex items-center justify-center" 
             onClick={handleGoogleSignIn}
-            disabled={isPending || !isLoaded}
+            disabled={isPending || !auth.isLoaded}
           >
             <FcGoogle className="mr-2 h-5 w-5" />
             Continuar con Google

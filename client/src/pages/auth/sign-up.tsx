@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
-import { useSignUp } from '@clerk/clerk-react';
+import { useSignUp as useClerkSignUp } from '@clerk/clerk-react';
 import { FcGoogle } from 'react-icons/fc';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/protected-route';
+import { useAuthMode } from '@/lib/clerk-provider';
 
 // Esquema de validación para el formulario de registro
 const registerSchema = z.object({
@@ -26,7 +28,8 @@ const registerSchema = z.object({
 });
 
 export default function SignUpPage() {
-  const { isLoaded, signUp } = useSignUp();
+  const { mode } = useAuthMode();
+  const auth = useAuth();
   
   const [isPending, setIsPending] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState(false);
@@ -46,50 +49,58 @@ export default function SignUpPage() {
 
   // Manejar envío del formulario
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
-    console.log("Formulario enviado", values);
-    
-    if (!isLoaded) {
-      console.log("Auth no está cargado");
+    if (!auth.isLoaded) {
       return;
     }
     
     setIsPending(true);
-    console.log("signUp disponible:", !!signUp);
 
     try {
       const [firstName, ...lastNameParts] = values.fullName.split(' ');
       const lastName = lastNameParts.join(' ');
       
-      console.log("Intentando crear usuario con:", {
-        email: values.email,
-        firstName,
-        lastName: lastName || undefined
-      });
+      let result;
       
-      if (!signUp || typeof signUp.create !== 'function') {
-        throw new Error("La función de registro no está disponible");
+      if (mode === 'development') {
+        // En modo desarrollo, usamos la autenticación simulada
+        result = await auth.signUp.create({
+          emailAddress: values.email,
+          password: values.password,
+          firstName,
+          lastName: lastName || undefined,
+        });
+        
+        // En desarrollo, no enviamos código de verificación real
+        setVerifyEmail(false);
+        
+        toast({
+          title: 'Registro exitoso',
+          description: 'Cuenta creada correctamente en modo desarrollo.',
+        });
+        
+        // Redirigir directamente al dashboard
+        window.location.href = '/dashboard';
+      } else {
+        // En producción, usamos Clerk
+        result = await auth.signUp.create({
+          emailAddress: values.email,
+          password: values.password,
+          firstName,
+          lastName: lastName || undefined,
+        });
+
+        // Iniciar proceso de verificación de email
+        await auth.signUp.prepareEmailAddressVerification({
+          strategy: "email_code",
+        });
+
+        setVerifyEmail(true);
+        
+        toast({
+          title: 'Registro exitoso',
+          description: 'Te hemos enviado un código de verificación a tu correo electrónico.',
+        });
       }
-      
-      const result = await signUp.create({
-        emailAddress: values.email,
-        password: values.password,
-        firstName,
-        lastName: lastName || undefined,
-      });
-      
-      console.log("Resultado del registro:", result);
-
-      // Iniciar proceso de verificación de email
-      await signUp.prepareEmailAddressVerification({
-        strategy: "email_code",
-      });
-
-      setVerifyEmail(true);
-      
-      toast({
-        title: 'Registro exitoso',
-        description: 'Te hemos enviado un código de verificación a tu correo electrónico.',
-      });
     } catch (err: any) {
       console.error("Error en el registro:", err);
       toast({
@@ -104,20 +115,86 @@ export default function SignUpPage() {
 
   // Manejar registro con Google
   const handleGoogleSignUp = async () => {
-    if (!isLoaded || !signUp) return;
+    if (!auth.isLoaded) return;
     
     try {
-      await signUp.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/dashboard",
-        redirectUrlComplete: "/dashboard"
-      });
+      if (mode === 'development') {
+        // En desarrollo, simulamos el registro con Google
+        const result = await auth.signUp.create({
+          emailAddress: 'google-user@example.com',
+          password: 'password123',
+          firstName: 'Usuario',
+          lastName: 'Google',
+        });
+        
+        toast({
+          title: 'Registro exitoso',
+          description: 'Cuenta creada correctamente con Google (simulado).',
+        });
+        
+        // Redirigir directamente al dashboard
+        window.location.href = '/dashboard';
+      } else {
+        // En producción, usamos la autenticación real de Google con Clerk
+        await auth.signUp.authenticateWithRedirect({
+          strategy: "oauth_google",
+          redirectUrl: "/dashboard",
+          redirectUrlComplete: "/dashboard"
+        });
+      }
     } catch (err: any) {
       toast({
         title: 'Error al registrarse con Google',
         description: err.message || 'No se pudo completar el registro',
         variant: 'destructive'
       });
+    }
+  };
+
+  // Función para manejar la verificación del código
+  const handleVerifyCode = async (code: string) => {
+    if (!code || code.length < 6) {
+      toast({
+        title: "Código inválido",
+        description: "Por favor ingresa el código completo que recibiste",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsPending(true);
+    
+    try {
+      if (!auth.signUp) {
+        throw new Error("La función de verificación no está disponible");
+      }
+      
+      const completeSignUp = await auth.signUp.attemptEmailAddressVerification({
+        code,
+      });
+      
+      if (completeSignUp.status === "complete") {
+        toast({
+          title: "Verificación exitosa",
+          description: "Tu cuenta ha sido verificada correctamente"
+        });
+        
+        window.location.href = "/auth/sign-in";
+      } else {
+        toast({
+          title: "Error",
+          description: "No se pudo verificar tu cuenta. Por favor intenta nuevamente.",
+          variant: "destructive"
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error de verificación",
+        description: err.errors?.[0]?.message || "Código inválido o expirado",
+        variant: "destructive"
+      });
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -128,6 +205,11 @@ export default function SignUpPage() {
           <CardTitle className="text-2xl font-bold text-center">Crear una cuenta</CardTitle>
           <CardDescription className="text-center">
             Ingresa tus datos para registrarte en Efectivio
+            {mode === 'development' && (
+              <span className="block mt-2 p-2 bg-yellow-100 text-yellow-800 rounded text-xs">
+                Modo desarrollo - La autenticación es simulada
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -138,7 +220,7 @@ export default function SignUpPage() {
                 variant="outline" 
                 className="w-full mb-5 flex items-center justify-center" 
                 onClick={handleGoogleSignUp}
-                disabled={isPending || !isLoaded}
+                disabled={isPending || !auth.isLoaded}
               >
                 <FcGoogle className="mr-2 h-5 w-5" />
                 Continuar con Google
@@ -242,60 +324,17 @@ export default function SignUpPage() {
             </>
           ) : (
             <div className="flex flex-col items-center space-y-4">
-              <p className="text-center text-muted-foreground mb-4">
+              <div className="text-center text-muted-foreground mb-4">
                 Hemos enviado un código de verificación a tu correo electrónico.
                 Ingresa el código a continuación para completar tu registro:
-              </p>
+              </div>
               
               <div className="w-full">
                 <form 
                   onSubmit={async (e) => {
                     e.preventDefault();
                     const code = (e.target as any).code.value;
-                    
-                    if (!code || code.length < 6) {
-                      toast({
-                        title: "Código inválido",
-                        description: "Por favor ingresa el código completo que recibiste",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    
-                    setIsPending(true);
-                    
-                    try {
-                      if (!signUp) {
-                        throw new Error("La función de verificación no está disponible");
-                      }
-                      
-                      const completeSignUp = await signUp.attemptEmailAddressVerification({
-                        code,
-                      });
-                      
-                      if (completeSignUp.status === "complete") {
-                        toast({
-                          title: "Verificación exitosa",
-                          description: "Tu cuenta ha sido verificada correctamente"
-                        });
-                        
-                        window.location.href = "/auth/sign-in";
-                      } else {
-                        toast({
-                          title: "Error",
-                          description: "No se pudo verificar tu cuenta. Por favor intenta nuevamente.",
-                          variant: "destructive"
-                        });
-                      }
-                    } catch (err: any) {
-                      toast({
-                        title: "Error de verificación",
-                        description: err.errors?.[0]?.message || "Código inválido o expirado",
-                        variant: "destructive"
-                      });
-                    } finally {
-                      setIsPending(false);
-                    }
+                    await handleVerifyCode(code);
                   }}
                   className="space-y-4 w-full"
                 >
