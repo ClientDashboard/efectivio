@@ -50,12 +50,7 @@ export default function Sidebar() {
     inventory: false
   });
   
-  // Datos de usuario para la interfaz (en un sistema real, estos datos vendrían de la base de datos)
-  const user = {
-    name: 'Usuario',
-    initials: 'U',
-    role: ''
-  };
+  // Ya no necesitamos datos de usuario
   
   // Si el sidebar no está abierto (aunque debería estarlo siempre), no renderizar nada
   if (!isSidebarOpen) {
@@ -122,19 +117,6 @@ export default function Sidebar() {
       <div className="p-4 flex items-center justify-center border-b border-gray-200">
         <img src={primaryLogo} alt="Efectivio" className="h-8" />
       </div>
-
-      <div className="border-b border-gray-200 py-4 px-4">
-        <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-medium">
-            {user?.initials || 'U'}
-          </div>
-          <div className="ml-3">
-            <div className="font-medium text-gray-900">{user?.name || 'Usuario'}</div>
-            {user?.role && <div className="text-sm text-gray-500">{user.role}</div>}
-          </div>
-        </div>
-      </div>
-
       <nav className="flex-1 overflow-y-auto py-4">
         <div className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase">Principal</div>
         {mainNavigation.map((item) => (
