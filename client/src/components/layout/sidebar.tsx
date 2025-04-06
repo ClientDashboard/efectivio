@@ -49,6 +49,7 @@ import {
   RefreshCw,
   TrendingUp,
   Lock,
+  Mic,
   PieChart
 } from 'lucide-react';
 
@@ -63,6 +64,7 @@ export default function Sidebar() {
     compras: false,
     contabilidad: false,
     inventory: false,
+    ai: false,
     configuracion: false
   });
   
@@ -133,10 +135,10 @@ export default function Sidebar() {
     { name: 'Movimientos', path: '/inventory/movements', icon: ShoppingCart },
   ];
 
-  // IA y Análisis (sin acordeón)
+  // IA y Análisis (con acordeón)
   const aiNavigation = [
-    { name: 'Análisis de Texto', path: '/ai/text-analysis', icon: Brain },
-    { name: 'Transcripciones', path: '/ai/transcriptions', icon: FileText },
+    { name: 'Análisis de Texto', path: '/ai/text-analysis', icon: FileText },
+    { name: 'Transcripciones', path: '/ai/transcriptions', icon: Mic },
     { name: 'Asistente Virtual', path: '/ai/assistant', icon: MessageSquare },
   ];
 
@@ -306,23 +308,38 @@ export default function Sidebar() {
           </div>
         )}
 
-        {/* IA y Análisis - Enlaces directos */}
-        <div className="mt-4">
-        {aiNavigation.map((item) => (
-          <Link
-            key={item.path}
-            href={item.path}
-            className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
-              location === item.path
-                ? 'bg-primary/10 text-primary'
-                : 'text-gray-700 hover:bg-gray-50'
-            } mt-1`}
-          >
-            <item.icon className="w-5 h-5 mr-3" />
-            {item.name}
-          </Link>
-        ))}
-        </div>
+        {/* IA y Análisis - Menú desplegable */}
+        <button
+          onClick={() => toggleSubMenu('ai')}
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+        >
+          <div className="flex items-center">
+            <Brain className="w-5 h-5 mr-3" />
+            <span>IA y Análisis</span>
+          </div>
+          <ChevronDown 
+            className={`w-4 h-4 transition-transform ${activeMenus.ai ? 'rotate-180' : ''}`} 
+          />
+        </button>
+        
+        {activeMenus.ai && (
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+            {aiNavigation.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center px-3 py-2 rounded-lg text-sm ${
+                  location === item.path
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <item.icon className="w-4 h-4 mr-3" />
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Portal del Cliente - Enlace directo */}
         <Link
