@@ -126,12 +126,12 @@ export default function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Logo de la empresa - Ahora a la derecha */}
+        {/* Logo de la empresa */}
         <div className="flex items-center">
           <img 
-            src={customLogo || primaryLogo} 
+            src={primaryLogo} 
             alt="Efectivio" 
-            className="h-9"
+            className="h-5"
           />
         </div>
 

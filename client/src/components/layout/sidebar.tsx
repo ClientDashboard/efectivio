@@ -118,7 +118,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white h-screen flex flex-col">
+    <aside className="w-64 bg-white h-full flex flex-col">
       <div className="p-4 flex items-center justify-center border-b border-gray-200">
         <img src={primaryLogo} alt="Efectivio" className="h-10" />
       </div>
