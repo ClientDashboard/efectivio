@@ -249,6 +249,10 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-gray-200">
+        <div className="flex flex-col items-center justify-center">
+          <p className="text-xs text-gray-500 mb-2">Powered by:</p>
+          <img src="/images/primary-logo.png" alt="Efectivio" className="h-6" />
+        </div>
         <button
           onClick={() => {
             if (signOut) {
@@ -267,9 +271,9 @@ export default function Sidebar() {
               }
             }
           }}
-          className="flex items-center w-full px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50"
+          className="flex items-center w-full px-3 py-2 mt-2 text-xs text-red-600 rounded-lg hover:bg-red-50"
         >
-          <LogOut className="w-5 h-5 mr-3" />
+          <LogOut className="w-4 h-4 mr-2" />
           Cerrar Sesión
         </button>
       </div>
