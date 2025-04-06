@@ -155,7 +155,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="bg-white h-full w-full flex flex-col overflow-hidden">
+    <div className="bg-gray-50 h-full w-full flex flex-col overflow-hidden border-r border-gray-200 min-w-[280px]">
       <div className="p-4 flex items-center justify-center border-b border-gray-200">
         <img src={primaryLogo} alt="Efectivio" className="h-8" />
       </div>
@@ -168,7 +168,7 @@ export default function Sidebar() {
             className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
               location === item.path
                 ? 'bg-primary/10 text-primary'
-                : 'text-gray-700 hover:bg-gray-50'
+                : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
             <item.icon className="w-5 h-5 mr-3" />
@@ -179,7 +179,7 @@ export default function Sidebar() {
         {/* Ventas - Menú desplegable */}
         <button
           onClick={() => toggleSubMenu('ventas')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
         >
           <div className="flex items-center">
             <CreditCard className="w-5 h-5 mr-3" />
@@ -191,7 +191,7 @@ export default function Sidebar() {
         </button>
         
         {activeMenus.ventas && (
-          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1 pr-2">
             {ventasNavigation.map((item) => (
               <Link
                 key={item.path}
@@ -199,7 +199,7 @@ export default function Sidebar() {
                 className={`flex items-center px-3 py-2 rounded-lg text-sm ${
                   location === item.path
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <item.icon className="w-4 h-4 mr-3" />
@@ -212,7 +212,7 @@ export default function Sidebar() {
         {/* Compras - Menú desplegable */}
         <button
           onClick={() => toggleSubMenu('compras')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
         >
           <div className="flex items-center">
             <Truck className="w-5 h-5 mr-3" />
@@ -224,7 +224,7 @@ export default function Sidebar() {
         </button>
         
         {activeMenus.compras && (
-          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1 pr-2">
             {comprasNavigation.map((item) => (
               <Link
                 key={item.path}
@@ -232,7 +232,7 @@ export default function Sidebar() {
                 className={`flex items-center px-3 py-2 rounded-lg text-sm ${
                   location === item.path
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <item.icon className="w-4 h-4 mr-3" />
@@ -245,7 +245,7 @@ export default function Sidebar() {
         {/* Contabilidad - Menú desplegable */}
         <button
           onClick={() => toggleSubMenu('contabilidad')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
         >
           <div className="flex items-center">
             <BookOpen className="w-5 h-5 mr-3" />
@@ -257,7 +257,7 @@ export default function Sidebar() {
         </button>
         
         {activeMenus.contabilidad && (
-          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1 pr-2">
             {contabilidadNavigation.map((item) => (
               <Link
                 key={item.path}
@@ -265,7 +265,7 @@ export default function Sidebar() {
                 className={`flex items-center px-3 py-2 rounded-lg text-sm ${
                   location === item.path
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <item.icon className="w-4 h-4 mr-3" />
@@ -278,7 +278,7 @@ export default function Sidebar() {
         {/* Inventario - Menú desplegable */}
         <button
           onClick={() => toggleSubMenu('inventory')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
         >
           <div className="flex items-center">
             <Box className="w-5 h-5 mr-3" />
@@ -290,7 +290,7 @@ export default function Sidebar() {
         </button>
         
         {activeMenus.inventory && (
-          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1 pr-2">
             {inventoryNavigation.map((item) => (
               <Link
                 key={item.path}
@@ -298,7 +298,7 @@ export default function Sidebar() {
                 className={`flex items-center px-3 py-2 rounded-lg text-sm ${
                   location === item.path
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <item.icon className="w-4 h-4 mr-3" />
@@ -311,7 +311,7 @@ export default function Sidebar() {
         {/* IA y Análisis - Menú desplegable */}
         <button
           onClick={() => toggleSubMenu('ai')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
         >
           <div className="flex items-center">
             <Brain className="w-5 h-5 mr-3" />
@@ -323,7 +323,7 @@ export default function Sidebar() {
         </button>
         
         {activeMenus.ai && (
-          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1 pr-2">
             {aiNavigation.map((item) => (
               <Link
                 key={item.path}
@@ -331,7 +331,7 @@ export default function Sidebar() {
                 className={`flex items-center px-3 py-2 rounded-lg text-sm ${
                   location === item.path
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <item.icon className="w-4 h-4 mr-3" />
@@ -347,7 +347,7 @@ export default function Sidebar() {
           className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
             location === '/client-portal'
               ? 'bg-primary/10 text-primary'
-              : 'text-gray-700 hover:bg-gray-50'
+              : 'text-gray-700 hover:bg-gray-100'
           } mt-4`}
         >
           <Users className="w-5 h-5 mr-3" />
@@ -360,7 +360,7 @@ export default function Sidebar() {
           className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
             location === '/reports'
               ? 'bg-primary/10 text-primary'
-              : 'text-gray-700 hover:bg-gray-50'
+              : 'text-gray-700 hover:bg-gray-100'
           } mt-4`}
         >
           <PieChart className="w-5 h-5 mr-3" />
@@ -373,7 +373,7 @@ export default function Sidebar() {
           className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
             location === '/files'
               ? 'bg-primary/10 text-primary'
-              : 'text-gray-700 hover:bg-gray-50'
+              : 'text-gray-700 hover:bg-gray-100'
           } mt-4`}
         >
           <HardDrive className="w-5 h-5 mr-3" />
@@ -383,7 +383,7 @@ export default function Sidebar() {
         {/* Configuración - Menú desplegable */}
         <button
           onClick={() => toggleSubMenu('configuracion')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
         >
           <div className="flex items-center">
             <Settings2 className="w-5 h-5 mr-3" />
@@ -395,7 +395,7 @@ export default function Sidebar() {
         </button>
         
         {activeMenus.configuracion && (
-          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1">
+          <div className="ml-5 pl-4 border-l border-gray-200 mt-1 space-y-1 pr-2">
             {configNavigation.map((item) => (
               <Link
                 key={item.path}
@@ -403,7 +403,7 @@ export default function Sidebar() {
                 className={`flex items-center px-3 py-2 rounded-lg text-sm ${
                   location === item.path
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <item.icon className="w-4 h-4 mr-3" />
