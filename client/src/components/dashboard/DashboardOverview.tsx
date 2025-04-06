@@ -35,7 +35,7 @@ interface ChartColorScheme {
 export default function DashboardOverview() {
   const { data: dashboardData, isLoading, refetch } = useQuery<DashboardData>({
     queryKey: ["/api/dashboard"],
-    enabled: true,
+    enabled: false, // Deshabilitado inicialmente para evitar llamadas innecesarias
   });
 
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);

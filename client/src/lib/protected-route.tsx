@@ -12,15 +12,8 @@ const isDevelopmentMode = typeof window !== 'undefined' &&
 
 // En desarrollo, siempre usamos el DevAuth para evitar problemas con Clerk
 export function useAuth() {
-  // En este momento siempre usamos el proveedor de desarrollo para evitar
-  // el error de requerir ClerkProvider
-  const devAuth = useDevAuth();
-  return {
-    ...devAuth,
-    // Garantizar que signUp y signIn están disponibles
-    signUp: devAuth.signUp,
-    signIn: devAuth.signIn
-  };
+  // Usar el proveedor de desarrollo que incluye todas las propiedades necesarias
+  return useDevAuth();
 }
 
 interface ProtectedRouteProps {
@@ -54,9 +47,10 @@ export function ProtectedRoute({ path, children }: ProtectedRouteProps) {
           );
         }
 
-        // Si no hay userId o no está signed in, redirigir a login
+        // Si no hay userId o no está signed in, redirigir a login usando redirección de navegador
         if (!userId && !isSignedIn) {
-          return <Redirect to="/auth/sign-in" />;
+          window.location.href = "/auth/sign-in";
+          return null; // Retornar null porque la redirección ya se ha iniciado
         }
 
         return <>{children}</>;
@@ -92,7 +86,8 @@ export function PublicRoute({ path, children }: ProtectedRouteProps) {
         }
 
         if (userId) {
-          return <Redirect to="/" />;
+          window.location.href = "/dashboard";
+          return null; // Retornar null porque la redirección ya se ha iniciado
         }
 
         return <>{children}</>;

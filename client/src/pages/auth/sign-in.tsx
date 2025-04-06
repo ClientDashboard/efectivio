@@ -52,7 +52,8 @@ export default function SignInPage() {
           title: 'Inicio de sesión exitoso',
           description: 'Bienvenido a Efectivio',
         });
-        navigate('/dashboard');
+        // Usar redirección nativa en lugar de la navegación de Wouter
+        window.location.href = '/dashboard';
       } else {
         toast({
           title: 'Error al iniciar sesión',
@@ -134,15 +135,15 @@ export default function SignInPage() {
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
             ¿Olvidaste tu contraseña?{' '}
-            <Link to="/auth/reset-password" className="underline text-primary hover:text-primary/90">
+            <a href="/auth/reset-password" className="underline text-primary hover:text-primary/90">
               Recuperar
-            </Link>
+            </a>
           </div>
           <div className="text-sm text-center text-muted-foreground">
             ¿No tienes una cuenta?{' '}
-            <Link to="/auth/sign-up" className="underline text-primary hover:text-primary/90">
+            <a href="/auth/sign-up" className="underline text-primary hover:text-primary/90">
               Regístrate
-            </Link>
+            </a>
           </div>
         </CardFooter>
       </Card>

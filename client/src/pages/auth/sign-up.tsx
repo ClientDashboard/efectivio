@@ -230,7 +230,7 @@ export default function SignUpPage() {
                           description: "Tu cuenta ha sido verificada correctamente"
                         });
                         
-                        navigate("/auth/sign-in");
+                        window.location.href = "/auth/sign-in";
                       } else {
                         toast({
                           title: "Error",
@@ -279,7 +279,7 @@ export default function SignUpPage() {
                 <div className="mt-4">
                   <Button
                     variant="outline"
-                    onClick={() => navigate('/auth/sign-in')}
+                    onClick={() => window.location.href = '/auth/sign-in'}
                     className="w-full"
                   >
                     Cancelar y volver a Iniciar Sesión
@@ -292,9 +292,9 @@ export default function SignUpPage() {
         <CardFooter>
           <div className="text-sm text-center text-muted-foreground w-full">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/auth/sign-in" className="underline text-primary hover:text-primary/90">
+            <a href="/auth/sign-in" className="underline text-primary hover:text-primary/90">
               Iniciar Sesión
-            </Link>
+            </a>
           </div>
         </CardFooter>
       </Card>
