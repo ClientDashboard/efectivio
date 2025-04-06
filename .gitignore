@@ -51,4 +51,12 @@ Thumbs.db
 # otros
 .vercel
 .replit
-replit_zip_error_log.txt.env*
+replit_zip_error_log.txt
+.env*
+efectivio-updates.zip
+efectivio-deploy.tar.gz
+efectivio_minimal.tar.gz
+efectivio_project.tar.gz
+efectivio_update.tar.gz
+file-changes-summary.txt
+recent-changes.txt
