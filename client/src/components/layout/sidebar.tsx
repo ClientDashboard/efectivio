@@ -118,9 +118,9 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white h-full flex flex-col">
+    <div className="bg-white h-full w-full flex flex-col overflow-hidden">
       <div className="p-4 flex items-center justify-center border-b border-gray-200">
-        <img src={primaryLogo} alt="Efectivio" className="h-10" />
+        <img src={primaryLogo} alt="Efectivio" className="h-8" />
       </div>
 
       <div className="border-b border-gray-200 py-4 px-4">
@@ -248,8 +248,8 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
-
+      
       {/* Se ha eliminado "Powered by" y movido al Footer */}
-    </aside>
+    </div>
   );
 }

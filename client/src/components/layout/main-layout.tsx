@@ -30,9 +30,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Header />
       <div className="flex flex-1">
         {/* Sidebar - forzado a ser siempre visible */}
-        <div className="flex-shrink-0 border-r border-gray-200" style={{ display: 'block', width: '16rem' }}>
+        <aside className="flex-shrink-0 border-r border-gray-200 w-64 h-[calc(100vh-64px)]">
           <Sidebar />
-        </div>
+        </aside>
         
         <div className="flex flex-col flex-1">
           <main className="flex-1 overflow-y-auto focus:outline-none bg-white">
