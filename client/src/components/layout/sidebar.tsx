@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/lib/protected-route';
 import { useAppStore } from '@/lib/store';
+import primaryLogo from '@/assets/primary-logo.png';
 import {
   LayoutDashboard,
   Users,
@@ -119,7 +120,7 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
       <div className="p-4 flex items-center justify-center border-b border-gray-200">
-        <img src="/images/primary-logo.png" alt="Efectivio" className="h-10" />
+        <img src={primaryLogo} alt="Efectivio" className="h-10" />
       </div>
 
       <div className="border-b border-gray-200 py-4 px-4">
@@ -251,7 +252,7 @@ export default function Sidebar() {
       <div className="p-4 border-t border-gray-200">
         <div className="flex flex-col items-center justify-center">
           <p className="text-xs text-gray-500 mb-2">Powered by:</p>
-          <img src="/images/primary-logo.png" alt="Efectivio" className="h-7" />
+          <img src={primaryLogo} alt="Efectivio" className="h-7" />
         </div>
       </div>
     </aside>
