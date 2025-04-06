@@ -3,6 +3,7 @@ import { ReactNode, useEffect } from "react";
 import { useLocation } from "wouter";
 import Sidebar from "./sidebar";
 import Header from "./header";
+import Footer from "./footer";
 import { useAppStore } from "@/lib/store";
 
 interface MainLayoutProps {
@@ -27,20 +28,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
-      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex flex-1">
         {/* Sidebar - forzado a ser siempre visible */}
         <div className="flex-shrink-0 border-r border-gray-200" style={{ display: 'block', width: '16rem' }}>
           <Sidebar />
         </div>
         
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <main className="flex-1 relative overflow-y-auto focus:outline-none bg-white">
+        <div className="flex flex-col flex-1">
+          <main className="flex-1 overflow-y-auto focus:outline-none bg-white">
             <div className="py-6">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                 {children}
               </div>
             </div>
           </main>
+          <Footer />
         </div>
       </div>
     </div>

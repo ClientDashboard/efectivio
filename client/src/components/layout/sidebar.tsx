@@ -249,12 +249,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex flex-col items-center justify-center">
-          <p className="text-xs text-gray-500 mb-2">Powered by:</p>
-          <img src={primaryLogo} alt="Efectivio" className="h-7" />
-        </div>
-      </div>
+      {/* Se ha eliminado "Powered by" y movido al Footer */}
     </aside>
   );
 }
