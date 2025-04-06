@@ -62,21 +62,21 @@ export default function LandingPage() {
           
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/auth/sign-in">
+            <a href="/auth/sign-in" style={{ textDecoration: 'none' }}>
               <Button 
                 variant="ghost" 
                 className="text-sm font-medium hover:text-[#39FFBD]"
               >
                 Iniciar Sesión
               </Button>
-            </Link>
-            <Link href="/auth/sign-up">
+            </a>
+            <a href="/auth/sign-up" style={{ textDecoration: 'none' }}>
               <Button 
                 className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] text-sm font-medium"
               >
                 Registrarse
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -122,21 +122,21 @@ export default function LandingPage() {
                 Precios
               </a>
               <div className="flex flex-col gap-2 mt-4">
-                <Link href="/auth/sign-up" className="w-full">
+                <a href="/auth/sign-up" style={{ textDecoration: 'none', width: '100%' }}>
                   <Button 
                     className="w-full bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644]"
                   >
                     Registrarse
                   </Button>
-                </Link>
-                <Link href="/auth/sign-in" className="w-full">
+                </a>
+                <a href="/auth/sign-in" style={{ textDecoration: 'none', width: '100%' }}>
                   <Button 
                     variant="outline" 
                     className="w-full"
                   >
                     Iniciar Sesión
                   </Button>
-                </Link>
+                </a>
               </div>
             </nav>
           </div>
@@ -202,7 +202,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row mt-6">
-                <Link href="/auth/sign-up">
+                <a href="/auth/sign-up" style={{ textDecoration: 'none' }}>
                   <Button 
                     className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] font-medium text-base px-6 py-6 h-auto group relative overflow-hidden"
                   >
@@ -210,7 +210,7 @@ export default function LandingPage() {
                     <span className="relative">Prueba Gratis</span>
                     <ArrowRight className="ml-2 h-4 w-4 relative group-hover:translate-x-1 transition-transform" />
                   </Button>
-                </Link>
+                </a>
                 <Button
                   variant="outline"
                   className="border-white/30 text-white hover:bg-white/10 font-medium text-base px-6 py-6 h-auto"
@@ -323,13 +323,13 @@ export default function LandingPage() {
           </div>
           
           <div className="flex justify-center mt-12">
-            <Link href="/auth/sign-up">
+            <a href="/auth/sign-up" style={{ textDecoration: 'none' }}>
               <Button 
                 className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] px-8 py-6 h-auto"
               >
                 Comenzar ahora
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -346,21 +346,21 @@ export default function LandingPage() {
                 Únete a miles de empresas que ya confían en Efectivio para su gestión contable diaria.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                <Link href="/auth/sign-up">
+                <a href="/auth/sign-up" style={{ textDecoration: 'none' }}>
                   <Button 
                     className="bg-[#39FFBD] hover:bg-[#39FFBD]/90 text-[#062644] w-full sm:w-auto font-medium px-6 py-6 h-auto"
                   >
                     Comenzar prueba gratuita
                   </Button>
-                </Link>
-                <Link href="/auth/sign-in">
+                </a>
+                <a href="/auth/sign-in" style={{ textDecoration: 'none' }}>
                   <Button 
                     variant="outline" 
                     className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto font-medium px-6 py-6 h-auto"
                   >
                     Iniciar sesión
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
             <div className="space-y-4 lg:space-y-6">
