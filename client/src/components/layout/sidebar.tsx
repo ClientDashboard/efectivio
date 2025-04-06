@@ -85,11 +85,11 @@ export default function Sidebar() {
 
   // Ventas (con acordeón)
   const ventasNavigation = [
-    { name: 'Clientes', path: '/sales/clients', icon: Users },
-    { name: 'Cotizaciones', path: '/sales/quotes', icon: FileSpreadsheet },
+    { name: 'Clientes', path: '/clients', icon: Users }, // Mantener path existente
+    { name: 'Cotizaciones', path: '/quotes', icon: FileSpreadsheet }, // Mantener path existente
     { name: 'Facturas de anticipo', path: '/sales/advance-invoices', icon: FilePlus },
     { name: 'Órdenes de venta', path: '/sales/orders', icon: ClipboardCheck },
-    { name: 'Facturas', path: '/sales/invoices', icon: FileText },
+    { name: 'Facturas', path: '/invoices', icon: FileText }, // Mantener path existente
     { name: 'Recibos de ventas', path: '/sales/receipts', icon: Receipt },
     { name: 'Pagos recibidos', path: '/sales/payments', icon: DollarSign },
     { name: 'Facturas recurrentes', path: '/sales/recurring-invoices', icon: Repeat },
@@ -99,7 +99,7 @@ export default function Sidebar() {
   // Compras (con acordeón)
   const comprasNavigation = [
     { name: 'Proveedores', path: '/purchases/vendors', icon: Truck },
-    { name: 'Gastos', path: '/purchases/expenses', icon: Receipt },
+    { name: 'Gastos', path: '/expenses', icon: Receipt }, // Mantener path existente
     { name: 'Gastos recurrentes', path: '/purchases/recurring-expenses', icon: Repeat },
     { name: 'Órdenes de compra', path: '/purchases/orders', icon: ClipboardList },
     { name: 'Facturas de proveedor', path: '/purchases/bills', icon: FileText },
@@ -159,7 +159,6 @@ export default function Sidebar() {
       </div>
       <nav className="flex-1 overflow-y-auto py-4">
         {/* Panel */}
-        <div className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase">Principal</div>
         {mainNavigation.map((item) => (
           <Link
             key={item.path}
@@ -176,10 +175,9 @@ export default function Sidebar() {
         ))}
 
         {/* Ventas - Menú desplegable */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Ventas</div>
         <button
           onClick={() => toggleSubMenu('ventas')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
         >
           <div className="flex items-center">
             <CreditCard className="w-5 h-5 mr-3" />
@@ -210,10 +208,9 @@ export default function Sidebar() {
         )}
 
         {/* Compras - Menú desplegable */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Compras</div>
         <button
           onClick={() => toggleSubMenu('compras')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
         >
           <div className="flex items-center">
             <Truck className="w-5 h-5 mr-3" />
@@ -244,10 +241,9 @@ export default function Sidebar() {
         )}
 
         {/* Contabilidad - Menú desplegable */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Contabilidad</div>
         <button
           onClick={() => toggleSubMenu('contabilidad')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
         >
           <div className="flex items-center">
             <BookOpen className="w-5 h-5 mr-3" />
@@ -278,10 +274,9 @@ export default function Sidebar() {
         )}
 
         {/* Inventario - Menú desplegable */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Inventario</div>
         <button
           onClick={() => toggleSubMenu('inventory')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
         >
           <div className="flex items-center">
             <Box className="w-5 h-5 mr-3" />
@@ -311,8 +306,8 @@ export default function Sidebar() {
           </div>
         )}
 
-        {/* IA y Análisis */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">IA y Análisis</div>
+        {/* IA y Análisis - Enlaces directos */}
+        <div className="mt-4">
         {aiNavigation.map((item) => (
           <Link
             key={item.path}
@@ -321,60 +316,57 @@ export default function Sidebar() {
               location === item.path
                 ? 'bg-primary/10 text-primary'
                 : 'text-gray-700 hover:bg-gray-50'
-            }`}
+            } mt-1`}
           >
             <item.icon className="w-5 h-5 mr-3" />
             {item.name}
           </Link>
         ))}
+        </div>
 
         {/* Portal del Cliente - Enlace directo */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Portal del Cliente</div>
         <Link
           href="/client-portal"
           className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
             location === '/client-portal'
               ? 'bg-primary/10 text-primary'
               : 'text-gray-700 hover:bg-gray-50'
-          }`}
+          } mt-4`}
         >
           <Users className="w-5 h-5 mr-3" />
           Portal del Cliente
         </Link>
 
         {/* Informes - Enlace directo */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Informes</div>
         <Link
           href="/reports"
           className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
             location === '/reports'
               ? 'bg-primary/10 text-primary'
               : 'text-gray-700 hover:bg-gray-50'
-          }`}
+          } mt-4`}
         >
           <PieChart className="w-5 h-5 mr-3" />
           Informes
         </Link>
 
         {/* Efectivio Drive - Enlace directo */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Archivo</div>
         <Link
           href="/files"
           className={`flex items-center px-3 py-2 mx-2 rounded-lg text-sm ${
             location === '/files'
               ? 'bg-primary/10 text-primary'
               : 'text-gray-700 hover:bg-gray-50'
-          }`}
+          } mt-4`}
         >
           <HardDrive className="w-5 h-5 mr-3" />
           Efectivio Drive
         </Link>
 
         {/* Configuración - Menú desplegable */}
-        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase">Configuración</div>
         <button
           onClick={() => toggleSubMenu('configuracion')}
-          className="flex items-center justify-between w-full px-3 py-2 mx-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          className="flex items-center justify-between w-full px-3 py-2 mx-2 mt-4 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
         >
           <div className="flex items-center">
             <Settings2 className="w-5 h-5 mr-3" />
